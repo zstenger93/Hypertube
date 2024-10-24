@@ -1,6 +1,7 @@
 import pg from "pg";
-import express from "express";
+import express, { request } from "express";
 import cors from "cors";
+import axios from "axios";
 
 // const { Client } = pg;
 
@@ -27,8 +28,16 @@ app.use(express.urlencoded({ extended: true }));
 
 app.get("/api/movies", async (req, res) => {
   const { title } = req.query;
-  console.log(title);
-  res.json({ title });
+  const apiKey = "75bb64d1";
+  const url = `http://www.omdbapi.com/?apikey=${apiKey}&s=${title}`;
+
+  try {
+    const response = await axios.get(url);
+    res.json(response.data);
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    res.status(500).send("Error fetching data from OMDB API");
+  }
 });
 
 app.listen(3000, () => console.log(`App running on port 3000.`));
