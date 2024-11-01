@@ -16,6 +16,7 @@ const SearchComponent = () => {
           `http://localhost:3000/api/movies?title=${value}`
         );
         const data = await response.json();
+        console.log(data);
         setResults(data.Search || []);
       } catch (error) {
         console.error("Error fetching data:", error);

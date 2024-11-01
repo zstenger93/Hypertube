@@ -6,6 +6,21 @@ const MovieDetails = () => {
   const { id } = useParams();
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const fetchYoutube = async (title) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/youtubeRequests?title=${title}`
+      );
+      if (!response.ok) throw new Error("Failed to fetch youtube video");
+
+      const data = await response.json();
+      console.log(data);
+    } catch (error) {
+      console.error("Error fetching youtube video:", error);
+    }
+  };
+
   useEffect(() => {
     const fetchMovieDetails = async () => {
       try {
@@ -16,6 +31,7 @@ const MovieDetails = () => {
 
         const data = await response.json();
         setMovie(data);
+        //if (data.Title) fetchYoutube(data.Title);
       } catch (error) {
         console.error("Error fetching movie details:", error);
       } finally {
