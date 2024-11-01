@@ -70,4 +70,16 @@ app.get("/api/youtubeRequests", async (req, res) => {
   }
 });
 
+
+app.get('/login', (req,res) => {
+  const CLIENT_ID = process.env.CLIENT_ID;
+  const CLIENT_SECRET = process.env.CLIENT_SECRET;
+  const REDIRECT_URI = "http://127.0.0.1:3000/users/auth/ft/callback";
+  const STATE = "a_random_unique_state_string";
+  
+  const authorizeUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&state=${STATE}`;
+  res.redirect(authorizeUrl);
+  console.log(res)
+})
+
 app.listen(3000, () => console.log(`App running on port 3000.`));
