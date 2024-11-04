@@ -5,6 +5,7 @@ import "../App.css";
 const MovieDetails = () => {
   const { id } = useParams();
   const [movie, setMovie] = useState(null);
+  const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchYoutube = async (title) => {
@@ -13,9 +14,8 @@ const MovieDetails = () => {
         `http://localhost:3000/api/youtubeRequests?title=${title}`
       );
       if (!response.ok) throw new Error("Failed to fetch youtube video");
-
       const data = await response.json();
-      console.log(data);
+      setVideos(data.items);
     } catch (error) {
       console.error("Error fetching youtube video:", error);
     }
@@ -31,7 +31,7 @@ const MovieDetails = () => {
 
         const data = await response.json();
         setMovie(data);
-        //if (data.Title) fetchYoutube(data.Title);
+        if (data.Title) fetchYoutube(data.Title);
       } catch (error) {
         console.error("Error fetching movie details:", error);
       } finally {
@@ -55,6 +55,24 @@ const MovieDetails = () => {
           <p>Genre: {movie.Genre}</p>
           <p>Plot: {movie.Plot}</p>
           <p>Director: {movie.Director}</p>
+          <h3>Related Videos:</h3>
+          <div className="videoList">
+            {videos.map((video) => (
+              <div key={video.id.videoId} className="videoItem">
+                <a
+                  href={`https://www.youtube.com/watch?v=${video.id.videoId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <img
+                    src={video.snippet.thumbnails.medium.url}
+                    alt={video.snippet.title}
+                  />
+                  <p>{video.snippet.title}</p>
+                </a>
+              </div>
+            ))}
+          </div>
         </div>
       ) : (
         <p>Movie details not found.</p>

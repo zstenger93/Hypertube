@@ -30,3 +30,21 @@
   height: 400px;
   object-fit: cover;
 }
+
+.videoList {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.videoItem {
+  margin: 20px;
+  width: 320px;
+  height: 300px;
+}
+
+.videoItem img {
+  height: 180px;
+  width: 320px;
+  border: 1px solid #000;
+}
