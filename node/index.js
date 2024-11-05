@@ -59,8 +59,8 @@ app.get("/api/watchTheMovie", async (req, res) => {
 
 app.get("/api/youtubeRequests", async (req, res) => {
   const { title } = req.query;
-  const movie = "_movie";
-  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=3 &q=${title}${movie}&key=${youtubeApiKey}`;
+  const movie = "%movie";
+  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=3&q=${title}&key=${youtubeApiKey}`;
   try {
     const response = await axios.get(url);
     res.json(response.data);
