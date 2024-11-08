@@ -3,7 +3,6 @@ import SearchComponent from "./components/searchMovies";
 import MovieDetails from "./components/movieDetails";
 import CallbackComponent from "./components/callBack";
 import Login from "./components/login";
-import Logout from "./components/logout";
 import ProtectedRoute from "./components/protectedRoute";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
@@ -16,17 +15,24 @@ export default function App() {
           <Route path="/auth/intra/callback" element={<CallbackComponent />} />
           <Route
             path="/search"
-            element={<ProtectedRoute element={SearchComponent} />}
+            element={
+              <ProtectedRoute>
+                <SearchComponent />
+              </ProtectedRoute>
+            }
           />
           <Route
             path="/movie/:id"
-            element={<ProtectedRoute element={MovieDetails} />}
+            element={
+              <ProtectedRoute>
+                <MovieDetails />
+              </ProtectedRoute>
+            }
           />
         </Routes>
       </div>
     </Router>
   );
 }
-
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(<App />);

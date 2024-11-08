@@ -9,6 +9,7 @@ const redirectURI = process.env.REDIRECT_URI;
 const ip = process.env.IP;
 const apiKey = process.env.OMDBAPI_KEY;
 const youtubeApiKey = process.env.YOUTUBE_KEY;
+
 // const { Client } = pg;
 
 // const client = new Client({
@@ -101,6 +102,28 @@ app.post("/auth/intra/callback", async (req, res) => {
 app.get("/auth/intra/callback", async (req, res) => {
   const code = req.query.code;
   console.log("Received code:", code);
+});
+
+async function validateIntra42Token(token) {
+  try {
+    const response = await axios.get("https://api.intra.42.fr/v2/me", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    return null;
+  }
+}
+
+app.get("/auth/validate", async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) return res.sendStatus(401);
+  const userData = await validateIntra42Token(token);
+  if (!userData) return res.sendStatus(403);
+  req.user = userData;
+  res.status(200).send({ message: "User is valid", user: userData });
 });
 
 app.listen(3000, () => console.log(`App running on port 3000.`));
