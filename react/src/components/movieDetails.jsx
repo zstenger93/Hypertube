@@ -50,7 +50,7 @@ const MovieDetails = () => {
       <Logout />
       <h1>HyperTube</h1>
       {movie ? (
-        <div className="movie-details">
+        <div>
           <img src={movie.Poster} alt={movie.Title} />
           <h2>{movie.Title}</h2>
           <p>Year: {movie.Year}</p>
