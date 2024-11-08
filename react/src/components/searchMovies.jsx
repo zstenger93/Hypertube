@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "../App.css";
 import { useNavigate } from "react-router-dom";
+import Logout from "./logout";
 
 const SearchComponent = () => {
   const [query, setQuery] = useState("");
@@ -28,6 +29,7 @@ const SearchComponent = () => {
 
   return (
     <div className="center">
+      <Logout />
       <h1>HyperTube</h1>
       <input
         type="text"

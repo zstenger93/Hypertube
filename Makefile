@@ -1,8 +1,14 @@
 build:
 	docker-compose up --build
 
+
+re: stop run
+
 run:
 	docker-compose up -d
+
+stop:
+	docker-compose down
 
 clean-docker:
 	docker stop $$(docker ps -q) \

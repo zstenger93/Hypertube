@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import "../App.css";
+import Logout from "./logout";
 
 const MovieDetails = () => {
   const { id } = useParams();
@@ -46,6 +47,7 @@ const MovieDetails = () => {
 
   return (
     <div className="center">
+      <Logout />
       <h1>HyperTube</h1>
       {movie ? (
         <div className="movie-details">

@@ -3,8 +3,9 @@ import express, { request } from "express";
 import cors from "cors";
 import axios from "axios";
 
-const jwtSecret = process.env.JWT_SECRET;
-const redirectUri = process.env.REDIRECT_URI;
+const intraSecret = process.env.INTRA_SECRET;
+const intraUUID = process.env.INTRA_UUID;
+const redirectURI = process.env.REDIRECT_URI;
 const ip = process.env.IP;
 const apiKey = process.env.OMDBAPI_KEY;
 const youtubeApiKey = process.env.YOUTUBE_KEY;
@@ -69,6 +70,37 @@ app.get("/api/youtubeRequests", async (req, res) => {
     console.error("Error fetching data:", error);
     res.status(500).send("Error fetching data from OMDB API");
   }
+});
+
+app.get("/auth/intra", (req, res) => {
+  const authURL = `https://api.intra.42.fr/oauth/authorize?client_id=${intraUUID}&redirect_uri=${redirectURI}&response_type=code`;
+  res.redirect(authURL);
+});
+
+app.post("/auth/intra/callback", async (req, res) => {
+  const code = req.body.code;
+  const tokenURL = "https://api.intra.42.fr/oauth/token";
+
+  try {
+    const response = await axios.post(tokenURL, {
+      grant_type: "authorization_code",
+      client_id: process.env.INTRA_UUID,
+      client_secret: process.env.INTRA_SECRET,
+      code,
+      redirect_uri: process.env.REDIRECT_URI,
+    });
+
+    const accessToken = response.data.access_token;
+    res.json({ accessToken });
+  } catch (error) {
+    console.error("OAuth2 error:", error);
+    res.status(500).send("Authentication failed");
+  }
+});
+
+app.get("/auth/intra/callback", async (req, res) => {
+  const code = req.query.code;
+  console.log("Received code:", code);
 });
 
 app.listen(3000, () => console.log(`App running on port 3000.`));
