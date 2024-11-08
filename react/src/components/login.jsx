@@ -5,6 +5,10 @@ function Login() {
     window.location.href = "http://localhost:3000/auth/intra";
   };
 
+  if (localStorage.getItem("accessToken")) {
+    window.location.href = "/search";
+  }
+
   return <button onClick={handleLogin}>Login with Intra</button>;
 }
 

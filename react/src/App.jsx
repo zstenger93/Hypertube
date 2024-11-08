@@ -11,7 +11,6 @@ export default function App() {
   return (
     <Router>
       <div>
-        <Logout />
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/auth/intra/callback" element={<CallbackComponent />} />
