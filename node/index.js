@@ -28,6 +28,18 @@ const youtubeApiKey = process.env.YOUTUBE_KEY;
 //     email VARCHAR (255) UNIQUE NOT NULL, age INT NOT NULL);`);
 // };
 
+const firebaseConfig = {
+  apiKey: "AIzaSyDdCQbBKuVCKAR67luHVd_WyxpEGVvRfNI",
+  authDomain: "hypertube-2287a.firebaseapp.com",
+  databaseURL:
+    "https://hypertube-2287a-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "hypertube-2287a",
+  storageBucket: "hypertube-2287a.firebasestorage.app",
+  messagingSenderId: "85856277402",
+  appId: "1:85856277402:web:9f580905d21756fbb52023",
+  measurementId: "G-NXKPNJX895",
+};
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -117,10 +129,27 @@ async function validateIntra42Token(token) {
   }
 }
 
+async function validateFirebaseToken(token) {
+  try {
+    const response = await axios.post(
+      `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${firebaseConfig.apiKey}`,
+      {
+        idToken: token,
+      }
+    );
+    return response.data.users[0];
+  } catch (error) {
+    return null;
+  }
+}
+
 app.get("/auth/validate", async (req, res) => {
+  var userData = null;
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) return res.sendStatus(401);
-  const userData = await validateIntra42Token(token);
+  if (req.headers.authorization.length < 120)
+    userData = await validateIntra42Token(token);
+  else userData = await validateFirebaseToken(token);
   if (!userData) return res.sendStatus(403);
   req.user = userData;
   res.status(200).send({ message: "User is valid", user: userData });
