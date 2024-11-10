@@ -18,6 +18,7 @@ const ProtectedRoute = ({ children }) => {
         setIsValid(true);
       } else {
         setIsValid(false);
+        localStorage.removeItem("accessToken");
         navigate("/");
       }
     };
