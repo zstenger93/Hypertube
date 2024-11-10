@@ -10,23 +10,23 @@ const ip = process.env.IP;
 const apiKey = process.env.OMDBAPI_KEY;
 const youtubeApiKey = process.env.YOUTUBE_KEY;
 
-// const { Client } = pg;
+const { Client } = pg;
 
-// const client = new Client({
-//   user: "postgres",
-//   host: "db",
-//   database: "postgres",
-//   password: "1234",
-//   port: 5432,
-// });
-// //client.connect();
-// //createTable();
+const client = new Client({
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD,
+  port: 5432,
+});
+const createTable = async () => {
+  await client.query(`CREATE TABLE IF NOT EXISTS users
+    (id serial PRIMARY KEY, name VARCHAR (255) UNIQUE NOT NULL,
+    email VARCHAR (255) UNIQUE NOT NULL, age INT NOT NULL);`);
+};
 
-// const createTable = async () => {
-//   await client.query(`CREATE TABLE IF NOT EXISTS users
-//     (id serial PRIMARY KEY, name VARCHAR (255) UNIQUE NOT NULL,
-//     email VARCHAR (255) UNIQUE NOT NULL, age INT NOT NULL);`);
-// };
+client.connect();
+createTable();
 
 const firebaseConfig = {
   apiKey: "AIzaSyDdCQbBKuVCKAR67luHVd_WyxpEGVvRfNI",
