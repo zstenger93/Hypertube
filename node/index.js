@@ -19,13 +19,46 @@ const client = new Client({
   password: process.env.DB_PASSWORD,
   port: 5432,
 });
-const createTable = async () => {
-  await client.query(`CREATE TABLE IF NOT EXISTS users
-    (id serial PRIMARY KEY, name VARCHAR (255) UNIQUE NOT NULL,
-    email VARCHAR (255) UNIQUE NOT NULL, age INT NOT NULL);`);
-};
 
-client.connect();
+async function createTable() {
+  try {
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS Users (
+          user_id SERIAL PRIMARY KEY,
+          username VARCHAR(100) NOT NULL,
+          email VARCHAR(100) UNIQUE NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS Movies (
+          movie_id SERIAL PRIMARY KEY,
+          title VARCHAR(255) NOT NULL,
+          description TEXT,
+          release_date DATE,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS Comments (
+          comment_id SERIAL PRIMARY KEY,
+          user_id INT REFERENCES Users(user_id) ON DELETE CASCADE,
+          movie_id INT REFERENCES Movies(movie_id) ON DELETE CASCADE,
+          content TEXT NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    console.log("Tables created successfully");
+  } catch (error) {
+    console.error("Error creating table:", error);
+  } finally {
+    await client.end();
+  }
+}
+
 createTable();
 
 const firebaseConfig = {
@@ -78,7 +111,6 @@ app.get("/api/youtubeRequests", async (req, res) => {
   try {
     const response = await axios.get(url);
     res.json(response.data);
-    console.log(url);
   } catch (error) {
     console.error("Error fetching data:", error);
     res.status(500).send("Error fetching data from OMDB API");
@@ -151,6 +183,7 @@ app.get("/auth/validate", async (req, res) => {
     userData = await validateIntra42Token(token);
   else userData = await validateFirebaseToken(token);
   if (!userData) return res.sendStatus(403);
+  console.log(userData.email);
   req.user = userData;
   res.status(200).send({ message: "User is valid", user: userData });
 });
