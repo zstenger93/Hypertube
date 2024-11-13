@@ -20,6 +20,70 @@ const client = new Client({
   port: 5432,
 });
 
+
+async function createUser() {
+
+}
+
+async function createComment(){
+
+}
+
+async function updateCommentContent(email, newComment) {
+  try {
+    const result = await client.query(`
+      SELECT * FROM Comments
+      WHERE user_id = $1;
+    `, [email]);
+
+    if (result.rows.length === 0) {
+      console.log(`No comments found for user_id: ${userId}`);
+      return;
+    }
+    await client.query(`
+      UPDATE Comments
+      SET content = $1
+      WHERE user_id = $2;
+    `, [newComment, email]);
+
+    console.log(`Updated comments for user_id: ${userId}`);
+  } catch (error) {
+    console.error("Error updating comment content:", error);
+  }
+}
+
+class User {
+
+}
+
+
+async function createUser(email, newComment) {
+  try {
+    const result = await client.query(`
+      SELECT * FROM Comments
+      WHERE user_id = $1;
+    `, [email]);
+
+    if (result.rows.length === 0) {
+      console.log(`No comments found for user_id: ${userId}`);
+      return;
+    }
+    await client.query(`
+      UPDATE Comments
+      SET content = $1
+      WHERE user_id = $2;
+    `, [newComment, email]);
+
+    console.log(`Updated comments for user_id: ${userId}`);
+  } catch (error) {
+    console.error("Error updating comment content:", error);
+  }
+}
+
+async function updateRating() {
+
+}
+
 async function createTable() {
   try {
     await client.query(`
@@ -27,25 +91,27 @@ async function createTable() {
           user_id SERIAL PRIMARY KEY,
           username VARCHAR(100) NOT NULL,
           email VARCHAR(100) UNIQUE NOT NULL,
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          language VARCHAR(100)
       );
     `);
 
     await client.query(`
       CREATE TABLE IF NOT EXISTS Movies (
-          movie_id SERIAL PRIMARY KEY,
+          movie_id VARCHAR(255) NOT NULL,
           title VARCHAR(255) NOT NULL,
           description TEXT,
           release_date DATE,
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          rating VARCHAR(255),
       );
     `);
 
     await client.query(`
       CREATE TABLE IF NOT EXISTS Comments (
           comment_id SERIAL PRIMARY KEY,
-          user_id INT REFERENCES Users(user_id) ON DELETE CASCADE,
-          movie_id INT REFERENCES Movies(movie_id) ON DELETE CASCADE,
+          user_id VARCHAR(100) REFERENCES Users(email) ON DELETE CASCADE,
+          movie_id VARCHAR(255) REFERENCES Movies(movie_id) ON DELETE CASCADE,
           content TEXT NOT NULL,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
@@ -161,6 +227,7 @@ async function validateIntra42Token(token) {
   }
 }
 
+
 async function validateFirebaseToken(token) {
   try {
     const response = await axios.post(
@@ -189,3 +256,24 @@ app.get("/auth/validate", async (req, res) => {
 });
 
 app.listen(3000, () => console.log(`App running on port 3000.`));
+
+
+// DATABASE INTERACTIONS
+
+app.get("/database/addUser", async (req, res) => {
+  var userData = null;
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) return res.sendStatus(401);
+  if (req.headers.authorization.length < 120)
+    userData = await validateIntra42Token(token);
+  else userData = await validateFirebaseToken(token);
+  if (!userData) return res.sendStatus(403);
+  console.log(userData.email);
+  req.user = userData;
+  req.user.email
+});
+
+app.post("/database/updateComment", async (req, res) => {
+  const code = req.query.code;
+  console.log("Received code:", code);
+});

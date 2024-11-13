@@ -44,7 +44,6 @@ const MovieDetails = () => {
   }, [id]);
 
   if (loading) return <p>Loading...</p>;
-
   return (
     <div className="center">
       <Logout />
@@ -57,6 +56,8 @@ const MovieDetails = () => {
           <p>Genre: {movie.Genre}</p>
           <p>Plot: {movie.Plot}</p>
           <p>Director: {movie.Director}</p>
+          <p>Ranking :</p>
+          <p>ImDB ranking: {movie.imdbRating}</p>
           <h3>Related Videos:</h3>
           <div className="videoList">
             {videos.map((video) => (
