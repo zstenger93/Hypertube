@@ -2,12 +2,14 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import "../App.css";
 import Logout from "./logout";
+import { useNavigate } from "react-router-dom";
 
 const MovieDetails = () => {
   const { id } = useParams();
   const [movie, setMovie] = useState(null);
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const fetchYoutube = async (title) => {
     try {
@@ -51,7 +53,9 @@ const MovieDetails = () => {
       <h1>HyperTube</h1>
       {movie ? (
         <div>
-          <img src={movie.Poster} alt={movie.Title} />
+          <button onClick={() => navigate(`/movie/${movie.imdbID}/watch`)}>
+            <img src={movie.Poster} alt={movie.Title} />
+          </button>
           <h2>{movie.Title}</h2>
           <p>Year: {movie.Year}</p>
           <p>Genre: {movie.Genre}</p>

@@ -27,6 +27,7 @@ async function createTable() {
           user_id SERIAL PRIMARY KEY,
           username VARCHAR(100) NOT NULL,
           email VARCHAR(100) UNIQUE NOT NULL,
+          profile_pic VARCHAR(255),
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
@@ -55,10 +56,17 @@ async function createTable() {
   } catch (error) {
     console.error("Error creating table:", error);
   } finally {
-    await client.end();
+    client.end();
   }
 }
 
+client.connect((err) => {
+  if (err) {
+    console.error("Failed to connect to the database:", err.stack);
+  } else {
+    console.log("Connected to the database.");
+  }
+});
 createTable();
 
 const firebaseConfig = {
@@ -175,6 +183,37 @@ async function validateFirebaseToken(token) {
   }
 }
 
+async function checkUser(email) {
+  try {
+    await client.connect();
+    console.log("Checking user:", email);
+    const query = `SELECT * FROM Users WHERE email = $1`;
+    const result = await client.query(query, [email]);
+    console.log("Result:", result.rows);
+    return result.rows.length > 0;
+  } catch (error) {
+    console.error("Error connecting to database:", error);
+    return 0;
+  }
+}
+
+async function addUser(userData) {
+  try {
+    await client.connect();
+    const query = `
+    INSERT INTO Users (username, email) 
+    VALUES ($1, $2)
+    RETURNING *;
+  `;
+    const values = [userData.username, userData.email];
+    const result = await client.query(query, values);
+    return result.rows[0];
+  } catch (error) {
+    console.error("Error connecting to database:", error);
+    return 0;
+  }
+}
+
 app.get("/auth/validate", async (req, res) => {
   var userData = null;
   const token = req.headers.authorization?.split(" ")[1];
@@ -183,8 +222,8 @@ app.get("/auth/validate", async (req, res) => {
     userData = await validateIntra42Token(token);
   else userData = await validateFirebaseToken(token);
   if (!userData) return res.sendStatus(403);
-  console.log(userData.email);
   req.user = userData;
+  if (!(await checkUser(userData.email))) await addUser(userData);
   res.status(200).send({ message: "User is valid", user: userData });
 });
 
