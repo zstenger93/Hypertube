@@ -2,6 +2,7 @@ import pg from "pg";
 import express, { request } from "express";
 import cors from "cors";
 import axios from "axios";
+import fs from "fs";
 
 const intraSecret = process.env.INTRA_SECRET;
 const intraUUID = process.env.INTRA_UUID;
@@ -20,8 +21,9 @@ const client = new Client({
   port: 5432,
 });
 
-async function createTable() {
+async function createTables() {
   try {
+    await client.query("BEGIN");
     await client.query(`
       CREATE TABLE IF NOT EXISTS Users (
           user_id SERIAL PRIMARY KEY,
@@ -31,7 +33,10 @@ async function createTable() {
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
+    console.log("Created Users");
+    await client.query("COMMIT");
 
+    await client.query("BEGIN");
     await client.query(`
       CREATE TABLE IF NOT EXISTS Movies (
           movie_id SERIAL PRIMARY KEY,
@@ -41,33 +46,70 @@ async function createTable() {
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
+    console.log("Created Movies");
+    await client.query("COMMIT");
 
+    await client.query("BEGIN");
     await client.query(`
       CREATE TABLE IF NOT EXISTS Comments (
           comment_id SERIAL PRIMARY KEY,
-          user_id INT REFERENCES Users(user_id) ON DELETE CASCADE,
+          user_email VARCHAR(100) REFERENCES Users(email) ON DELETE CASCADE,
           movie_id INT REFERENCES Movies(movie_id) ON DELETE CASCADE,
           content TEXT NOT NULL,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
-
-    console.log("Tables created successfully");
+    console.log("Created Comments");
+    await client.query("COMMIT");
   } catch (error) {
-    console.error("Error creating table:", error);
-  } finally {
-    client.end();
+    await client.query("ROLLBACK");
+    console.error("Error creating tables:", error);
   }
 }
 
-client.connect((err) => {
-  if (err) {
-    console.error("Failed to connect to the database:", err.stack);
-  } else {
-    console.log("Connected to the database.");
+async function checkUser(email) {
+  try {
+    const query = `SELECT * FROM Users WHERE email = $1`;
+    const result = await client.query(query, [email]);
+    return result.rows.length > 0;
+  } catch (error) {
+    console.error("Error checking user:", error);
+    return false;
   }
-});
-createTable();
+}
+
+async function addUser(userData) {
+  try {
+    const query = `
+      INSERT INTO Users (username, email) 
+      VALUES ($1, $2)
+      RETURNING *;
+    `;
+    fs.writeFile("userData.json", JSON.stringify(userData, null, 2), (err) => {
+      if (err) {
+        console.error("Error writing to file", err);
+      } else {
+        console.log("userData written to file");
+      }
+    });
+    const values = [userData.displayname, userData.email];
+    const result = await client.query(query, values);
+    return result.rows[0];
+  } catch (error) {
+    console.error("Error adding user:", error);
+    return null;
+  }
+}
+
+client
+  .connect()
+  .then(() => {
+    console.log("Connected to the database.");
+    return createTables();
+  })
+  .catch((err) => {
+    console.error("Failed to connect to the database:", err.stack);
+  });
 
 const firebaseConfig = {
   apiKey: "AIzaSyDdCQbBKuVCKAR67luHVd_WyxpEGVvRfNI",
@@ -180,37 +222,6 @@ async function validateFirebaseToken(token) {
     return response.data.users[0];
   } catch (error) {
     return null;
-  }
-}
-
-async function checkUser(email) {
-  try {
-    await client.connect();
-    console.log("Checking user:", email);
-    const query = `SELECT * FROM Users WHERE email = $1`;
-    const result = await client.query(query, [email]);
-    console.log("Result:", result.rows);
-    return result.rows.length > 0;
-  } catch (error) {
-    console.error("Error connecting to database:", error);
-    return 0;
-  }
-}
-
-async function addUser(userData) {
-  try {
-    await client.connect();
-    const query = `
-    INSERT INTO Users (username, email) 
-    VALUES ($1, $2)
-    RETURNING *;
-  `;
-    const values = [userData.username, userData.email];
-    const result = await client.query(query, values);
-    return result.rows[0];
-  } catch (error) {
-    console.error("Error connecting to database:", error);
-    return 0;
   }
 }
 
