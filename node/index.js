@@ -3,6 +3,9 @@ import express, { request } from "express";
 import cors from "cors";
 import axios from "axios";
 import fs from "fs";
+import TorrentSearchApi from 'torrent-search-api';
+import { exec } from 'child_process';
+import path from 'path';
 
 const intraSecret = process.env.INTRA_SECRET;
 const intraUUID = process.env.INTRA_UUID;
@@ -236,6 +239,67 @@ app.get("/auth/validate", async (req, res) => {
   req.user = userData;
   if (!(await checkUser(userData.email))) await addUser(userData);
   res.status(200).send({ message: "User is valid", user: userData });
+});
+
+TorrentSearchApi.enableProvider('ThePirateBay');
+
+app.get('/api/search', async (req, res) => {
+  const { query } = req.query;
+  const torrents = await TorrentSearchApi.search(query, 'Movies', 20);
+  res.json(torrents);
+});
+
+app.get('/api/download', (req, res) => {
+  const { magnetURI } = req.query;
+  const downloadPath = path.join(__dirname, 'downloads');
+
+  exec(`aria2c --seed-time=0 -d ${downloadPath} "${magnetURI}"`, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`exec error: ${error}`);
+      return res.status(500).send('Error downloading torrent');
+    }
+    console.log(`stdout: ${stdout}`);
+    console.error(`stderr: ${stderr}`);
+    res.send('Download started');
+  });
+});
+
+
+app.get('/api/stream', (req, res) => {
+  const videoPath = path.join(__dirname, 'downloads', 'video-file.mp4');
+  const stat = fs.statSync(videoPath);
+  const fileSize = stat.size;
+  const range = req.headers.range;
+
+  if (range) {
+    const parts = range.replace(/bytes=/, "").split("-");
+    const start = parseInt(parts[0], 10);
+    const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+
+    if (start >= fileSize) {
+      res.status(416).send('Requested range not satisfiable\n' + start + ' >= ' + fileSize);
+      return;
+    }
+
+    const chunksize = (end - start) + 1;
+    const file = fs.createReadStream(videoPath, { start, end });
+    const head = {
+      'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+      'Accept-Ranges': 'bytes',
+      'Content-Length': chunksize,
+      'Content-Type': 'video/mp4',
+    };
+
+    res.writeHead(206, head);
+    file.pipe(res);
+  } else {
+    const head = {
+      'Content-Length': fileSize,
+      'Content-Type': 'video/mp4',
+    };
+    res.writeHead(200, head);
+    fs.createReadStream(videoPath).pipe(res);
+  }
 });
 
 app.listen(3000, () => console.log(`App running on port 3000.`));
