@@ -88,6 +88,10 @@ async function addUser(userData) {
     let values = [userData.displayname, userData.email];
 
     if (userData.displayname === undefined) {
+      if (userData.displayName === undefined) {
+        values = [userData.email, userData.email];
+        return null;
+      }
       values = [userData.displayName, userData.email];
     }
 
