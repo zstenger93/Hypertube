@@ -3,6 +3,8 @@ import express, { request } from "express";
 import cors from "cors";
 import axios from "axios";
 import fs from "fs";
+import { profile } from "console";
+const defaultImage = "./assets/pesant.jpg";
 
 const intraSecret = process.env.INTRA_SECRET;
 const intraUUID = process.env.INTRA_UUID;
@@ -81,27 +83,18 @@ async function checkUser(email) {
 async function addUser(userData) {
   try {
     const query = `
-    INSERT INTO Users (username, email) 
-    VALUES ($1, $2)
+    INSERT INTO Users (username, email, profile_pic) 
+    VALUES ($1, $2, $3)
     RETURNING *;
     `;
-    let values = [userData.displayname, userData.email];
+    let values = [
+      userData.displayname ?? userData.displayName ?? userData.email,
+      userData.email ?? "No email provided",
+      userData.image?.versions?.medium ??
+        userData?.providerUserInfo[0].photoUrl ??
+        defaultImage,
+    ];
 
-    if (userData.displayname === undefined) {
-      if (userData.displayName === undefined) {
-        values = [userData.email, userData.email];
-        return null;
-      }
-      values = [userData.displayName, userData.email];
-    }
-
-    // fs.writeFile("userData.json", JSON.stringify(userData, null, 2), (err) => {
-    //   if (err) {
-    //     console.error("Error writing to file", err);
-    //   } else {
-    //     console.log("userData written to file");
-    //   }
-    // });
     const result = await client.query(query, values);
     return result.rows[0];
   } catch (error) {
@@ -243,7 +236,6 @@ app.get("/auth/validate", async (req, res) => {
   else userData = await validateFirebaseToken(token);
   if (!userData) return res.sendStatus(403);
   req.user = userData;
-  console.log("User data:", userData);
   if (!(await checkUser(userData.email))) {
     await addUser(userData);
   }
