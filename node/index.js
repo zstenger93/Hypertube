@@ -81,10 +81,16 @@ async function checkUser(email) {
 async function addUser(userData) {
   try {
     const query = `
-      INSERT INTO Users (username, email) 
-      VALUES ($1, $2)
-      RETURNING *;
+    INSERT INTO Users (username, email) 
+    VALUES ($1, $2)
+    RETURNING *;
     `;
+    let values = [userData.displayname, userData.email];
+
+    if (userData.displayname === undefined) {
+      values = [userData.displayName, userData.email];
+    }
+
     // fs.writeFile("userData.json", JSON.stringify(userData, null, 2), (err) => {
     //   if (err) {
     //     console.error("Error writing to file", err);
@@ -92,10 +98,8 @@ async function addUser(userData) {
     //     console.log("userData written to file");
     //   }
     // });
-    const values = [userData.displayname, userData.email];
     const result = await client.query(query, values);
     return result.rows[0];
-    console.log("User added:", result.rows[0]);
   } catch (error) {
     console.error("Error adding user:", error);
     return null;
@@ -235,8 +239,9 @@ app.get("/auth/validate", async (req, res) => {
   else userData = await validateFirebaseToken(token);
   if (!userData) return res.sendStatus(403);
   req.user = userData;
+  console.log("User data:", userData);
   if (!(await checkUser(userData.email))) {
-   await addUser(userData);
+    await addUser(userData);
   }
   res.status(200).send({ message: "User is valid", user: userData });
 });
