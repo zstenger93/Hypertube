@@ -1,7 +1,15 @@
 import React from "react";
 import { initializeApp } from "firebase/app";
-import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import {
+  getAuth,
+  signInWithPopup,
+  GoogleAuthProvider,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+} from "firebase/auth";
+
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDdCQbBKuVCKAR67luHVd_WyxpEGVvRfNI",
@@ -19,6 +27,10 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 function Login() {
+  const [showInputs, setShowInputs] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
   const handleLoginWithIntra = () => {
@@ -32,19 +44,78 @@ function Login() {
       const token = await result.user.getIdToken();
       localStorage.setItem("accessToken", token);
       navigate("/search");
+    } catch (error) {}
+  };
+
+  const handleSubmit = async () => {
+    const auth = getAuth();
+
+    try {
+      let userCredential;
+      if (isRegistering) {
+        userCredential = await createUserWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
+      } else {
+        userCredential = await signInWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
+      }
+      const token = await userCredential.user.getIdToken();
+      localStorage.setItem("accessToken", token);
+      navigate("/search");
     } catch (error) {
-      console.error("Google Login Error:", error);
+      console.error("Authentication Error:", error);
     }
   };
 
-  if (localStorage.getItem("accessToken")) {
-    window.location.href = "/search";
-  }
+  const handleShowHideInputs = () => {
+    setShowInputs(!showInputs);
+    setEmail("");
+    setPassword("");
+  };
 
   return (
     <div className="center">
       <button onClick={handleLoginWithIntra}>Login with Intra</button>
       <button onClick={handleGoogleLogin}>Login with Google</button>
+      <button onClick={handleShowHideInputs}>
+        {showInputs
+          ? isRegistering
+            ? "Hide Register"
+            : "Hide Login"
+          : isRegistering
+          ? "Register with Email"
+          : "Login with Email"}
+      </button>
+      {showInputs && (
+        <div className="center">
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <button onClick={handleSubmit}>
+            {isRegistering ? "Register with Email" : "Login with Email"}
+          </button>
+          <button onClick={() => setIsRegistering(!isRegistering)}>
+            {isRegistering
+              ? "Already have an account? Login"
+              : "Don't have an account? Register"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -85,16 +85,17 @@ async function addUser(userData) {
       VALUES ($1, $2)
       RETURNING *;
     `;
-    fs.writeFile("userData.json", JSON.stringify(userData, null, 2), (err) => {
-      if (err) {
-        console.error("Error writing to file", err);
-      } else {
-        console.log("userData written to file");
-      }
-    });
+    // fs.writeFile("userData.json", JSON.stringify(userData, null, 2), (err) => {
+    //   if (err) {
+    //     console.error("Error writing to file", err);
+    //   } else {
+    //     console.log("userData written to file");
+    //   }
+    // });
     const values = [userData.displayname, userData.email];
     const result = await client.query(query, values);
     return result.rows[0];
+    console.log("User added:", result.rows[0]);
   } catch (error) {
     console.error("Error adding user:", error);
     return null;
@@ -103,9 +104,9 @@ async function addUser(userData) {
 
 client
   .connect()
-  .then(() => {
+  .then(async () => {
     console.log("Connected to the database.");
-    return createTables();
+    return await createTables();
   })
   .catch((err) => {
     console.error("Failed to connect to the database:", err.stack);
@@ -234,7 +235,9 @@ app.get("/auth/validate", async (req, res) => {
   else userData = await validateFirebaseToken(token);
   if (!userData) return res.sendStatus(403);
   req.user = userData;
-  if (!(await checkUser(userData.email))) await addUser(userData);
+  if (!(await checkUser(userData.email))) {
+   await addUser(userData);
+  }
   res.status(200).send({ message: "User is valid", user: userData });
 });
 
