@@ -54,13 +54,16 @@ const MovieDetails = () => {
       {movie ? (
         <div>
           <button onClick={() => navigate(`/movie/${movie.imdbID}/watch`)}>
-            <img src={movie.Poster} alt={movie.Title} />
+            <img
+              src={movie.Poster ?? movie.poster}
+              alt={movie.Title ?? movie.title}
+            />
           </button>
           <h2>{movie.Title}</h2>
-          <p>Year: {movie.Year}</p>
-          <p>Genre: {movie.Genre}</p>
-          <p>Plot: {movie.Plot}</p>
-          <p>Director: {movie.Director}</p>
+          <p>Year: {movie.Year ?? movie.year}</p>
+          <p>Genre: {movie.Genre ?? movie.genre}</p>
+          <p>Plot: {movie.Plot ?? movie.plot}</p>
+          <p>Director: {movie.Director ?? movie.director}</p>
           <h3>Related Videos:</h3>
           <div className="videoList">
             {videos.map((video) => (
