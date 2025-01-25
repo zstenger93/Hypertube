@@ -23,11 +23,27 @@ const client = new Client({
   port: 5432,
 });
 
+async function dropTables() {
+  await client.query("BEGIN");
+  await client.query(`
+    DROP TABLE IF EXISTS public.Comments CASCADE;
+  `);
+  await client.query(`
+    DROP TABLE IF EXISTS public.Movies CASCADE;
+  `);
+  await client.query(`
+    DROP TABLE IF EXISTS public.Users CASCADE;
+  `);
+  await client.query("COMMIT");
+  console.log("Dropped tables");
+}
+
 async function createTables() {
   try {
+    await dropTables();
     await client.query("BEGIN");
     await client.query(`
-      CREATE TABLE IF NOT EXISTS Users (
+      CREATE TABLE IF NOT EXISTS public.Users (
           user_id SERIAL PRIMARY KEY,
           username VARCHAR(100) NOT NULL,
           email VARCHAR(100) UNIQUE NOT NULL,
@@ -40,7 +56,7 @@ async function createTables() {
 
     await client.query("BEGIN");
     await client.query(`
-      CREATE TABLE IF NOT EXISTS Movies (
+      CREATE TABLE IF NOT EXISTS public.Movies (
           movie_id SERIAL PRIMARY KEY,
           title VARCHAR(255) NOT NULL,
           description TEXT,
@@ -53,7 +69,7 @@ async function createTables() {
 
     await client.query("BEGIN");
     await client.query(`
-      CREATE TABLE IF NOT EXISTS Comments (
+      CREATE TABLE IF NOT EXISTS public.Comments (
           comment_id SERIAL PRIMARY KEY,
           user_email VARCHAR(100) REFERENCES Users(email) ON DELETE CASCADE,
           movie_id INT REFERENCES Movies(movie_id) ON DELETE CASCADE,
