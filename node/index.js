@@ -5,6 +5,7 @@ import axios from "axios";
 import fs from "fs";
 import { profile } from "console";
 const defaultImage = "./assets/pesant.jpg";
+const defaultPoster = "./assets/poster.jpg";
 
 const intraSecret = process.env.INTRA_SECRET;
 const intraUUID = process.env.INTRA_UUID;
@@ -57,13 +58,13 @@ async function createTables() {
     await client.query(`
       CREATE TABLE IF NOT EXISTS public.Movies (
           movie_id SERIAL PRIMARY KEY,
-          Title VARCHAR(100) NOT NULL,
+          Title VARCHAR(255) NOT NULL,
           Year INT,
           Genre VARCHAR(100),
           Plot TEXT,
           Director VARCHAR(100),
           Poster VARCHAR(255),
-          imdbID VARCHAR(20),
+          imdbID VARCHAR(255) UNIQUE,
           imdbRating VARCHAR(10),
           imdbVotes VARCHAR(20),
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -122,9 +123,6 @@ async function addUser(userData) {
   }
 }
 
-
-
-
 const firebaseConfig = {
   apiKey: "AIzaSyDdCQbBKuVCKAR67luHVd_WyxpEGVvRfNI",
   authDomain: "hypertube-2287a.firebaseapp.com",
@@ -145,17 +143,57 @@ app.use(express.urlencoded({ extended: true }));
 app.get("/api/movies", async (req, res) => {
   const { title } = req.query;
   if (title.length < 3) {
-    return res.status(400).send("Title must be at least 3 characters long");
+    return res.json([]);
   }
   try {
+    const searchMoviesInDb = `
+    SELECT * FROM Movies WHERE Title ILIKE '%' || $1 || '%';
+  `;
+    const movieResult = await client.query(searchMoviesInDb, [title]);
+    console.log(movieResult.rows);
+    if (movieResult.rows.length > 0) {
+      res.json(movieResult.rows);
+      //console.log(movieResult.rows);
+      return;
+    }
     const url = `http://www.omdbapi.com/?apikey=${apiKey}&s=${title}`;
     const response = await axios.get(url);
+    if (response.data.Response === "False") {
+      return res.status(404).send("Movie not found in OMDB API");
+    }
+    await client.query("BEGIN");
+    for (let element of response.data.Search) {
+      const movie = {
+        title: element.Title,
+        poster: element.Poster !== "N/A" ? element.Poster : null,
+        imdbID: element.imdbID,
+        year: isNaN(Number(element.Year)) ? null : Number(element.Year),
+      };
+      // console.log("Insering movie:");
+      // console.log(movie);
+      const insertQuery = `
+      INSERT INTO Movies (Title, Year, Genre, Plot, Director, Poster, imdbID, imdbRating, imdbVotes)
+      VALUES ($1, $2, NULL, NULL, NULL, $3, $4, NULL, NULL)
+      ON CONFLICT (imdbID) DO UPDATE
+      SET 
+        Poster = COALESCE(EXCLUDED.Poster, Movies.Poster)
+      RETURNING *;
+    `;
+
+      await client.query(insertQuery, [
+        movie.title,
+        movie.year,
+        movie.poster,
+        movie.imdbID,
+      ]);
+    }
     res.json(response.data);
   } catch (error) {
     console.error("Error fetching data:", error);
     res.status(500).send("Error fetching data from OMDB API");
   }
 });
+
 
 app.get("/api/watchTheMovie", async (req, res) => {
   const { id } = req.query;
@@ -166,14 +204,11 @@ app.get("/api/watchTheMovie", async (req, res) => {
     SELECT * FROM Movies WHERE LOWER(imdbID) = LOWER($1) LIMIT 1;
     `;
     const movieResult = await client.query(searchMoviesInDb, [id]);
-    console.log(movieResult.rows[0]); 
     if (movieResult.rows.length > 0 && movieResult.rows[0].imdbrating) {
       res.json(movieResult.rows[0]);
       return;
     }
-    console.log("i was here???");
     const response = await axios.get(url);
-    //console.log(response.data);
     if (response.data.Response === "False") {
       return res.status(404).send("Movie not found in OMDB API");
     }
@@ -189,10 +224,20 @@ app.get("/api/watchTheMovie", async (req, res) => {
       imdbVotes: response.data.imdbVotes ?? "N/A",
     };
     const insertQuery = `
-      INSERT INTO Movies (Title, Year, Genre, Plot, Director, Poster, imdbID, imdbRating, imdbVotes)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-      RETURNING *;
-    `;
+    INSERT INTO Movies (Title, Year, Genre, Plot, Director, Poster, imdbID, imdbRating, imdbVotes)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+    ON CONFLICT (imdbID) DO UPDATE 
+    SET 
+      Title = EXCLUDED.Title,
+      Year = EXCLUDED.Year,
+      Genre = EXCLUDED.Genre,
+      Plot = EXCLUDED.Plot,
+      Director = EXCLUDED.Director,
+      Poster = EXCLUDED.Poster,
+      imdbRating = EXCLUDED.imdbRating,
+      imdbVotes = EXCLUDED.imdbVotes
+    RETURNING *;
+  `;
     const insertResult = await client.query(insertQuery, [
       movieData.title,
       movieData.year,

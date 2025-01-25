@@ -18,9 +18,13 @@ const MovieDetails = () => {
       );
       if (!response.ok) throw new Error("Failed to fetch youtube video");
       const data = await response.json();
-      setVideos(data.items);
+      if (data.items) {
+        setVideos(data.items);
+      } else if (data) {
+        setVideos(data);
+      }
     } catch (error) {
-      console.error("Error fetching youtube video:", error);
+      setVideos([]);
     }
   };
 
@@ -31,12 +35,10 @@ const MovieDetails = () => {
           `http://localhost:3000/api/watchTheMovie?id=${id}`
         );
         if (!response.ok) throw new Error("Failed to fetch movie details");
-
         const data = await response.json();
         setMovie(data);
-        if (data.Title) fetchYoutube(data.Title);
+        //if (data.Title) fetchYoutube(data.Title);
       } catch (error) {
-        console.error("Error fetching movie details:", error);
       } finally {
         setLoading(false);
       }
