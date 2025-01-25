@@ -161,7 +161,6 @@ app.get("/api/movies", async (req, res) => {
       SELECT * FROM Movies WHERE Title ILIKE '%' || $1 || '%';
     `;
       const movieResult = await client.query(searchMoviesInDb, [title]);
-      console.log(movieResult.rows);
       if (movieResult.rows.length > 0) {
         res.json(movieResult.rows);
         return;
