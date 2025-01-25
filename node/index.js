@@ -96,13 +96,13 @@ async function checkUser(email) {
     const result = await client.query(query, [email]);
     return result.rows.length > 0;
   } catch (error) {
-    console.error("Error checking user:", error);
     return false;
   }
 }
 
 async function addUser(userData) {
   try {
+    await client.query("BEGIN");
     const query = `
     INSERT INTO Users (username, email, profile_pic) 
     VALUES ($1, $2, $3)
@@ -116,6 +116,7 @@ async function addUser(userData) {
         defaultImage,
     ];
     const result = await client.query(query, values);
+    await client.query("COMMIT");
     return result.rows[0];
   } catch (error) {
     console.error("Error adding user:", error);
@@ -142,18 +143,41 @@ app.use(express.urlencoded({ extended: true }));
 
 app.get("/api/movies", async (req, res) => {
   const { title } = req.query;
+  if (title.length === 0) {
+    try {
+      const fetchAllMovies = `
+        SELECT * FROM Movies LIMIT 50;
+      `;
+      const movieResult = await client.query(fetchAllMovies);
+      res.json(movieResult.rows);
+    } catch (error) {
+      res.status(500).send("Error fetching movies");
+    }
+    return;
+  }
   if (title.length < 3) {
-    return res.json([]);
+    try {
+      const searchMoviesInDb = `
+      SELECT * FROM Movies WHERE Title ILIKE '%' || $1 || '%';
+    `;
+      const movieResult = await client.query(searchMoviesInDb, [title]);
+      console.log(movieResult.rows);
+      if (movieResult.rows.length > 0) {
+        res.json(movieResult.rows);
+        return;
+      }
+      return res.json([]);
+    } catch {
+      return res.json([]);
+    }
   }
   try {
     const searchMoviesInDb = `
     SELECT * FROM Movies WHERE Title ILIKE '%' || $1 || '%';
   `;
     const movieResult = await client.query(searchMoviesInDb, [title]);
-    console.log(movieResult.rows);
     if (movieResult.rows.length > 0) {
       res.json(movieResult.rows);
-      //console.log(movieResult.rows);
       return;
     }
     const url = `http://www.omdbapi.com/?apikey=${apiKey}&s=${title}`;
@@ -187,13 +211,13 @@ app.get("/api/movies", async (req, res) => {
         movie.imdbID,
       ]);
     }
+    await client.query("COMMIT");
     res.json(response.data);
   } catch (error) {
     console.error("Error fetching data:", error);
     res.status(500).send("Error fetching data from OMDB API");
   }
 });
-
 
 app.get("/api/watchTheMovie", async (req, res) => {
   const { id } = req.query;
@@ -218,11 +242,13 @@ app.get("/api/watchTheMovie", async (req, res) => {
       genre: response.data.Genre,
       plot: response.data.Plot,
       director: response.data.Director,
-      poster: response.data.Poster,
+      poster: response.data.Poster === "N/A" ? null : response.data.Poster,
       imdbID: response.data.imdbID,
       imdbRating: response.data.imdbRating ?? "N/A",
       imdbVotes: response.data.imdbVotes ?? "N/A",
     };
+    await client.query("BEGIN");
+
     const insertQuery = `
     INSERT INTO Movies (Title, Year, Genre, Plot, Director, Poster, imdbID, imdbRating, imdbVotes)
     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
@@ -238,6 +264,7 @@ app.get("/api/watchTheMovie", async (req, res) => {
       imdbVotes = EXCLUDED.imdbVotes
     RETURNING *;
   `;
+
     const insertResult = await client.query(insertQuery, [
       movieData.title,
       movieData.year,
@@ -250,6 +277,7 @@ app.get("/api/watchTheMovie", async (req, res) => {
       movieData.imdbVotes,
     ]);
     insertResult.rows;
+    await client.query("COMMIT");
     res.json(response.data);
     return;
   } catch (error) {

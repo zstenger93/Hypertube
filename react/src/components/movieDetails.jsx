@@ -3,6 +3,8 @@ import { useParams } from "react-router-dom";
 import "../App.css";
 import Logout from "./logout";
 import { useNavigate } from "react-router-dom";
+import poster from "../assets/poster.jpg";
+
 
 const MovieDetails = () => {
   const { id } = useParams();
@@ -49,6 +51,11 @@ const MovieDetails = () => {
 
   if (loading) return <p>Loading...</p>;
 
+  const thePoster =
+    movie?.Poster && movie.Poster !== "N/A"
+      ? movie.Poster
+      : movie?.poster || poster;
+
   return (
     <div className="center">
       <Logout />
@@ -57,7 +64,7 @@ const MovieDetails = () => {
         <div>
           <button onClick={() => navigate(`/movie/${movie.imdbID}/watch`)}>
             <img
-              src={movie.Poster ?? movie.poster}
+              src={thePoster}
               alt={movie.Title ?? movie.title}
             />
           </button>

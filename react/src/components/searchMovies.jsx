@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../App.css";
 import { useNavigate } from "react-router-dom";
 import Logout from "./logout";
@@ -8,6 +8,24 @@ const SearchComponent = () => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchInitialMovies = async () => {
+      try {
+        const response = await fetch(`http://localhost:3000/api/movies?title=`);
+        const data = await response.json();
+        if (data.Search) {
+          setResults(data.Search || []);
+        } else if (data) {
+          setResults(data || []);
+        }
+      } catch (error) {
+        setResults([]);
+      }
+    };
+
+    fetchInitialMovies();
+  }, []);
 
   const handleApiRequest = async (e) => {
     const value = e.target.value;
@@ -30,7 +48,20 @@ const SearchComponent = () => {
         setResults([]);
       }
     } else {
-      setResults([]);
+      try {
+        const response = await fetch(`http://localhost:3000/api/movies?title=`);
+        const data = await response.json();
+        if (data.Search) {
+          setResults(data.Search || []);
+        } else if (data) {
+          setResults(data || []);
+        }
+        if (data.error) {
+          return;
+        }
+      } catch (error) {
+        setResults([]);
+      }
     }
   };
 
