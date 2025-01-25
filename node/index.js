@@ -103,16 +103,6 @@ async function addUser(userData) {
   }
 }
 
-client
-  .connect()
-  .then(async () => {
-    console.log("Connected to the database.");
-    return await createTables();
-  })
-  .catch((err) => {
-    console.error("Failed to connect to the database:", err.stack);
-  });
-
 const firebaseConfig = {
   apiKey: "AIzaSyDdCQbBKuVCKAR67luHVd_WyxpEGVvRfNI",
   authDomain: "hypertube-2287a.firebaseapp.com",
@@ -242,4 +232,22 @@ app.get("/auth/validate", async (req, res) => {
   res.status(200).send({ message: "User is valid", user: userData });
 });
 
-app.listen(3000, () => console.log(`App running on port 3000.`));
+setTimeout(async () => {
+  client
+    .connect()
+    .then(async () => {
+      console.log("Connected to the database.");
+      try {
+        await createTables();
+      } catch (error) {
+        console.error("Error tables:", error);
+        process.exit(1);
+      }
+      app.listen(3000, () => {
+        console.log("App running on port 3000.");
+      });
+    })
+    .catch((err) => {
+      console.error("Failed to connect to the database:", err.stack);
+    });
+}, 10000);
