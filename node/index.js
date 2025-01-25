@@ -3,14 +3,11 @@ import express, { request } from "express";
 import cors from "cors";
 import axios from "axios";
 import fs from "fs";
-<<<<<<< HEAD
 import TorrentSearchApi from 'torrent-search-api';
 import { exec } from 'child_process';
 import path from 'path';
-=======
 import { profile } from "console";
 const defaultImage = "./assets/pesant.jpg";
->>>>>>> master
 
 const intraSecret = process.env.INTRA_SECRET;
 const intraUUID = process.env.INTRA_UUID;
