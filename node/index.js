@@ -372,22 +372,20 @@ app.get("/auth/validate", async (req, res) => {
   res.status(200).send({ message: "User is valid", user: userData });
 });
 
-setTimeout(async () => {
-  client
-    .connect()
-    .then(async () => {
-      console.log("Connected to the database.");
-      try {
-        await createTables();
-      } catch (error) {
-        console.error("Error tables:", error);
-        process.exit(1);
-      }
-      app.listen(3000, () => {
-        console.log("App running on port 3000.");
-      });
-    })
-    .catch((err) => {
-      console.error("Failed to connect to the database:", err.stack);
+client
+  .connect()
+  .then(async () => {
+    console.log("Connected to the database.");
+    try {
+      await createTables();
+    } catch (error) {
+      console.error("Error tables:", error);
+      process.exit(1);
+    }
+    app.listen(3000, () => {
+      console.log("App running on port 3000.");
     });
-}, 10000);
+  })
+  .catch((err) => {
+    console.error("Failed to connect to the database:", err.stack);
+  });
