@@ -4,8 +4,6 @@ import cors from "cors";
 import axios from "axios";
 import fs from "fs";
 import { profile } from "console";
-const defaultImage = "./assets/pesant.jpg";
-const defaultPoster = "./assets/poster.jpg";
 
 const intraSecret = process.env.INTRA_SECRET;
 const intraUUID = process.env.INTRA_UUID;
@@ -67,6 +65,7 @@ async function createTables() {
           imdbID VARCHAR(255) UNIQUE,
           imdbRating VARCHAR(10),
           imdbVotes VARCHAR(20),
+          videos JSON,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
@@ -113,7 +112,7 @@ async function addUser(userData) {
       userData.email ?? "No email provided",
       userData.image?.versions?.medium ??
         userData?.providerUserInfo[0].photoUrl ??
-        defaultImage,
+        null,
     ];
     const result = await client.query(query, values);
     await client.query("COMMIT");
@@ -192,8 +191,6 @@ app.get("/api/movies", async (req, res) => {
         imdbID: element.imdbID,
         year: isNaN(Number(element.Year)) ? null : Number(element.Year),
       };
-      // console.log("Insering movie:");
-      // console.log(movie);
       const insertQuery = `
       INSERT INTO Movies (Title, Year, Genre, Plot, Director, Poster, imdbID, imdbRating, imdbVotes)
       VALUES ($1, $2, NULL, NULL, NULL, $3, $4, NULL, NULL)
@@ -213,6 +210,8 @@ app.get("/api/movies", async (req, res) => {
     await client.query("COMMIT");
     res.json(response.data);
   } catch (error) {
+    await client.query("ROLLBACK");
+
     console.error("Error fetching data:", error);
     res.status(500).send("Error fetching data from OMDB API");
   }
@@ -287,15 +286,42 @@ app.get("/api/watchTheMovie", async (req, res) => {
 
 app.get("/api/youtubeRequests", async (req, res) => {
   const { title } = req.query;
-  const movie = "%movie";
   const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=3&q=${title}&key=${youtubeApiKey}`;
   try {
+    const searchMoviesInDb = `
+      SELECT * FROM Movies WHERE LOWER(Title) = LOWER($1) LIMIT 1;
+    `;
+    const movieResult = await client.query(searchMoviesInDb, [title]);
+    // console.log("Movie result:", movieResult.rows);
+    if (movieResult.rows.length > 0 && movieResult.rows[0].videos) {
+      res.json(movieResult.rows[0].videos);
+      //console.log("I was here");
+      return;
+    }
     const response = await axios.get(url);
-    console.log(response.data);
-    res.json(response.data);
+    if (!response.data || !response.data.items || response.data.error) {
+      res.status(500).send("Error fetching data from YouTube API");
+      return;
+    }
+    const videos = JSON.stringify(response.data.items);
+    await client.query("BEGIN");
+    const updateQuery = `
+      UPDATE Movies
+      SET videos = $1
+      WHERE LOWER(Title) = LOWER($2)
+      RETURNING *;
+    `;
+    const updateResult = await client.query(updateQuery, [videos, title]);
+    if (updateResult.rows.length === 0) {
+    }
+    await client.query("COMMIT");
+    res.json(response.data.items);
   } catch (error) {
-    console.error("Error fetching data:", error);
-    res.status(500).send("Error fetching data from OMDB API");
+    await client.query("ROLLBACK");
+    console.error("Error in transaction:", error);
+    res
+      .status(500)
+      .send("Error fetching data from YouTube API or updating the database");
   }
 });
 

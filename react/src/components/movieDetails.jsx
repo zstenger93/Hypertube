@@ -5,7 +5,6 @@ import Logout from "./logout";
 import { useNavigate } from "react-router-dom";
 import poster from "../assets/poster.jpg";
 
-
 const MovieDetails = () => {
   const { id } = useParams();
   const [movie, setMovie] = useState(null);
@@ -18,6 +17,7 @@ const MovieDetails = () => {
       const response = await fetch(
         `http://localhost:3000/api/youtubeRequests?title=${title}`
       );
+      console.log(response);
       if (!response.ok) throw new Error("Failed to fetch youtube video");
       const data = await response.json();
       if (data.items) {
@@ -39,7 +39,7 @@ const MovieDetails = () => {
         if (!response.ok) throw new Error("Failed to fetch movie details");
         const data = await response.json();
         setMovie(data);
-        //if (data.Title) fetchYoutube(data.Title);
+        if (data.Title ?? data.title) fetchYoutube(data.Title ?? data.title);
       } catch (error) {
       } finally {
         setLoading(false);
@@ -51,11 +51,13 @@ const MovieDetails = () => {
 
   if (loading) return <p>Loading...</p>;
 
-  const thePoster =
-    movie?.Poster && movie.Poster !== "N/A"
+  let thePoster =
+    movie.Poster && movie.Poster !== "N/A"
       ? movie.Poster
-      : movie?.poster || poster;
-
+      : movie.poster || poster;
+  if (thePoster === "N/A") {
+    thePoster = poster;
+  }
   return (
     <div className="center">
       <Logout />
@@ -63,14 +65,11 @@ const MovieDetails = () => {
       {movie ? (
         <div>
           <button onClick={() => navigate(`/movie/${movie.imdbID}/watch`)}>
-            <img
-              src={thePoster}
-              alt={movie.Title ?? movie.title}
-            />
+            <img src={thePoster} alt={movie.Title ?? movie.title} />
           </button>
           <h2>{movie.Title}</h2>
           <p>Year: {movie.Year ?? movie.year}</p>
-          <p>Genre: {movie.Genre ?? movie.genre}</p>
+          <p>Genre: {movie.Genre ?? movie.genre}</p>d
           <p>Plot: {movie.Plot ?? movie.plot}</p>
           <p>Director: {movie.Director ?? movie.director}</p>
           <h3>Related Videos:</h3>

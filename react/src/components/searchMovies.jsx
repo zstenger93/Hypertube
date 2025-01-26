@@ -78,10 +78,13 @@ const SearchComponent = () => {
       <div className="displayMovies ">
         {results.length > 0 ? (
           results.map((movie) => {
-            const thePoster =
+            let thePoster =
               movie.Poster && movie.Poster !== "N/A"
                 ? movie.Poster
                 : movie.poster || poster;
+            if (thePoster === "N/A") {
+              thePoster = poster;
+            }
             return (
               <button
                 key={movie.imdbID ?? movie.imdbid}
