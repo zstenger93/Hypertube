@@ -67,14 +67,17 @@ const SearchComponent = () => {
 
   return (
     <div className="center">
-      <Logout />
-      <h1>HyperTube</h1>
-      <input
-        type="text"
-        placeholder="Search..."
-        value={query}
-        onChange={handleApiRequest}
-      />
+      <div className="searchBox">
+        <Logout />
+        <h1 className="lastColor">HyperCrime</h1>
+        <input
+          type="text"
+          placeholder="Search..."
+          value={query}
+          className="searchInput"
+          onChange={handleApiRequest}
+        />
+      </div>
       <div className="displayMovies ">
         {results.length > 0 ? (
           results.map((movie) => {

@@ -17,7 +17,6 @@ const MovieDetails = () => {
       const response = await fetch(
         `http://localhost:3000/api/youtubeRequests?title=${title}`
       );
-      console.log(response);
       if (!response.ok) throw new Error("Failed to fetch youtube video");
       const data = await response.json();
       if (data.items) {
@@ -61,32 +60,38 @@ const MovieDetails = () => {
   return (
     <div className="center">
       <Logout />
-      <h1>HyperTube</h1>
+      <h1>HyperCrime</h1>
       {movie ? (
         <div>
-          <button onClick={() => navigate(`/movie/${movie.imdbID}/watch`)}>
-            <img src={thePoster} alt={movie.Title ?? movie.title} />
-          </button>
-          <h2>{movie.Title}</h2>
-          <p>Year: {movie.Year ?? movie.year}</p>
-          <p>Genre: {movie.Genre ?? movie.genre}</p>d
-          <p>Plot: {movie.Plot ?? movie.plot}</p>
-          <p>Director: {movie.Director ?? movie.director}</p>
+          <div className="movieBox">
+            <button
+              className="movieFrame1"
+              onClick={() => navigate(`/movie/${movie.imdbID}/watch`)}
+            >
+              <img src={thePoster} alt={movie.Title ?? movie.title} />
+            </button>
+            <div className="anotherColor">
+              <h2>{movie.Title ?? movie.title}</h2>
+              <h3>{movie.Plot ?? movie.plot}</h3>
+              <p>Year: {movie.Year ?? movie.year}</p>
+              <p>Genre: {movie.Genre ?? movie.genre}</p>
+              <p>Director: {movie.Director ?? movie.director}</p>
+              <p>IMDB Raiting: {movie.imdbRating ?? movie.imdbrating}</p>
+            </div>
+          </div>
           <h3>Related Videos:</h3>
           <div className="videoList">
-            {videos.map((video) => (
-              <div key={video.id.videoId} className="videoItem">
-                <a
-                  href={`https://www.youtube.com/watch?v=${video.id.videoId}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <img
-                    src={video.snippet.thumbnails.medium.url}
-                    alt={video.snippet.title}
-                  />
-                  <p>{video.snippet.title}</p>
-                </a>
+            {videos.map((video, index) => (
+              <div
+                key={video.id?.videoId || `video-${index}`}
+                className="videoItem"
+              >
+                <iframe
+                  src={`https://www.youtube.com/embed/${video.id?.videoId}`}
+                  title={video.snippet?.title}
+                  frameBorder="0"
+                  allowFullScreen
+                ></iframe>
               </div>
             ))}
           </div>
