@@ -10,7 +10,7 @@ run:
 stop:
 	docker-compose down
 
-clean-docker:
+clean_docker:
 	docker stop $$(docker ps -q) \
 	&& docker rm -f $$(docker ps -a -q) \
 	&& docker rmi -f $$(docker images -q) \

@@ -81,7 +81,7 @@ const MovieDetails = () => {
           </div>
           <h3>Related Videos:</h3>
           <div className="videoList">
-            {videos.map((video, index) => (
+            {videos.slice(0,3).map((video, index) => (
               <div
                 key={video.id?.videoId || `video-${index}`}
                 className="videoItem"

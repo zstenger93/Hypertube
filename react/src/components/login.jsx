@@ -80,7 +80,7 @@ function Login() {
   };
 
   return (
-    <div className="center">
+    <div className="centerScreen">
       <button onClick={handleLoginWithIntra}>Login with Intra</button>
       <button onClick={handleGoogleLogin}>Login with Google</button>
       <button onClick={handleShowHideInputs}>

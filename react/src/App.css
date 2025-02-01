@@ -143,6 +143,16 @@ body {
   position: fixed;
   top: 20px;
   right: 20px;
+  padding: 10px 20px;
+  border: 2px solid #bfbfbf;
+  border-radius: 5px;
+  background-color: #1a1b26;
+  width: 100px;
+  margin: 20px;
+  color: #bfbfbf;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
 }
 
 .mainColor {
@@ -190,4 +200,40 @@ body {
 
 .lastColor {
   color: #bfbfbf;
+}
+
+.centerScreen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  background-color: #0d0d0d;
+  width: 100%;
+  height: 100vh;
+}
+
+.centerScreen button {
+  padding: 10px 20px;
+  border: 2px solid #bfbfbf;
+  border-radius: 5px;
+  background-color: #1a1b26;
+  width: 300px;
+  margin: 20px;
+  color: #bfbfbf;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.center input {
+  padding: 10px 20px;
+  border: 2px solid #bfbfbf;
+  border-radius: 5px;
+  background-color: #1a1b26;
+  width: 250px;
+  margin: 20px;
+  color: #bfbfbf;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
 }
