@@ -6,8 +6,12 @@ const CommentBox = (movie) => {
   const sendComment = async (event) => {
     event.preventDefault();
     const token = localStorage.getItem("accessToken");
-    console.log(token);
-    console.log(event.target.comment.value);
+    const text = event.target.comment.value;
+    const movieId = movie;
+    // console.log(token);
+    // console.log(event.target.comment.value);
+    console.log(movieId);
+
     event.target.comment.value = "";
   };
 
@@ -21,6 +25,8 @@ const CommentBox = (movie) => {
   );
 };
 
-const DisplayComments = () => {};
+const DisplayComments = () => {
+
+};
 
 export { DisplayComments, CommentBox };

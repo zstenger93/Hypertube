@@ -84,7 +84,7 @@ body {
 
 .movieFrame1 {
   margin: 20px;
-  width: 500px;
+  width: 300px;
   border: 2px solid #000;
   height: 400px;
   background-color: #bfbfbf;
@@ -95,8 +95,8 @@ body {
 }
 
 .movieFrame1 img {
-  width: 100%;
-  height: 360px;
+  width: 90%;
+  height: 90%;
   object-fit: cover;
   border: 2px solid #000;
   border-radius: 5px;
@@ -169,6 +169,10 @@ body {
 
 .anotherColor {
   color: #bfbfbf;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  max-width: 70%;
 }
 
 .anotherColor h2 {
@@ -178,6 +182,7 @@ body {
   text-transform: capitalize;
   border-bottom: 2px solid #ddd;
   padding-bottom: 5px;
+  word-wrap: break-word;
 }
 
 .anotherColor h3 {
@@ -256,7 +261,7 @@ body {
   border: 2px solid #bfbfbf;
   border-radius: 5px;
   background-color: #1a1b26;
-  width: 250px;
+  width: 300px;
   margin: 20px;
   color: #bfbfbf;
   font-size: 1rem;

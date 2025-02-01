@@ -96,10 +96,11 @@ const MovieDetails = () => {
               </div>
             ))}
           </div>
-          </div>
+        </div>
       ) : (
         <p>Movie details not found.</p>
       )}
+      <CommentBox movie={id} />
     </div>
   );
 };
