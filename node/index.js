@@ -4,6 +4,7 @@ import cors from "cors";
 import axios from "axios";
 import fs from "fs";
 import { profile } from "console";
+import { parse } from "path";
 
 const intraSecret = process.env.INTRA_SECRET;
 const intraUUID = process.env.INTRA_UUID;
@@ -118,6 +119,7 @@ async function addUser(userData) {
     await client.query("COMMIT");
     return result.rows[0];
   } catch (error) {
+    await client.query("ROLLBACK");
     console.error("Error adding user:", error);
     return null;
   }
@@ -228,15 +230,18 @@ app.get("/api/watchTheMovie", async (req, res) => {
     const movieResult = await client.query(searchMoviesInDb, [id]);
     if (movieResult.rows.length > 0 && movieResult.rows[0].imdbrating) {
       res.json(movieResult.rows[0]);
+      console.log("Load from DB movie");
       return;
     }
     const response = await axios.get(url);
     if (response.data.Response === "False") {
       return res.status(404).send("Movie not found in OMDB API");
     }
+
+    var parseYear = parseInt(response?.data?.year, 10) || 1900;
     const movieData = {
       title: response.data.Title,
-      year: response.data.Year,
+      year: parseYear,
       genre: response.data.Genre,
       plot: response.data.Plot,
       director: response.data.Director,
@@ -246,7 +251,6 @@ app.get("/api/watchTheMovie", async (req, res) => {
       imdbVotes: response.data.imdbVotes ?? "N/A",
     };
     await client.query("BEGIN");
-
     const insertQuery = `
     INSERT INTO Movies (Title, Year, Genre, Plot, Director, Poster, imdbID, imdbRating, imdbVotes)
     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
@@ -295,7 +299,7 @@ app.get("/api/youtubeRequests", async (req, res) => {
     // console.log("Movie result:", movieResult.rows);
     if (movieResult.rows.length > 0 && movieResult.rows[0].videos) {
       res.json(movieResult.rows[0].videos);
-      //console.log("I was here");
+      console.log("Load from DB youtube videos");
       return;
     }
     const response = await axios.get(url);

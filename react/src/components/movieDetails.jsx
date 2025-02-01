@@ -4,6 +4,7 @@ import "../App.css";
 import Logout from "./logout";
 import { useNavigate } from "react-router-dom";
 import poster from "../assets/poster.jpg";
+import { CommentBox } from "./displayComments";
 
 const MovieDetails = () => {
   const { id } = useParams();
@@ -81,7 +82,7 @@ const MovieDetails = () => {
           </div>
           <h3>Related Videos:</h3>
           <div className="videoList">
-            {videos.slice(0,3).map((video, index) => (
+            {videos.slice(0, 3).map((video, index) => (
               <div
                 key={video.id?.videoId || `video-${index}`}
                 className="videoItem"
@@ -95,7 +96,7 @@ const MovieDetails = () => {
               </div>
             ))}
           </div>
-        </div>
+          </div>
       ) : (
         <p>Movie details not found.</p>
       )}
