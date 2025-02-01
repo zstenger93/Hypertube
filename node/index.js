@@ -58,7 +58,7 @@ async function createTables() {
       CREATE TABLE IF NOT EXISTS public.Movies (
           movie_id SERIAL PRIMARY KEY,
           Title VARCHAR(255) NOT NULL,
-          Year INT,
+          Year TEXT,
           Genre VARCHAR(100),
           Plot TEXT,
           Director VARCHAR(100),
@@ -191,7 +191,7 @@ app.get("/api/movies", async (req, res) => {
         title: element.Title,
         poster: element.Poster !== "N/A" ? element.Poster : null,
         imdbID: element.imdbID,
-        year: isNaN(Number(element.Year)) ? null : Number(element.Year),
+        year: element.Year,
       };
       const insertQuery = `
       INSERT INTO Movies (Title, Year, Genre, Plot, Director, Poster, imdbID, imdbRating, imdbVotes)
@@ -422,11 +422,7 @@ app.post("/api/comments", async (req, res) => {
     }
     const id = movieResult.rows[0].movie_id;
     const insertQuery = `INSERT INTO Comments (user_email, movie_id, content) VALUES ($1, $2, $3) RETURNING *;`;
-    const result = await client.query(insertQuery, [
-      userData.email,
-      id,
-      text,
-    ]);
+    const result = await client.query(insertQuery, [userData.email, id, text]);
     result.rows;
     await client.query("COMMIT");
     res.status(200).send({ message: "Comment Added" });
