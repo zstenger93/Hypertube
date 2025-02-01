@@ -402,6 +402,35 @@ app.get("/auth/validate", async (req, res) => {
   res.status(200).send({ message: "User is valid", user: userData });
 });
 
+app.get("/api/comments", async (req, res) => {
+  console.log("Indeed here");
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) return res.sendStatus(401);
+  if (req.headers.authorization.length < 120)
+    userData = await validateIntra42Token(token);
+  else userData = await validateFirebaseToken(token);
+  if (!userData) return res.sendStatus(403);
+  req.user = userData;
+  const { text, movieId } = req.body;
+  res.status(200).send({ message: "Comment Added" });
+  try {
+    const insertQuery = `INSERT INTO Comments (user_email, movie_id, content) VALUES ($1, $2, $3) RETURNING *;`;
+    await client.query("BEGIN");
+    const result = await client.query(insertQuery, [
+      userData.email,
+      movieId,
+      text,
+    ]);
+    result.rows;
+    await client.query("COMMIT");
+    console.log("Here");
+  } catch (error) {
+    await client.query("ROLLBACK");
+    res.status(500).send("Error adding comment");
+    console.log("Not Here");
+  }
+});
+
 client
   .connect()
   .then(async () => {

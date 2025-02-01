@@ -7,11 +7,24 @@ const CommentBox = (movie) => {
     event.preventDefault();
     const token = localStorage.getItem("accessToken");
     const text = event.target.comment.value;
-    const movieId = movie;
-    // console.log(token);
-    // console.log(event.target.comment.value);
+    const movieId = movie.movie;
+    console.log(token);
+    console.log(event.target.comment.value);
     console.log(movieId);
-
+    try {
+      const response = await fetch(`http://localhost:3000/api/comments`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ text, movieId }),
+      });
+      const data = await response.json();
+      console.log(data);
+    } catch (error) {
+      console.log(error);
+    }
     event.target.comment.value = "";
   };
 
@@ -25,8 +38,6 @@ const CommentBox = (movie) => {
   );
 };
 
-const DisplayComments = () => {
-
-};
+const DisplayComments = () => {};
 
 export { DisplayComments, CommentBox };
