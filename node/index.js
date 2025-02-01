@@ -402,8 +402,8 @@ app.get("/auth/validate", async (req, res) => {
   res.status(200).send({ message: "User is valid", user: userData });
 });
 
-app.get("/api/comments", async (req, res) => {
-  console.log("Indeed here");
+app.post("/api/comments", async (req, res) => {
+  var userData = null;
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) return res.sendStatus(401);
   if (req.headers.authorization.length < 120)
@@ -412,22 +412,27 @@ app.get("/api/comments", async (req, res) => {
   if (!userData) return res.sendStatus(403);
   req.user = userData;
   const { text, movieId } = req.body;
-  res.status(200).send({ message: "Comment Added" });
+  await client.query("BEGIN");
   try {
+    const searchMovie = `SELECT * FROM Movies WHERE imdbID = $1;`;
+    const movieResult = await client.query(searchMovie, [movieId]);
+    if (movieResult.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).send("Movie not found");
+    }
+    const id = movieResult.rows[0].movie_id;
     const insertQuery = `INSERT INTO Comments (user_email, movie_id, content) VALUES ($1, $2, $3) RETURNING *;`;
-    await client.query("BEGIN");
     const result = await client.query(insertQuery, [
       userData.email,
-      movieId,
+      id,
       text,
     ]);
     result.rows;
     await client.query("COMMIT");
-    console.log("Here");
+    res.status(200).send({ message: "Comment Added" });
   } catch (error) {
     await client.query("ROLLBACK");
     res.status(500).send("Error adding comment");
-    console.log("Not Here");
   }
 });
 

@@ -8,9 +8,6 @@ const CommentBox = (movie) => {
     const token = localStorage.getItem("accessToken");
     const text = event.target.comment.value;
     const movieId = movie.movie;
-    console.log(token);
-    console.log(event.target.comment.value);
-    console.log(movieId);
     try {
       const response = await fetch(`http://localhost:3000/api/comments`, {
         method: "POST",
@@ -21,9 +18,8 @@ const CommentBox = (movie) => {
         body: JSON.stringify({ text, movieId }),
       });
       const data = await response.json();
-      console.log(data);
     } catch (error) {
-      console.log(error);
+      console.log(error.message);
     }
     event.target.comment.value = "";
   };
