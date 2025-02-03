@@ -16,7 +16,7 @@ const MovieDetails = () => {
   const fetchYoutube = async (title) => {
     try {
       const response = await fetch(
-        `http://localhost:3000/api/youtubeRequests?title=${title}`
+        `http://localhost:3000/api/youtubeRequests/${title}`
       );
       if (!response.ok) throw new Error("Failed to fetch youtube video");
       const data = await response.json();
@@ -34,7 +34,7 @@ const MovieDetails = () => {
     const fetchMovieDetails = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3000/api/watchTheMovie?id=${id}`
+          `http://localhost:3000/api/watchTheMovie/${id}`
         );
         if (!response.ok) throw new Error("Failed to fetch movie details");
         const data = await response.json();

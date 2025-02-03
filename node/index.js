@@ -143,8 +143,20 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.get("/api/movies", async (req, res) => {
-  const { title } = req.query;
-  if (title.length === 0) {
+  try {
+    const fetchAllMovies = `
+        SELECT * FROM Movies LIMIT 50;
+      `;
+    const movieResult = await client.query(fetchAllMovies);
+    res.json(movieResult.rows);
+  } catch (error) {
+    res.status(500).send("Error fetching movies");
+  }
+});
+
+app.get("/api/movies/:title", async (req, res) => {
+  const { title } = req.params;
+  if (!title || title.length === 0) {
     try {
       const fetchAllMovies = `
         SELECT * FROM Movies LIMIT 50;
@@ -219,10 +231,12 @@ app.get("/api/movies", async (req, res) => {
   }
 });
 
-app.get("/api/watchTheMovie", async (req, res) => {
-  const { id } = req.query;
+app.get("/api/watchTheMovie/:id", async (req, res) => {
+  const { id } = req.params;
   const url = `http://www.omdbapi.com/?apikey=${apiKey}&i=${id}`;
-
+  if (!id || id.length === 0) {
+    return res.status(400).send("Potato");
+  }
   try {
     const searchMoviesInDb = `
     SELECT * FROM Movies WHERE LOWER(imdbID) = LOWER($1) LIMIT 1;
@@ -288,8 +302,11 @@ app.get("/api/watchTheMovie", async (req, res) => {
   }
 });
 
-app.get("/api/youtubeRequests", async (req, res) => {
-  const { title } = req.query;
+app.get("/api/youtubeRequests/:title", async (req, res) => {
+  const { title } = req.params;
+  if (!title || title.length === 0) {
+    return res.status(400).send("Potato");
+  }
   const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=3&q=${title}&key=${youtubeApiKey}`;
   try {
     const searchMoviesInDb = `
