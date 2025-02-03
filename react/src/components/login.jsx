@@ -6,6 +6,7 @@ import {
   GoogleAuthProvider,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
 } from "firebase/auth";
 
 import { useNavigate } from "react-router-dom";
@@ -31,6 +32,7 @@ function Login() {
   const [isRegistering, setIsRegistering] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [resetEmail, resetPasswprd] = useState(false);
   const navigate = useNavigate();
 
   const handleLoginWithIntra = () => {
@@ -47,9 +49,18 @@ function Login() {
     } catch (error) {}
   };
 
+  const handleForgotPassword = async () => {
+    if (email === "") return;
+    console.log("here");
+    try {
+      await sendPasswordResetEmail(auth, email);
+    } catch (error) {
+      console.error("Error sending reset email:", error);
+    }
+  };
+
   const handleSubmit = async () => {
     const auth = getAuth();
-
     try {
       let userCredential;
       if (isRegistering) {
@@ -114,6 +125,7 @@ function Login() {
               ? "Already have an account? Login"
               : "Don't have an account? Register"}
           </button>
+          <button onClick={handleForgotPassword}>{"Forgot password?"}</button>
         </div>
       )}
     </div>
