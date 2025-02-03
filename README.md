@@ -1,10 +1,10 @@
-✅ Mandatory Part
+❌ Mandatory Part
  - [✅] Create a web application with a user-friendly UI
  - [✅] User registration with email and a protected password
  - [❌] username, last name, first name, needs to be edited
  - [✅] Omniauth login (42 strategy + another method)
  - [✅] Login with username & password
- - [❌] password reset via email
+ - [✅] password reset via email
  - [✅] Logout with one click from any page
  - [❌] Select a preferred language (default: English)
  - [❌] Modify profile details (email, profile picture, info)
@@ -39,10 +39,10 @@
  - [❌] Retrieve/update user profiles
  - [❌] Access/post comments via /comments/:id and /movies/:id/comments
  - [✅] View front page with top movies
- - [❌] Fetch movie details via /movies/:id
+ - [✅] Fetch movie details via /movies/:id
  - [✅] API must return appropriate HTTP codes for invalid calls
  - [❌] Provide proof that the API is truly RESTful
-⭐ Bonus Part
+❌ Bonus Part
  - [✅] Additional Omniauth strategies
  - [❌] Support for multiple video resolutions
  - [❌] Stream video via the MediaStream API
