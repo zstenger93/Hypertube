@@ -419,7 +419,30 @@ app.get("/auth/validate", async (req, res) => {
   res.status(200).send({ message: "User is valid", user: userData });
 });
 
-app.post("/api/comments", async (req, res) => {
+app.get("/api/comments/:movieId", async (req, res) => {
+  const { movieId } = req.params;
+  if (!movieId || movieId.length === 0) {
+    return res.status(400).send("Potato");
+  }
+  try {
+    const searchMovie = `SELECT * FROM Movies WHERE imdbID = $1;`;
+    const movieResult = await client.query(searchMovie, [movieId]);
+    if (movieResult.rows.length === 0) {
+      return res.status(404).send("Movie not found");
+    }
+    const id = movieResult.rows[0].movie_id;
+    const searchComments = `SELECT * FROM Comments WHERE movie_id = $1;`;
+    const commentsResult = await client.query(searchComments, [id]);
+    
+    res.json(commentsResult.rows);
+  } catch (error) {
+    console.error("Error fetching comments:", error);
+    res.status(500).send("Error fetching comments");
+  }
+});
+
+app.post("/api/comments/:movieId", async (req, res) => {
+  const movieId = req.params.movieId;
   var userData = null;
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) return res.sendStatus(401);
@@ -428,7 +451,7 @@ app.post("/api/comments", async (req, res) => {
   else userData = await validateFirebaseToken(token);
   if (!userData) return res.sendStatus(403);
   req.user = userData;
-  const { text, movieId } = req.body;
+  const { text } = req.body;
   await client.query("BEGIN");
   try {
     const searchMovie = `SELECT * FROM Movies WHERE imdbID = $1;`;

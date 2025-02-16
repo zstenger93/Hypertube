@@ -4,7 +4,7 @@ import "../App.css";
 import Logout from "./logout";
 import { useNavigate } from "react-router-dom";
 import poster from "../assets/poster.jpg";
-import { CommentBox } from "./displayComments";
+import { CommentBox, DisplayComments } from "./displayComments";
 
 const MovieDetails = () => {
   const { id } = useParams();
@@ -101,6 +101,7 @@ const MovieDetails = () => {
         <p>Movie details not found.</p>
       )}
       <CommentBox movie={id} />
+      <DisplayComments movie={id} />
     </div>
   );
 };

@@ -38,7 +38,7 @@
 - [❌] Convert videos on-the-fly if unsupported (at least mkv format)
 - [✅] Develop a RESTful API with OAuth2 authentication
 - [❌] Retrieve/update user profiles
-- [❌] Access/post comments via /comments/:id and /movies/:id/comments
+- [✅] Access/post comments via /comments/:id and /movies/:id/comments
 - [✅] View front page with top movies
 - [✅] Fetch movie details via /movies/:id
 - [✅] API must return appropriate HTTP codes for invalid calls
