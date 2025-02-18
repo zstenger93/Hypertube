@@ -8,15 +8,21 @@ const ProtectedRoute = ({ children }) => {
   useEffect(() => {
     const checkToken = async () => {
       const token = localStorage.getItem("accessToken");
-      const response = await fetch("http://localhost:3000/auth/validate", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (response.ok) {
-        setIsValid(true);
-      } else {
+      try {
+        const response = await fetch("http://localhost:3000/auth/validate", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (response.ok) {
+          setIsValid(true);
+        } else {
+          setIsValid(false);
+          localStorage.removeItem("accessToken");
+          navigate("/");
+        }
+      } catch (error) {
         setIsValid(false);
         localStorage.removeItem("accessToken");
         navigate("/");

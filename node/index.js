@@ -7,7 +7,7 @@ import TorrentSearchApi from 'torrent-search-api';
 import { exec } from 'child_process';
 import path from 'path';
 import { profile } from "console";
-const defaultImage = "./assets/pesant.jpg";
+import { parse } from "path";
 
 const intraSecret = process.env.INTRA_SECRET;
 const intraUUID = process.env.INTRA_UUID;
@@ -60,15 +60,16 @@ async function createTables() {
     await client.query(`
       CREATE TABLE IF NOT EXISTS public.Movies (
           movie_id SERIAL PRIMARY KEY,
-          Title VARCHAR(100) NOT NULL,
-          Year INT,
+          Title VARCHAR(255) NOT NULL,
+          Year TEXT,
           Genre VARCHAR(100),
           Plot TEXT,
           Director VARCHAR(100),
           Poster VARCHAR(255),
-          imdbID VARCHAR(20),
+          imdbID VARCHAR(255) UNIQUE,
           imdbRating VARCHAR(10),
           imdbVotes VARCHAR(20),
+          videos JSON,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
@@ -98,13 +99,13 @@ async function checkUser(email) {
     const result = await client.query(query, [email]);
     return result.rows.length > 0;
   } catch (error) {
-    console.error("Error checking user:", error);
     return false;
   }
 }
 
 async function addUser(userData) {
   try {
+    await client.query("BEGIN");
     const query = `
     INSERT INTO Users (username, email, profile_pic) 
     VALUES ($1, $2, $3)
@@ -115,18 +116,17 @@ async function addUser(userData) {
       userData.email ?? "No email provided",
       userData.image?.versions?.medium ??
         userData?.providerUserInfo[0].photoUrl ??
-        defaultImage,
+        null,
     ];
     const result = await client.query(query, values);
+    await client.query("COMMIT");
     return result.rows[0];
   } catch (error) {
+    await client.query("ROLLBACK");
     console.error("Error adding user:", error);
     return null;
   }
 }
-
-
-
 
 const firebaseConfig = {
   apiKey: "AIzaSyDdCQbBKuVCKAR67luHVd_WyxpEGVvRfNI",
@@ -146,56 +146,144 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.get("/api/movies", async (req, res) => {
-  const { title } = req.query;
+  try {
+    const fetchAllMovies = `
+        SELECT * FROM Movies LIMIT 50;
+      `;
+    const movieResult = await client.query(fetchAllMovies);
+    res.json(movieResult.rows);
+  } catch (error) {
+    res.status(500).send("Error fetching movies");
+  }
+});
+
+app.get("/api/movies/:title", async (req, res) => {
+  const { title } = req.params;
+  if (!title || title.length === 0) {
+    try {
+      const fetchAllMovies = `
+        SELECT * FROM Movies LIMIT 50;
+      `;
+      const movieResult = await client.query(fetchAllMovies);
+      res.json(movieResult.rows);
+    } catch (error) {
+      res.status(500).send("Error fetching movies");
+    }
+    return;
+  }
   if (title.length < 3) {
-    return res.status(400).send("Title must be at least 3 characters long");
+    try {
+      const searchMoviesInDb = `
+      SELECT * FROM Movies WHERE Title ILIKE '%' || $1 || '%';
+    `;
+      const movieResult = await client.query(searchMoviesInDb, [title]);
+      if (movieResult.rows.length > 0) {
+        res.json(movieResult.rows);
+        return;
+      }
+      return res.json([]);
+    } catch {
+      return res.json([]);
+    }
   }
   try {
+    const searchMoviesInDb = `
+    SELECT * FROM Movies WHERE Title ILIKE '%' || $1 || '%';
+  `;
+    const movieResult = await client.query(searchMoviesInDb, [title]);
+    if (movieResult.rows.length > 0) {
+      res.json(movieResult.rows);
+      return;
+    }
     const url = `http://www.omdbapi.com/?apikey=${apiKey}&s=${title}`;
     const response = await axios.get(url);
+    if (response.data.Response === "False") {
+      return res.status(404).send("Movie not found in OMDB API");
+    }
+    await client.query("BEGIN");
+    for (let element of response.data.Search) {
+      const movie = {
+        title: element.Title,
+        poster: element.Poster !== "N/A" ? element.Poster : null,
+        imdbID: element.imdbID,
+        year: element.Year,
+      };
+      const insertQuery = `
+      INSERT INTO Movies (Title, Year, Genre, Plot, Director, Poster, imdbID, imdbRating, imdbVotes)
+      VALUES ($1, $2, NULL, NULL, NULL, $3, $4, NULL, NULL)
+      ON CONFLICT (imdbID) DO UPDATE
+      SET 
+        Poster = COALESCE(EXCLUDED.Poster, Movies.Poster)
+      RETURNING *;
+    `;
+
+      await client.query(insertQuery, [
+        movie.title,
+        movie.year,
+        movie.poster,
+        movie.imdbID,
+      ]);
+    }
+    await client.query("COMMIT");
     res.json(response.data);
   } catch (error) {
+    await client.query("ROLLBACK");
+
     console.error("Error fetching data:", error);
     res.status(500).send("Error fetching data from OMDB API");
   }
 });
 
-app.get("/api/watchTheMovie", async (req, res) => {
-  const { id } = req.query;
+app.get("/api/watchTheMovie/:id", async (req, res) => {
+  const { id } = req.params;
   const url = `http://www.omdbapi.com/?apikey=${apiKey}&i=${id}`;
-
+  if (!id || id.length === 0) {
+    return res.status(400).send("Potato");
+  }
   try {
     const searchMoviesInDb = `
     SELECT * FROM Movies WHERE LOWER(imdbID) = LOWER($1) LIMIT 1;
     `;
     const movieResult = await client.query(searchMoviesInDb, [id]);
-    console.log(movieResult.rows[0]); 
     if (movieResult.rows.length > 0 && movieResult.rows[0].imdbrating) {
       res.json(movieResult.rows[0]);
+      console.log("Load from DB movie");
       return;
     }
-    console.log("i was here???");
     const response = await axios.get(url);
-    //console.log(response.data);
     if (response.data.Response === "False") {
       return res.status(404).send("Movie not found in OMDB API");
     }
+
+    var parseYear = parseInt(response?.data?.year, 10) || 1900;
     const movieData = {
       title: response.data.Title,
-      year: response.data.Year,
+      year: parseYear,
       genre: response.data.Genre,
       plot: response.data.Plot,
       director: response.data.Director,
-      poster: response.data.Poster,
+      poster: response.data.Poster === "N/A" ? null : response.data.Poster,
       imdbID: response.data.imdbID,
       imdbRating: response.data.imdbRating ?? "N/A",
       imdbVotes: response.data.imdbVotes ?? "N/A",
     };
+    await client.query("BEGIN");
     const insertQuery = `
-      INSERT INTO Movies (Title, Year, Genre, Plot, Director, Poster, imdbID, imdbRating, imdbVotes)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-      RETURNING *;
-    `;
+    INSERT INTO Movies (Title, Year, Genre, Plot, Director, Poster, imdbID, imdbRating, imdbVotes)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+    ON CONFLICT (imdbID) DO UPDATE 
+    SET 
+      Title = EXCLUDED.Title,
+      Year = EXCLUDED.Year,
+      Genre = EXCLUDED.Genre,
+      Plot = EXCLUDED.Plot,
+      Director = EXCLUDED.Director,
+      Poster = EXCLUDED.Poster,
+      imdbRating = EXCLUDED.imdbRating,
+      imdbVotes = EXCLUDED.imdbVotes
+    RETURNING *;
+  `;
+
     const insertResult = await client.query(insertQuery, [
       movieData.title,
       movieData.year,
@@ -208,6 +296,7 @@ app.get("/api/watchTheMovie", async (req, res) => {
       movieData.imdbVotes,
     ]);
     insertResult.rows;
+    await client.query("COMMIT");
     res.json(response.data);
     return;
   } catch (error) {
@@ -216,17 +305,47 @@ app.get("/api/watchTheMovie", async (req, res) => {
   }
 });
 
-app.get("/api/youtubeRequests", async (req, res) => {
-  const { title } = req.query;
-  const movie = "%movie";
+app.get("/api/youtubeRequests/:title", async (req, res) => {
+  const { title } = req.params;
+  if (!title || title.length === 0) {
+    return res.status(400).send("Potato");
+  }
   const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=3&q=${title}&key=${youtubeApiKey}`;
   try {
+    const searchMoviesInDb = `
+      SELECT * FROM Movies WHERE LOWER(Title) = LOWER($1) LIMIT 1;
+    `;
+    const movieResult = await client.query(searchMoviesInDb, [title]);
+    // console.log("Movie result:", movieResult.rows);
+    if (movieResult.rows.length > 0 && movieResult.rows[0].videos) {
+      res.json(movieResult.rows[0].videos);
+      console.log("Load from DB youtube videos");
+      return;
+    }
     const response = await axios.get(url);
-    console.log(response.data);
-    res.json(response.data);
+    if (!response.data || !response.data.items || response.data.error) {
+      res.status(500).send("Error fetching data from YouTube API");
+      return;
+    }
+    const videos = JSON.stringify(response.data.items);
+    await client.query("BEGIN");
+    const updateQuery = `
+      UPDATE Movies
+      SET videos = $1
+      WHERE LOWER(Title) = LOWER($2)
+      RETURNING *;
+    `;
+    const updateResult = await client.query(updateQuery, [videos, title]);
+    if (updateResult.rows.length === 0) {
+    }
+    await client.query("COMMIT");
+    res.json(response.data.items);
   } catch (error) {
-    console.error("Error fetching data:", error);
-    res.status(500).send("Error fetching data from OMDB API");
+    await client.query("ROLLBACK");
+    console.error("Error in transaction:", error);
+    res
+      .status(500)
+      .send("Error fetching data from YouTube API or updating the database");
   }
 });
 
@@ -303,84 +422,73 @@ app.get("/auth/validate", async (req, res) => {
   res.status(200).send({ message: "User is valid", user: userData });
 });
 
-TorrentSearchApi.enableProvider('ThePirateBay');
-
-app.get('/api/search', async (req, res) => {
-  const { query } = req.query;
-  const torrents = await TorrentSearchApi.search(query, 'Movies', 20);
-  res.json(torrents);
-});
-
-app.get('/api/download', (req, res) => {
-  const { magnetURI } = req.query;
-  const downloadPath = path.join(__dirname, 'downloads');
-
-  exec(`aria2c --seed-time=0 -d ${downloadPath} "${magnetURI}"`, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`exec error: ${error}`);
-      return res.status(500).send('Error downloading torrent');
+app.get("/api/comments/:movieId", async (req, res) => {
+  const { movieId } = req.params;
+  if (!movieId || movieId.length === 0) {
+    return res.status(400).send("Potato");
+  }
+  try {
+    const searchMovie = `SELECT * FROM Movies WHERE imdbID = $1;`;
+    const movieResult = await client.query(searchMovie, [movieId]);
+    if (movieResult.rows.length === 0) {
+      return res.status(404).send("Movie not found");
     }
-    console.log(`stdout: ${stdout}`);
-    console.error(`stderr: ${stderr}`);
-    res.send('Download started');
-  });
-});
-
-
-app.get('/api/stream', (req, res) => {
-  const videoPath = path.join(__dirname, 'downloads', 'video-file.mp4');
-  const stat = fs.statSync(videoPath);
-  const fileSize = stat.size;
-  const range = req.headers.range;
-
-  if (range) {
-    const parts = range.replace(/bytes=/, "").split("-");
-    const start = parseInt(parts[0], 10);
-    const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
-
-    if (start >= fileSize) {
-      res.status(416).send('Requested range not satisfiable\n' + start + ' >= ' + fileSize);
-      return;
-    }
-
-    const chunksize = (end - start) + 1;
-    const file = fs.createReadStream(videoPath, { start, end });
-    const head = {
-      'Content-Range': `bytes ${start}-${end}/${fileSize}`,
-      'Accept-Ranges': 'bytes',
-      'Content-Length': chunksize,
-      'Content-Type': 'video/mp4',
-    };
-
-    res.writeHead(206, head);
-    file.pipe(res);
-  } else {
-    const head = {
-      'Content-Length': fileSize,
-      'Content-Type': 'video/mp4',
-    };
-    res.writeHead(200, head);
-    fs.createReadStream(videoPath).pipe(res);
+    const id = movieResult.rows[0].movie_id;
+    const searchComments = `SELECT * FROM Comments WHERE movie_id = $1;`;
+    const commentsResult = await client.query(searchComments, [id]);
+    
+    res.json(commentsResult.rows);
+  } catch (error) {
+    console.error("Error fetching comments:", error);
+    res.status(500).send("Error fetching comments");
   }
 });
 
-// app.listen(3000, () => console.log(`App running on port 3000.`));
-setTimeout(async () => {
-  client
-    .connect()
-    .then(async () => {
-      console.log("Connected to the database.");
-      try {
-        await createTables();
-      } catch (error) {
-        console.error("Error tables:", error);
-        process.exit(1);
-      }
-      app.listen(3000, () => {
-        console.log("App running on port 3000.");
-      });
-    })
-    .catch((err) => {
-      console.error("Failed to connect to the database:", err.stack);
+app.post("/api/comments/:movieId", async (req, res) => {
+  const movieId = req.params.movieId;
+  var userData = null;
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) return res.sendStatus(401);
+  if (req.headers.authorization.length < 120)
+    userData = await validateIntra42Token(token);
+  else userData = await validateFirebaseToken(token);
+  if (!userData) return res.sendStatus(403);
+  req.user = userData;
+  const { text } = req.body;
+  await client.query("BEGIN");
+  try {
+    const searchMovie = `SELECT * FROM Movies WHERE imdbID = $1;`;
+    const movieResult = await client.query(searchMovie, [movieId]);
+    if (movieResult.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).send("Movie not found");
+    }
+    const id = movieResult.rows[0].movie_id;
+    const insertQuery = `INSERT INTO Comments (user_email, movie_id, content) VALUES ($1, $2, $3) RETURNING *;`;
+    const result = await client.query(insertQuery, [userData.email, id, text]);
+    result.rows;
+    await client.query("COMMIT");
+    res.status(200).send({ message: "Comment Added" });
+  } catch (error) {
+    await client.query("ROLLBACK");
+    res.status(500).send("Error adding comment");
+  }
+});
+
+client
+  .connect()
+  .then(async () => {
+    console.log("Connected to the database.");
+    try {
+      await createTables();
+    } catch (error) {
+      console.error("Error tables:", error);
+      process.exit(1);
+    }
+    app.listen(3000, () => {
+      console.log("App running on port 3000.");
     });
-}, 10000);
+  })
+  .catch((err) => {
+    console.error("Failed to connect to the database:", err.stack);
+  });

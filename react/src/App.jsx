@@ -6,7 +6,6 @@ import Login from "./components/login";
 import ProtectedRoute from "./components/protectedRoute";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import WatchMovie from "./components/watchMovie";
-import WatchYoutube from "./components/watchYoutube";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 
@@ -38,14 +37,6 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <WatchMovie />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/movie/:id/youtube/:videoId"
-            element={
-              <ProtectedRoute>
-                <WatchYoutube />
               </ProtectedRoute>
             }
           />

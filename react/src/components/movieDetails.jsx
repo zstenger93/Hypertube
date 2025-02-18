@@ -3,6 +3,8 @@ import { useParams } from "react-router-dom";
 import "../App.css";
 import Logout from "./logout";
 import { useNavigate } from "react-router-dom";
+import poster from "../assets/poster.jpg";
+import { CommentBox, DisplayComments } from "./displayComments";
 
 const MovieDetails = () => {
   const { id } = useParams();
@@ -14,13 +16,17 @@ const MovieDetails = () => {
   const fetchYoutube = async (title) => {
     try {
       const response = await fetch(
-        `http://localhost:3000/api/youtubeRequests?title=${title}`
+        `http://localhost:3000/api/youtubeRequests/${title}`
       );
       if (!response.ok) throw new Error("Failed to fetch youtube video");
       const data = await response.json();
-      setVideos(data.items);
+      if (data.items) {
+        setVideos(data.items);
+      } else if (data) {
+        setVideos(data);
+      }
     } catch (error) {
-      console.error("Error fetching youtube video:", error);
+      setVideos([]);
     }
   };
 
@@ -28,15 +34,13 @@ const MovieDetails = () => {
     const fetchMovieDetails = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3000/api/watchTheMovie?id=${id}`
+          `http://localhost:3000/api/watchTheMovie/${id}`
         );
         if (!response.ok) throw new Error("Failed to fetch movie details");
-
         const data = await response.json();
         setMovie(data);
-        if (data.Title) fetchYoutube(data.Title);
+        if (data.Title ?? data.title) fetchYoutube(data.Title ?? data.title);
       } catch (error) {
-        console.error("Error fetching movie details:", error);
       } finally {
         setLoading(false);
       }
@@ -47,38 +51,48 @@ const MovieDetails = () => {
 
   if (loading) return <p>Loading...</p>;
 
+  let thePoster =
+    movie.Poster && movie.Poster !== "N/A"
+      ? movie.Poster
+      : movie.poster || poster;
+  if (thePoster === "N/A") {
+    thePoster = poster;
+  }
   return (
     <div className="center">
       <Logout />
-      <h1>HyperTube</h1>
+      <h1>HyperCrime</h1>
       {movie ? (
         <div>
-          <button onClick={() => navigate(`/movie/${movie.imdbID}/watch`)}>
-            <img
-              src={movie.Poster ?? movie.poster}
-              alt={movie.Title ?? movie.title}
-            />
-          </button>
-          <h2>{movie.Title}</h2>
-          <p>Year: {movie.Year ?? movie.year}</p>
-          <p>Genre: {movie.Genre ?? movie.genre}</p>
-          <p>Plot: {movie.Plot ?? movie.plot}</p>
-          <p>Director: {movie.Director ?? movie.director}</p>
+          <div className="movieBox">
+            <button
+              className="movieFrame1"
+              onClick={() => navigate(`/movie/${movie.imdbID}/watch`)}
+            >
+              <img src={thePoster} alt={movie.Title ?? movie.title} />
+            </button>
+            <div className="anotherColor">
+              <h2>{movie.Title ?? movie.title}</h2>
+              <h3>{movie.Plot ?? movie.plot}</h3>
+              <p>Year: {movie.Year ?? movie.year}</p>
+              <p>Genre: {movie.Genre ?? movie.genre}</p>
+              <p>Director: {movie.Director ?? movie.director}</p>
+              <p>IMDB Raiting: {movie.imdbRating ?? movie.imdbrating}</p>
+            </div>
+          </div>
           <h3>Related Videos:</h3>
           <div className="videoList">
-            {videos.map((video) => (
-              <div key={video.id.videoId} className="videoItem">
-                <a
-                  href={`https://www.youtube.com/watch?v=${video.id.videoId}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <img
-                    src={video.snippet.thumbnails.medium.url}
-                    alt={video.snippet.title}
-                  />
-                  <p>{video.snippet.title}</p>
-                </a>
+            {videos.slice(0, 3).map((video, index) => (
+              <div
+                key={video.id?.videoId || `video-${index}`}
+                className="videoItem"
+              >
+                <iframe
+                  src={`https://www.youtube.com/embed/${video.id?.videoId}`}
+                  title={video.snippet?.title}
+                  frameBorder="0"
+                  allowFullScreen
+                ></iframe>
               </div>
             ))}
           </div>
@@ -86,6 +100,8 @@ const MovieDetails = () => {
       ) : (
         <p>Movie details not found.</p>
       )}
+      <CommentBox movie={id} />
+      <DisplayComments movie={id} />
     </div>
   );
 };
