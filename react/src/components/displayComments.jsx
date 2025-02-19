@@ -75,8 +75,13 @@ const DisplayComments = ({ movie }) => {
       <div className="center">
         {comments.map((comment, index) => (
           <div className="center" key={comment.id ?? `comment${index}`}>
-            <h3>{comment.username}</h3>
-            <p>{comment.content}</p>
+            <div className="comment">
+              <div className="commentUser">
+                <h3>{comment.user.username}</h3>
+                <img src={comment.user.profile_pic}></img>
+              </div>
+              <p>{comment.content}</p>
+            </div>
           </div>
         ))}
       </div>

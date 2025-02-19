@@ -433,7 +433,11 @@ app.get("/api/comments/:movieId", async (req, res) => {
     const id = movieResult.rows[0].movie_id;
     const searchComments = `SELECT * FROM Comments WHERE movie_id = $1;`;
     const commentsResult = await client.query(searchComments, [id]);
-    
+    for (let comment of commentsResult.rows) {
+      const userQuery = `SELECT * FROM Users WHERE email = $1;`;
+      const userResult = await client.query(userQuery, [comment.user_email]);
+      comment.user = userResult.rows[0];
+    }
     res.json(commentsResult.rows);
   } catch (error) {
     console.error("Error fetching comments:", error);
