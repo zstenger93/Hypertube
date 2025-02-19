@@ -22,7 +22,7 @@
 - [❌] Differentiate watched & unwatched videos in thumbnails
 - [❌] Implement infinite scrolling (no "next page" link)
 - [❌] Sort & filter options (name, genre, IMDb rating, year, etc.)
-- [✅❌] Implement a Video Section (authenticated users only)
+- [✅] Implement a Video Section (authenticated users only)
 - [❌] Video player (if available)
 - [✅] Casting (producer, director, main cast, etc.)
 - [✅] Production year, length, IMDb rating
