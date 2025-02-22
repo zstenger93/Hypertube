@@ -61,7 +61,11 @@ const MovieDetails = () => {
   return (
     <div className="center">
       <Logout />
-      <h1>HyperCrime</h1>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <img src="/Pirate-Flag.svg" alt="Left SVG" style={{ width: '148px', height: '148px', marginRight: '10px' }} />
+      <h1 className="lastColor">HyperCrime</h1>
+      <img src="/Pirate-Flag.svg" alt="Right SVG" style={{ width: '148px', height: '148px', marginLeft: '10px' }} />
+    </div>
       {movie ? (
         <div>
           <div className="movieBox">
