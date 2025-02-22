@@ -4,7 +4,7 @@ import "../App.css";
 import Logout from "./logout";
 import { useNavigate } from "react-router-dom";
 import poster from "../assets/poster.jpg";
-import { CommentBox, DisplayComments } from "./displayComments";
+import { Comments } from "./displayComments";
 
 const MovieDetails = () => {
   const { id } = useParams();
@@ -62,10 +62,10 @@ const MovieDetails = () => {
     <div className="center">
       <Logout />
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <img src="/Pirate-Flag.svg" alt="Left SVG" style={{ width: '148px', height: '148px', marginRight: '10px' }} />
-      <h1 className="lastColor">HyperCrime</h1>
-      <img src="/Pirate-Flag.svg" alt="Right SVG" style={{ width: '148px', height: '148px', marginLeft: '10px' }} />
-    </div>
+		<img src="/Pirate-Flag.svg" alt="Left SVG" style={{ width: '148px', height: '148px', marginRight: '10px' }} />
+		<h1 className="lastColor">HyperCrime</h1>
+		<img src="/Pirate-Flag.svg" alt="Right SVG" style={{ width: '148px', height: '148px', marginLeft: '10px' }} />
+      </div>
       {movie ? (
         <div>
           <div className="movieBox">
@@ -104,8 +104,7 @@ const MovieDetails = () => {
       ) : (
         <p>Movie details not found.</p>
       )}
-      <CommentBox movie={id} />
-      <DisplayComments movie={id} />
+	  <Comments movie={id} />
     </div>
   );
 };
