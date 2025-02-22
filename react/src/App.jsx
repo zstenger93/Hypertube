@@ -8,6 +8,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import WatchMovie from "./components/watchMovie";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import Profile from "./components/profile";
 
 export default function App() {
   return (
@@ -16,17 +17,21 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/auth/intra/callback" element={<CallbackComponent />} />
-          <Route
-            path="/search"
-            element={
-                <SearchComponent />
-            }
-          />
+          <Route path="/search" element={<SearchComponent />} />
+          <Route path="/comments" element={<SearchComponent />} />
           <Route
             path="/movie/:id"
             element={
               <ProtectedRoute>
                 <MovieDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
               </ProtectedRoute>
             }
           />

@@ -32,7 +32,6 @@ function Login() {
   const [isRegistering, setIsRegistering] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [resetEmail, resetPasswprd] = useState(false);
   const navigate = useNavigate();
 
   const handleLoginWithIntra = () => {
@@ -51,7 +50,6 @@ function Login() {
 
   const handleForgotPassword = async () => {
     if (email === "") return;
-    console.log("here");
     try {
       await sendPasswordResetEmail(auth, email);
     } catch (error) {
@@ -92,6 +90,8 @@ function Login() {
 
   return (
     <div className="centerScreen">
+      <button onClick={() => navigate("/search")}>Seach</button>
+      <button onClick={() => navigate("/comments")}>Comments</button>
       <button onClick={handleLoginWithIntra}>Login with Intra</button>
       <button onClick={handleGoogleLogin}>Login with Google</button>
       <button onClick={handleShowHideInputs}>
