@@ -39,11 +39,13 @@ export default function App() {
                 <WatchMovie />
               </ProtectedRoute>
             }
-          />
+            />
           <Route
             path="/movie/watch"
             element={
+              <ProtectedRoute>
                 <WatchMovie />
+                </ProtectedRoute>
             }
           />
         </Routes>
