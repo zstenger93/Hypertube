@@ -41,7 +41,7 @@ async function dropTables() {
 
 async function createTables() {
   try {
-    //await dropTables();
+    // await dropTables();
     await client.query("BEGIN");
     await client.query(`
       CREATE TABLE IF NOT EXISTS public.Users (
