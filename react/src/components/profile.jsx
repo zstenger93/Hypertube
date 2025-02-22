@@ -36,8 +36,10 @@ const Profile = () => {
     <div className="center">
       <Logout />
       <h1>Profile</h1>
-      <img src={user.profile_pic} alt="profile" />
-      <h2>{user.email}</h2>
+      <div className="profile">
+        <img src={user.profile_pic} alt="profile" />
+        <img src={"/src/assets/jail.png"} alt="overlay" className="overlay" />
+      </div>
       <h3>{user.username}</h3>
     </div>
   );
