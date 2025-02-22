@@ -16,6 +16,8 @@ const ProtectedRoute = ({ children }) => {
           },
         });
         if (response.ok) {
+          // const data = await response.json();
+          // localStorage.setItem("accessToken", data.user.oauth);
           setIsValid(true);
         } else {
           setIsValid(false);
@@ -28,7 +30,6 @@ const ProtectedRoute = ({ children }) => {
         navigate("/");
       }
     };
-
     checkToken();
   }, [navigate]);
 
