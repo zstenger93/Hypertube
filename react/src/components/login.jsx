@@ -89,7 +89,21 @@ function Login() {
   };
 
   return (
-    <div className="centerScreen">
+    <div className="centerScreen" >
+		 <div
+        style={{
+          backgroundImage: "url('/Pirate-Flag.svg')",
+          backgroundSize: "calc(100% - 40px) calc(100% - 40px)",
+		  backgroundRepeat: "no-repeat",
+          backgroundPosition: "center",
+          position: "absolute",
+          top: 0,
+          left: 0,
+          height: "100%",
+          width: "100%",
+          zIndex: 0,
+        }}
+      ></div>
       <button onClick={() => navigate("/search")}>Seach</button>
       <button onClick={() => navigate("/comments")}>Comments</button>
       <button onClick={handleLoginWithIntra}>Login with Intra</button>
