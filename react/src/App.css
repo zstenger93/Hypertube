@@ -42,7 +42,7 @@ body {
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  background-color: #242222;
+  z-index: 1;
 }
 
 .displayMovies {
