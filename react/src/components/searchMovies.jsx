@@ -83,7 +83,11 @@ const SearchComponent = () => {
     <div className="center">
       <div className="searchBox">
         <Logout />
-        <h1 className="lastColor">HyperCrime</h1>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+			<img src="Pirate-Flag.svg" alt="Left SVG" style={{ width: '148px', height: '148px', marginRight: '10px' }} />
+			<h1 className="lastColor">HyperCrime</h1>
+			<img src="Pirate-Flag.svg" alt="Right SVG" style={{ width: '148px', height: '148px', marginLeft: '10px' }} />
+      	</div>
         <input
           type="text"
           placeholder="Search..."
