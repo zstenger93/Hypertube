@@ -10,6 +10,7 @@ const MovieDetails = () => {
   const { id } = useParams();
   const [movie, setMovie] = useState(null);
   const [videos, setVideos] = useState([]);
+  const [torrents, setTorrents] = useState("");
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -31,6 +32,29 @@ const MovieDetails = () => {
   };
 
   useEffect(() => {
+    const fetchTorrent = async () => {
+      try {
+        const response = await fetch(
+          `https://archive.org/advancedsearch.php?q=${id}&fl%5B%5D=identifier&sort%5B%5D=&sort%5B%5D=&sort%5B%5D=&rows=50&page=1&output=json&save=yes#raw`
+        );
+        if (!response.ok) throw new Error("Failed to fetch torrrents");
+        const data = await response.json();
+        console.log("-  - -- - - - - - - - - ---  - - - - --  - - - - TORRENT  - - - - - - - - - - - - - - - - - - - - - - - - --  -");
+        if (data.response && data.response.docs && data.response.docs.length > 0) {
+          const identifier = data.response.docs[0].identifier;
+          console.log("Identifier:", identifier);
+          setTorrents(identifier);
+        } else if (data) {
+          setTorrents("");
+        }
+      } catch (error) {
+        setTorrents("");
+      }
+    };
+    fetchTorrent();
+  }, [id]);
+
+  useEffect(() => {
     const fetchMovieDetails = async () => {
       try {
         const response = await fetch(
@@ -39,7 +63,9 @@ const MovieDetails = () => {
         if (!response.ok) throw new Error("Failed to fetch movie details");
         const data = await response.json();
         setMovie(data);
-        if (data.Title ?? data.title) fetchYoutube(data.Title ?? data.title);
+        if (data.Title ?? data.title) {
+          fetchYoutube(data.Title ?? data.title);
+        }
       } catch (error) {
       } finally {
         setLoading(false);
@@ -83,6 +109,18 @@ const MovieDetails = () => {
               <p>Director: {movie.Director ?? movie.director}</p>
               <p>IMDB Raiting: {movie.imdbRating ?? movie.imdbrating}</p>
             </div>
+          </div>
+          <h3>Torrent Data:</h3>
+          <div className="torrentList">
+            {torrents != "" ? (
+              
+                <div className="torrentItem">
+                  <p>Name: {torrents}</p>
+         
+                </div>
+            ) : (
+              <p>No torrents found.</p>
+            )}
           </div>
           <h3>Related Videos:</h3>
           <div className="videoList">
