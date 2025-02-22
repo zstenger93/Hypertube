@@ -28,7 +28,6 @@
 - [✅] Production year, length, IMDb rating
 - [✅] Cover image
 - [✅] Users can post & view comments
-- [❌] Video streaming system:
 - [❌] If not downloaded, start torrent download on the server
 - [❌] Initiate streaming as soon as enough data is available
 - [❌] Store downloaded movies to avoid re-downloading
@@ -43,6 +42,7 @@
 - [✅] Fetch movie details via /movies/:id
 - [✅] API must return appropriate HTTP codes for invalid calls
 - [❌] Provide proof that the API is truly RESTful
+
   ❌ Bonus Part
 - [✅] Additional Omniauth strategies
 - [❌] Support for multiple video resolutions
