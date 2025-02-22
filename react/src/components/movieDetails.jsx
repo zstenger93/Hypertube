@@ -116,6 +116,7 @@ const MovieDetails = () => {
               
                 <div className="torrentItem">
                   <p>Name: {torrents}</p>
+                  <h2>torrent link: https://archive.org/download/{torrents}/{torrents}_archive.torrent</h2>
          
                 </div>
             ) : (
