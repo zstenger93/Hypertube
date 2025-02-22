@@ -1,3 +1,6 @@
+![Login](./login.png)
+![Search](./search.png)
+
 ❌ Mandatory Part
 
 - [✅] Create a web application with a user-friendly UI
