@@ -111,11 +111,9 @@ async function addUser(userData) {
     RETURNING *;
     `;
     let values = [
-      userData.displayname ?? userData.displayName ?? userData.email,
+      userData.displayname ?? userData.displayName ?? "Anonymous",
       userData.email ?? "No email provided",
-      userData.image?.versions?.medium ??
-        userData?.providerUserInfo[0].photoUrl ??
-        null,
+      userData.image?.versions?.medium ?? null,
       crypto.randomBytes(32).toString("hex"),
     ];
     const result = await client.query(query, values);
