@@ -90,6 +90,8 @@ function Login() {
 
   return (
     <div className="centerScreen">
+      <button onClick={() => navigate("/search")}>Seach</button>
+      <button onClick={() => navigate("/comments")}>Comments</button>
       <button onClick={handleLoginWithIntra}>Login with Intra</button>
       <button onClick={handleGoogleLogin}>Login with Google</button>
       <button onClick={handleShowHideInputs}>

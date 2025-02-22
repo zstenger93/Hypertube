@@ -18,6 +18,7 @@ export default function App() {
           <Route path="/" element={<Login />} />
           <Route path="/auth/intra/callback" element={<CallbackComponent />} />
           <Route path="/search" element={<SearchComponent />} />
+          <Route path="/comments" element={<SearchComponent />} />
           <Route
             path="/movie/:id"
             element={

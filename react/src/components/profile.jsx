@@ -33,7 +33,7 @@ const Profile = () => {
   if (user.profile_pic === null) user.profile_pic = profile;
 
   return (
-    <div>
+    <div className="center">
       <Logout />
       <h1>Profile</h1>
       <img src={user.profile_pic} alt="profile" />

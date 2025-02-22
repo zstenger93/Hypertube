@@ -28,9 +28,7 @@ function Logout() {
   const handleLogout = async () => {
     try {
       await this.signOutUser();
-      console.log("Logged out from Firebase");
     } catch (error) {
-      console.error("Firebase logout error", error);
     }
     localStorage.removeItem("accessToken");
     setIsAuthenticated(false);
