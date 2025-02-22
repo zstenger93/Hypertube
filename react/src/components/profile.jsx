@@ -18,16 +18,6 @@ const Profile = () => {
         });
         if (!response.ok) throw new Error("Failed to fetch user details");
         const data = await response.json();
-        console.log(data);
-        // const response = await fetch("http://localhost:3000/auth/validate", {
-        //   method: "GET",
-        //   headers: {
-        //     Authorization: `Bearer ${token}`,
-        //   },
-        // });
-        // if (!response.ok) throw new Error("Failed to fetch user details");
-        // const data = await response.json();
-        // setUser(data);
       } catch (error) {
       } finally {
         //setLoading(false);

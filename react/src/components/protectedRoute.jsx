@@ -16,8 +16,8 @@ const ProtectedRoute = ({ children }) => {
           },
         });
         if (response.ok) {
-          // const data = await response.json();
-          // localStorage.setItem("accessToken", data.user.oauth);
+          const data = await response.json();
+          localStorage.setItem("accessToken", data.user.oauth);
           setIsValid(true);
         } else {
           setIsValid(false);
