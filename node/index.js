@@ -254,13 +254,13 @@ app.get("/api/watchTheMovie/:id", async (req, res) => {
 
     var parseYear = parseInt(response?.data?.year, 10) || 1900;
     const movieData = {
-      title: response.data.Title,
-      year: parseYear,
-      genre: response.data.Genre,
-      plot: response.data.Plot,
-      director: response.data.Director,
+      title: response.data.Title ?? "N/A",
+      year: parseYear ?? "N/A",
+      genre: response.data.Genre ?? "N/A",
+      plot: response.data.Plot ?? "N/A",
+      director: response.data.Director ?? "N/A",
       poster: response.data.Poster === "N/A" ? null : response.data.Poster,
-      imdbID: response.data.imdbID,
+      imdbID: response.data.imdbID ?? "N/A",
       imdbRating: response.data.imdbRating ?? "N/A",
       imdbVotes: response.data.imdbVotes ?? "N/A",
     };
