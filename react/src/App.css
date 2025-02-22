@@ -1,5 +1,5 @@
 body {
-  background-color: #0d0d0d;
+  background-color: #242222;
 }
 
 #root {
@@ -7,7 +7,7 @@ body {
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
-  background-color: #0d0d0d;
+  background-color: #242222;
 }
 
 .searchBox {
@@ -15,7 +15,7 @@ body {
   top: 0;
   left: 0;
   width: 100%;
-  background-color: #0d0d0d;
+  background-color: #242222;
   z-index: 1001;
   padding: 10px 20px;
   box-shadow: #bfbfbf;
@@ -42,14 +42,14 @@ body {
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  background-color: #0d0d0d;
+  background-color: #242222;
 }
 
 .displayMovies {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  background-color: #0d0d0d;
+  background-color: #242222;
   margin-top: 240px;
 }
 
@@ -112,7 +112,7 @@ body {
   padding: 20px;
   width: 80%;
   max-width: 1200px;
-  background-color: #0d0d0d;
+  background-color: #242222;
   border: 2px solid #ddd;
   border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
@@ -122,7 +122,7 @@ body {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  background-color: #0d0d0d;
+  background-color: #242222;
 }
 
 .videoItem {
@@ -213,7 +213,7 @@ body {
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  background-color: #0d0d0d;
+  background-color: #242222;
   width: 100%;
   height: 100vh;
 }
@@ -273,7 +273,7 @@ body {
 .comment {
   display: flex;
   flex-direction: row;
-  background-color: #0d0d0d;
+  background-color: #242222;
   width: 40vw;
   height: 120px;
   border: 2px solid #bfbfbf;
@@ -289,7 +289,7 @@ body {
 .commentUser {
   display: flex;
   flex-direction: column;
-  background-color: #0d0d0d;
+  background-color: #242222;
   width: 100px;
   height: 120px;
   align-items: center;
