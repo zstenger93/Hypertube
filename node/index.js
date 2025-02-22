@@ -40,7 +40,6 @@ async function dropTables() {
   await client.query("COMMIT");
   console.log("Dropped tables");
 }
-
 async function createTables() {
   try {
     //await dropTables();

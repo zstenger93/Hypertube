@@ -9,7 +9,10 @@ const WatchMovie = () => {
   const videoRef = useRef(null);
 
   const searchTorrents = async () => {
-    const response = await axios.get(`/api/search?query=${query}`);
+    const url = `https://archive.org/metadata/${query}`;
+    const response = await axios.get(url);
+    // const torrent = data.files.find(file => file.name.endsWith('.torrent'));
+    console.log(response.data);
     setTorrents(response.data);
   };
 
@@ -28,7 +31,7 @@ const WatchMovie = () => {
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search for a movie"
       />
-      <button onClick={searchTorrents}>Search</button>
+      <button onClick={searchTorrents}>search torrent</button>
       <ul>
         {torrents.map((torrent) => (
           <li key={torrent.magnet}>

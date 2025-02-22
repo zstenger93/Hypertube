@@ -40,6 +40,12 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/movie/watch"
+            element={
+                <WatchMovie />
+            }
+          />
         </Routes>
       </div>
     </Router>
