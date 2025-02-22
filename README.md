@@ -1,3 +1,6 @@
+![Login](./login.png)
+![Search](./search.png)
+
 ❌ Mandatory Part
 
 - [✅] Create a web application with a user-friendly UI
@@ -21,14 +24,13 @@
 - [✅] Cover image
 - [❌] Differentiate watched & unwatched videos in thumbnails
 - [❌] Implement infinite scrolling (no "next page" link)
-- [❌] Sort & filter options (name, genre, IMDb rating, year, etc.)
-- [✅❌] Implement a Video Section (authenticated users only)
+- [✅] Sort & filter options (name, genre, IMDb rating, year, etc.)
+- [✅] Implement a Video Section (authenticated users only)
 - [❌] Video player (if available)
 - [✅] Casting (producer, director, main cast, etc.)
 - [✅] Production year, length, IMDb rating
 - [✅] Cover image
 - [✅] Users can post & view comments
-- [❌] Video streaming system:
 - [❌] If not downloaded, start torrent download on the server
 - [❌] Initiate streaming as soon as enough data is available
 - [❌] Store downloaded movies to avoid re-downloading
@@ -43,6 +45,7 @@
 - [✅] Fetch movie details via /movies/:id
 - [✅] API must return appropriate HTTP codes for invalid calls
 - [❌] Provide proof that the API is truly RESTful
+
   ❌ Bonus Part
 - [✅] Additional Omniauth strategies
 - [❌] Support for multiple video resolutions

@@ -2,6 +2,7 @@ import pg from "pg";
 import express, { request } from "express";
 import cors from "cors";
 import axios from "axios";
+import crypto from "crypto";
 import fs from "fs";
 import TorrentSearchApi from 'torrent-search-api';
 import { exec } from 'child_process';
@@ -50,6 +51,7 @@ async function createTables() {
         username VARCHAR(100) NOT NULL,
         email VARCHAR(100) UNIQUE NOT NULL,
         profile_pic VARCHAR(255),
+        oauth VARCHAR(255) UNIQUE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
       `);
@@ -106,16 +108,15 @@ async function addUser(userData) {
   try {
     await client.query("BEGIN");
     const query = `
-    INSERT INTO Users (username, email, profile_pic) 
-    VALUES ($1, $2, $3)
+    INSERT INTO Users (username, email, profile_pic, oauth) 
+    VALUES ($1, $2, $3, $4)
     RETURNING *;
     `;
     let values = [
-      userData.displayname ?? userData.displayName ?? userData.email,
+      userData.displayname ?? userData.displayName ?? "Anonymous",
       userData.email ?? "No email provided",
-      userData.image?.versions?.medium ??
-        userData?.providerUserInfo[0].photoUrl ??
-        null,
+      userData.image?.versions?.medium ?? null,
+      crypto.randomBytes(32).toString("hex"),
     ];
     const result = await client.query(query, values);
     await client.query("COMMIT");
@@ -246,7 +247,6 @@ app.get("/api/watchTheMovie/:id", async (req, res) => {
     const movieResult = await client.query(searchMoviesInDb, [id]);
     if (movieResult.rows.length > 0 && movieResult.rows[0].imdbrating) {
       res.json(movieResult.rows[0]);
-      console.log("Load from DB movie");
       return;
     }
     const response = await axios.get(url);
@@ -256,13 +256,13 @@ app.get("/api/watchTheMovie/:id", async (req, res) => {
 
     var parseYear = parseInt(response?.data?.year, 10) || 1900;
     const movieData = {
-      title: response.data.Title,
-      year: parseYear,
-      genre: response.data.Genre,
-      plot: response.data.Plot,
-      director: response.data.Director,
+      title: response.data.Title ?? "N/A",
+      year: parseYear ?? "N/A",
+      genre: response.data.Genre ?? "N/A",
+      plot: response.data.Plot ?? "N/A",
+      director: response.data.Director ?? "N/A",
       poster: response.data.Poster === "N/A" ? null : response.data.Poster,
-      imdbID: response.data.imdbID,
+      imdbID: response.data.imdbID ?? "N/A",
       imdbRating: response.data.imdbRating ?? "N/A",
       imdbVotes: response.data.imdbVotes ?? "N/A",
     };
@@ -315,10 +315,8 @@ app.get("/api/youtubeRequests/:title", async (req, res) => {
       SELECT * FROM Movies WHERE LOWER(Title) = LOWER($1) LIMIT 1;
     `;
     const movieResult = await client.query(searchMoviesInDb, [title]);
-    // console.log("Movie result:", movieResult.rows);
     if (movieResult.rows.length > 0 && movieResult.rows[0].videos) {
       res.json(movieResult.rows[0].videos);
-      console.log("Load from DB youtube videos");
       return;
     }
     const response = await axios.get(url);
@@ -376,7 +374,6 @@ app.post("/auth/intra/callback", async (req, res) => {
 
 app.get("/auth/intra/callback", async (req, res) => {
   const code = req.query.code;
-  console.log("Received code:", code);
 });
 
 async function validateIntra42Token(token) {
@@ -410,15 +407,35 @@ app.get("/auth/validate", async (req, res) => {
   var userData = null;
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) return res.sendStatus(401);
+  try {
+    const searchToken = `SELECT * FROM Users WHERE oauth = $1;`;
+    const result = await client.query(searchToken, [token]);
+    if (result.rows.length !== 0) {
+      userData = result.rows[0];
+      return res.status(200).send({ message: "User is valid", user: userData });
+    }
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    return res.sendStatus(500);
+  }
   if (req.headers.authorization.length < 120)
     userData = await validateIntra42Token(token);
   else userData = await validateFirebaseToken(token);
   if (!userData) return res.sendStatus(403);
-  req.user = userData;
   if (!(await checkUser(userData.email))) {
     await addUser(userData);
   }
-  res.status(200).send({ message: "User is valid", user: userData });
+  try {
+    const query = `SELECT * FROM Users WHERE email = $1`;
+    const result = await client.query(query, [userData.email]);
+    if (result.rows.length === 0) {
+      return res.status(404).send("User not found");
+    }
+    userData = result.rows[0];
+    res.status(200).send({ message: "User is valid", user: userData });
+  } catch (error) {
+    res.status(404).send("Error");
+  }
 });
 
 app.get("/api/comments/:movieId", async (req, res) => {
@@ -435,7 +452,12 @@ app.get("/api/comments/:movieId", async (req, res) => {
     const id = movieResult.rows[0].movie_id;
     const searchComments = `SELECT * FROM Comments WHERE movie_id = $1;`;
     const commentsResult = await client.query(searchComments, [id]);
-    
+    for (let comment of commentsResult.rows) {
+      const userQuery = `SELECT * FROM Users WHERE email = $1;`;
+      const userResult = await client.query(userQuery, [comment.user_email]);
+      comment.user = userResult.rows[0];
+      comment.user.oauth = null;
+    }
     res.json(commentsResult.rows);
   } catch (error) {
     console.error("Error fetching comments:", error);
@@ -448,11 +470,17 @@ app.post("/api/comments/:movieId", async (req, res) => {
   var userData = null;
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) return res.sendStatus(401);
-  if (req.headers.authorization.length < 120)
-    userData = await validateIntra42Token(token);
-  else userData = await validateFirebaseToken(token);
+  try {
+    const searchToken = `SELECT * FROM Users WHERE oauth = $1;`;
+    const result = await client.query(searchToken, [token]);
+    if (result.rows.length !== 0) {
+      userData = result.rows[0];
+    }
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    return res.sendStatus(500);
+  }
   if (!userData) return res.sendStatus(403);
-  req.user = userData;
   const { text } = req.body;
   await client.query("BEGIN");
   try {

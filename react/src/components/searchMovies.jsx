@@ -7,6 +7,7 @@ import poster from "../assets/poster.jpg";
 const SearchComponent = () => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
+  const [filter, setFilter] = useState("year");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -65,11 +66,28 @@ const SearchComponent = () => {
     }
   };
 
+  const handleFilterChange = (e) => {
+    setFilter(e.target.value);
+  };
+
+  const filteredResults = results.sort((a, b) => {
+    if (filter === "year") {
+      return (b.Year ?? b.year) - (a.Year ?? a.year);
+    } else if (filter === "imdbRating") {
+      return (b.imdbRating ?? b.imdbrating) - (a.imdbRating ?? a.imdbrating);
+    }
+    return 0;
+  });
+
   return (
     <div className="center">
       <div className="searchBox">
         <Logout />
-        <h1 className="lastColor">HyperCrime</h1>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+			<img src="Pirate-Flag.svg" alt="Left SVG" style={{ width: '148px', height: '148px', marginRight: '10px' }} />
+			<h1 className="lastColor">HyperCrime</h1>
+			<img src="Pirate-Flag.svg" alt="Right SVG" style={{ width: '148px', height: '148px', marginLeft: '10px' }} />
+      	</div>
         <input
           type="text"
           placeholder="Search..."
@@ -77,10 +95,14 @@ const SearchComponent = () => {
           className="searchInput"
           onChange={handleApiRequest}
         />
+        <select value={filter} onChange={handleFilterChange}>
+          <option value="year">Year</option>
+          <option value="imdbRating">IMDb Rating</option>
+        </select>
       </div>
       <div className="displayMovies ">
-        {results.length > 0 ? (
-          results.map((movie) => {
+        {filteredResults.length > 0 ? (
+          filteredResults.map((movie) => {
             let thePoster =
               movie.Poster && movie.Poster !== "N/A"
                 ? movie.Poster
