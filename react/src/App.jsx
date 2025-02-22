@@ -19,9 +19,7 @@ export default function App() {
           <Route
             path="/search"
             element={
-              <ProtectedRoute>
                 <SearchComponent />
-              </ProtectedRoute>
             }
           />
           <Route
