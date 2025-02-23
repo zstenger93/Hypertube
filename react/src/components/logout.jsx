@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { initializeApp } from "firebase/app";
 import { getAuth, signOut } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
+
 
 const firebaseConfig = {
   apiKey: "AIzaSyDdCQbBKuVCKAR67luHVd_WyxpEGVvRfNI",
   authDomain: "hypertube-2287a.firebaseapp.com",
   databaseURL:
-    "https://hypertube-2287a-default-rtdb.europe-west1.firebasedatabase.app",
+  "https://hypertube-2287a-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "hypertube-2287a",
   storageBucket: "hypertube-2287a.firebasestorage.app",
   messagingSenderId: "85856277402",
@@ -19,7 +21,8 @@ const auth = getAuth(app);
 
 function Logout() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-
+  
+  const navigate = useNavigate();
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     setIsAuthenticated(!!token);
@@ -28,8 +31,7 @@ function Logout() {
   const handleLogout = async () => {
     try {
       await this.signOutUser();
-    } catch (error) {
-    }
+    } catch (error) {}
     localStorage.removeItem("accessToken");
     setIsAuthenticated(false);
     window.location.href = "/";
@@ -38,9 +40,10 @@ function Logout() {
   return (
     <nav>
       {isAuthenticated && (
-        <button className="hoverTop" onClick={handleLogout}>
-          Logout
-        </button>
+        <div className="hoverTop">
+          <button onClick={() => navigate("/profile")}>Profile</button>
+          <button onClick={handleLogout}>Logout</button>
+        </div>
       )}
     </nav>
   );

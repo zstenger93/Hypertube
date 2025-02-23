@@ -244,18 +244,17 @@ app.get("/api/watchTheMovie/:id", async (req, res) => {
     `;
     const movieResult = await client.query(searchMoviesInDb, [id]);
     if (movieResult.rows.length > 0 && movieResult.rows[0].imdbrating) {
-      res.json(movieResult.rows[0]);
-      return;
+      return res.json(movieResult.rows[0]);
     }
+    console.log("Fetching from OMDB API");
     const response = await axios.get(url);
     if (response.data.Response === "False") {
       return res.status(404).send("Movie not found in OMDB API");
     }
 
-    var parseYear = parseInt(response?.data?.year, 10) || 1900;
     const movieData = {
       title: response.data.Title ?? "N/A",
-      year: parseYear ?? "N/A",
+      year: response?.data?.Year ?? "N/A",
       genre: response.data.Genre ?? "N/A",
       plot: response.data.Plot ?? "N/A",
       director: response.data.Director ?? "N/A",
@@ -294,8 +293,7 @@ app.get("/api/watchTheMovie/:id", async (req, res) => {
     ]);
     insertResult.rows;
     await client.query("COMMIT");
-    res.json(response.data);
-    return;
+    return res.json(response.data);
   } catch (error) {
     console.error("Error fetching data:", error);
     res.status(500).send("Error fetching data from OMDB API");

@@ -38,6 +38,7 @@ const MovieDetails = () => {
         );
         if (!response.ok) throw new Error("Failed to fetch movie details");
         const data = await response.json();
+        console.log(data);
         setMovie(data);
         if (data.Title ?? data.title) fetchYoutube(data.Title ?? data.title);
       } catch (error) {
