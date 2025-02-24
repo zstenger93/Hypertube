@@ -281,8 +281,9 @@ body {
   flex-direction: row;
   background-color: #242222;
   width: 40vw;
-  height: 120px;
+  height: 300px;
   border: 2px solid #bfbfbf;
+  min-width: 700px;
   margin: 10px;
 }
 
@@ -290,6 +291,24 @@ body {
   font-size: 1rem;
   margin: 10px;
   overflow: hidden;
+  color: #bfbfbf;
+}
+
+.comment button {
+  height: 300px;
+  width: 200px;
+  border: 5px solid #bfbfbf;
+  padding: 0;
+  margin: 0;
+  border-radius: 0px;
+  box-sizing: border-box;
+}
+
+.commentButton img {
+  width: 100%;
+  height: 100%;
+  size: cover;
+  filter: grayscale(80%);
 }
 
 .commentUser {
@@ -406,4 +425,27 @@ body {
   font-size: 1rem;
   font-weight: bold;
   cursor: pointer;
+}
+
+.center h1 {
+  color: #bfbfbf;
+}
+
+.centerComment {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+  height: 95%;
+  color: #bfbfbf;
+}
+
+.centerComment h3 {
+  height: 30px;
+}
+
+.centerComment p {
+  height: 240px;
+  overflow: auto;
 }
