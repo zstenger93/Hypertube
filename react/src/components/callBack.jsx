@@ -17,7 +17,6 @@ function CallbackComponent() {
             { code }
           );
           const token = response.data.accessToken;
-
           if (token) {
             localStorage.setItem("accessToken", token);
             navigate("/search");
@@ -28,7 +27,6 @@ function CallbackComponent() {
           navigate("/");
         }
       } catch (error) {
-        console.error("Error fetching token:", error);
         navigate("/");
       }
     };

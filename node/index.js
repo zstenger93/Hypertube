@@ -434,6 +434,28 @@ app.get("/auth/validate", async (req, res) => {
   }
 });
 
+app.get("/api/comments", async (req, res) => {
+  try {
+    const searchComments = `SELECT * FROM Comments;`;
+    const commentsResult = await client.query(searchComments);
+    for (let comment of commentsResult.rows) {
+      const userQuery = `SELECT * FROM Users WHERE email = $1;`;
+      const userResult = await client.query(userQuery, [comment.user_email]);
+      comment.user = userResult.rows[0];
+      comment.user_email = null;
+      comment.user.oauth = null;
+      comment.user.email = null;
+      comment.user.user_email = null;
+      const movieQuery = `SELECT * FROM Movies WHERE movie_id = $1;`;
+      const movieResult = await client.query(movieQuery, [comment.movie_id]);
+      comment.movieData = movieResult.rows[0];
+    }
+    res.json(commentsResult.rows);
+  } catch (error) {
+    res.status(500).send("Error fetching comments");
+  }
+});
+
 app.get("/api/comments/:movieId", async (req, res) => {
   const { movieId } = req.params;
   if (!movieId || movieId.length === 0) {
@@ -452,7 +474,10 @@ app.get("/api/comments/:movieId", async (req, res) => {
       const userQuery = `SELECT * FROM Users WHERE email = $1;`;
       const userResult = await client.query(userQuery, [comment.user_email]);
       comment.user = userResult.rows[0];
+      comment.user_email = null;
       comment.user.oauth = null;
+      comment.user.email = null;
+      comment.user.user_email = null;
     }
     res.json(commentsResult.rows);
   } catch (error) {
