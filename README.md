@@ -1,3 +1,4 @@
+![EducationalPurpose](./educationalPurpose.png)
 ![Login](./login.png)
 ![Search](./search.png)
 
@@ -47,6 +48,7 @@
 - [❌] Provide proof that the API is truly RESTful
 
   ❌ Bonus Part
+
 - [✅] Additional Omniauth strategies
 - [❌] Support for multiple video resolutions
 - [❌] Stream video via the MediaStream API
