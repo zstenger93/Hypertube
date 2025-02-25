@@ -36,6 +36,14 @@ export default function App() {
             }
           />
           <Route
+            path="/profile/:id"
+            element={
+              <ProtectedRoute>
+                <MovieDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/movie/:id/watch"
             element={
               <ProtectedRoute>

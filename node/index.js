@@ -41,12 +41,17 @@ async function dropTables() {
 
 async function createTables() {
   try {
-    // await dropTables();
+    //await dropTables();
     await client.query("BEGIN");
     await client.query(`
       CREATE TABLE IF NOT EXISTS public.Users (
         user_id SERIAL PRIMARY KEY,
         username VARCHAR(100) NOT NULL,
+        name VARCHAR(100) NOT NULL,
+        surename VARCHAR(100) NOT NULL,
+        watched_movies VARCHAR(50)[],
+        watch_list VARCHAR(50)[],
+        liked_movies VARCHAR(50)[],
         email VARCHAR(100) UNIQUE NOT NULL,
         profile_pic VARCHAR(255),
         oauth VARCHAR(255) UNIQUE,
@@ -69,6 +74,8 @@ async function createTables() {
           imdbRating VARCHAR(10),
           imdbVotes VARCHAR(20),
           videos JSON,
+          click_count INT DEFAULT 0,
+          comment_count INT DEFAULT 0,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
@@ -106,15 +113,17 @@ async function addUser(userData) {
   try {
     await client.query("BEGIN");
     const query = `
-    INSERT INTO Users (username, email, profile_pic, oauth) 
-    VALUES ($1, $2, $3, $4)
+    INSERT INTO Users (username, email, profile_pic, oauth, name, surename) 
+    VALUES ($1, $2, $3, $4, $5, $6)
     RETURNING *;
     `;
     let values = [
-      userData.displayname ?? userData.displayName ?? "Anonymous",
+      userData.login ?? userData.displayName ?? "Anonymous",
       userData.email ?? "No email provided",
       userData.image?.versions?.medium ?? null,
       crypto.randomBytes(32).toString("hex"),
+      userData.first_name ?? "Anonymous",
+      userData.last_name ?? "Anonymous",
     ];
     const result = await client.query(query, values);
     await client.query("COMMIT");
