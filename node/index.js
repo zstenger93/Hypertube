@@ -495,6 +495,36 @@ app.get("/api/comments/:movieId", async (req, res) => {
   }
 });
 
+app.get("/api/users/:user", async (req, res) => {
+  const { user } = req.params;
+  if (!user || user.length === 0) {
+    return res.status(400).send("Potato");
+  }
+  try {
+    const searchMovie = `SELECT * FROM Users WHERE username = $1;`;
+    const movieResult = await client.query(searchMovie, [movieId]);
+    if (movieResult.rows.length === 0) {
+      return res.status(404).send("User not found");
+    }
+    const id = movieResult.rows[0].movie_id;
+    const searchComments = `SELECT * FROM Comments WHERE movie_id = $1;`;
+    const commentsResult = await client.query(searchComments, [id]);
+    for (let comment of commentsResult.rows) {
+      const userQuery = `SELECT * FROM Users WHERE email = $1;`;
+      const userResult = await client.query(userQuery, [comment.user_email]);
+      comment.user = userResult.rows[0];
+      comment.user_email = null;
+      comment.user.oauth = null;
+      comment.user.email = null;
+      comment.user.user_email = null;
+    }
+    res.json(commentsResult.rows);
+  } catch (error) {
+    console.error("Error fetching comments:", error);
+    res.status(500).send("Error fetching comments");
+  }
+});
+
 app.post("/api/comments/:movieId", async (req, res) => {
   const movieId = req.params.movieId;
   var userData = null;
