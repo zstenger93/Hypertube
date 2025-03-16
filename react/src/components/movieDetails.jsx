@@ -17,7 +17,7 @@ const MovieDetails = () => {
   const fetchYoutube = async (title) => {
     try {
       const response = await fetch(
-        `http://localhost:3000/api/youtubeRequests/${title}`
+        // `http://localhost:3000/api/youtubeRequests/${title}`
       );
       if (!response.ok) throw new Error("Failed to fetch youtube video");
       const data = await response.json();
@@ -40,6 +40,8 @@ const MovieDetails = () => {
         if (!response.ok) throw new Error("Failed to fetch torrrents");
         const data = await response.json();
         console.log("-  - -- - - - - - - - - ---  - - - - --  - - - - TORRENT  - - - - - - - - - - - - - - - - - - - - - - - - --  -");
+        console.log("\nid---->",id);
+        console.log("\nmovie---->", movie);
         if (data.response && data.response.docs && data.response.docs.length > 0) {
           const identifier = data.response.docs[0].identifier;
           console.log("Identifier:", identifier);
@@ -52,7 +54,9 @@ const MovieDetails = () => {
       }
     };
     fetchTorrent();
-  }, [id]);
+  }, [movie]);
+
+
 
   useEffect(() => {
     const fetchMovieDetails = async () => {
@@ -117,6 +121,7 @@ const MovieDetails = () => {
                 <div className="torrentItem">
                   <p>Name: {torrents}</p>
                   <h2>torrent link: https://archive.org/download/{torrents}/{torrents}_archive.torrent</h2>
+                  {/* https://archive.org/download/house_on_haunted_hill_ipod/house_on_haunted_hill_ipod_archive.torrent */}
          
                 </div>
             ) : (
