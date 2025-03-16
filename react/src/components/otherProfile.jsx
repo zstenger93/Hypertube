@@ -4,7 +4,7 @@ import "../App.css";
 import Logout from "./logout";
 import profile from "../assets/pesant.jpg";
 
-const Profile = () => {
+const OtherProfile = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -47,4 +47,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default OtherProfile;

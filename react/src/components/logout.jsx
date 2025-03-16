@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { initializeApp } from "firebase/app";
 import { getAuth, signOut } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDdCQbBKuVCKAR67luHVd_WyxpEGVvRfNI",
@@ -20,6 +21,7 @@ const auth = getAuth(app);
 function Logout() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+  const navigate = useNavigate();
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     setIsAuthenticated(!!token);
@@ -28,8 +30,7 @@ function Logout() {
   const handleLogout = async () => {
     try {
       await this.signOutUser();
-    } catch (error) {
-    }
+    } catch (error) {}
     localStorage.removeItem("accessToken");
     setIsAuthenticated(false);
     window.location.href = "/";
@@ -37,11 +38,14 @@ function Logout() {
 
   return (
     <nav>
-      {isAuthenticated && (
-        <button className="hoverTop" onClick={handleLogout}>
-          Logout
-        </button>
-      )}
+      <div className="hoverTop">
+        <button onClick={() => navigate("/search")}>Search</button>
+        <button onClick={() => navigate("/comments")}>Comments</button>
+        {isAuthenticated && (
+          <button onClick={() => navigate("/profile")}>Profile</button>
+        )}
+        {isAuthenticated && <button onClick={handleLogout}>Logout</button>}
+      </div>
     </nav>
   );
 }
