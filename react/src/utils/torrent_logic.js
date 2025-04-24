@@ -6,8 +6,10 @@ import path from 'path'; // Import the path module
 
 const parseTorrentFile = (filePath) => {
   const torrent = bencode.decode(fs.readFileSync(filePath));
+  const asciiNumbers = torrent.announce.toString().split(',').map(Number);
+  const trackerUrl = asciiNumbers.map((num) => String.fromCharCode(num)).join('');
   return {
-    announce: torrent.announce.toString(),
+    announce: trackerUrl,
     info: torrent.info,
     pieceLength: torrent.info['piece length'],
     pieces: torrent.info.pieces,
@@ -42,12 +44,7 @@ const downloadTorrent = (url, callback) => {
 const torrentUrl = "https://archive.org/download/CC_1916_09_04_TheCount/CC_1916_09_04_TheCount_archive.torrent";
 const filePath = "./CC_1916_09_04_TheCount_archive.torrent";
 
-try {
-  const result = parseTorrentFile(filePath);
-  console.log(result);
-} catch (error) {
-  console.error('Error parsing torrent file:', error.message);
-}
+
 
 // downloadTorrent(torrentUrl, (filePath) => {
 //   try {
@@ -57,3 +54,38 @@ try {
 //     console.error('Error parsing torrent file:', error.message);
 //   }
 // });
+
+// npm install simple-peer
+
+import dgram from 'dgram';
+import { URL } from 'url';
+
+const getPeersFromTracker = (trackerUrl) => {
+  const url = new URL(trackerUrl);
+  const socket = dgram.createSocket('udp4');
+
+  const message = Buffer.from(/* tracker request message */);
+
+  socket.send(message, 0, message.length, url.port, url.hostname, (err) => {
+    if (err) console.error(err);
+  });
+
+  socket.on('message', (response) => {
+    // Parse response to get peer list
+    const peers = parseTrackerResponse(response);
+    socket.close();
+    return peers;
+  });
+};
+
+
+try {
+  const torrent = parseTorrentFile(filePath);
+  console.log(torrent);
+  console.log('Fetching peers from tracker...');
+  console.log(torrent.announce);
+  const peers = getPeersFromTracker(torrent.announce);
+  console.log(peers);
+} catch (error) {
+  console.error('Error parsing torrent file:', error.message);
+}
