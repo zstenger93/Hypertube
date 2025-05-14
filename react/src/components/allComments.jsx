@@ -51,7 +51,7 @@ const AllComments = () => {
             <h3>
               {comment.movieData.title} ({comment.movieData.year})
             </h3>
-            {/* <h3>{comment.user.username}</h3> */}
+            <h3>{comment.user.username}</h3>
             <p>
 				{comment.content.match(/.{1,60}/g)?.map((line, index) => (
 					<React.Fragment key={index}>
