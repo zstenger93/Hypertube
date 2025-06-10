@@ -41,7 +41,7 @@ async function dropTables() {
 
 async function createTables() {
   try {
-    //await dropTables();
+    await dropTables();
     await client.query("BEGIN");
     await client.query(`
       CREATE TABLE IF NOT EXISTS public.Users (
@@ -50,6 +50,7 @@ async function createTables() {
         name VARCHAR(100) NOT NULL,
         surename VARCHAR(100) NOT NULL,
         watched_movies VARCHAR(50)[],
+        clicked_movies VARCHAR(50)[],
         watch_list VARCHAR(50)[],
         liked_movies VARCHAR(50)[],
         email VARCHAR(100) UNIQUE NOT NULL,
@@ -492,6 +493,155 @@ app.get("/api/comments/:movieId", async (req, res) => {
   } catch (error) {
     console.error("Error fetching comments:", error);
     res.status(500).send("Error fetching comments");
+  }
+});
+
+app.post("/api/like/:movieId", async (req, res) => {
+  const movieId = req.params.movieId;
+  var userData = null;
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) return res.sendStatus(401);
+  try {
+    const searchToken = `SELECT * FROM Users WHERE oauth = $1;`;
+    const result = await client.query(searchToken, [token]);
+    if (result.rows.length !== 0) {
+      userData = result.rows[0];
+    }
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    return res.sendStatus(500);
+  }
+  if (!userData) return res.sendStatus(403);
+  const { text } = req.body;
+  await client.query("BEGIN");
+  try {
+    const searchMovie = `SELECT * FROM Movies WHERE imdbID = $1;`;
+    const movieResult = await client.query(searchMovie, [movieId]);
+    
+    if (movieResult.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).send("Movie not found");
+    }
+    const id = movieResult.rows[0].movie_id;
+    const insertQuery = `INSERT INTO Comments (user_email, movie_id, content) VALUES ($1, $2, $3) RETURNING *;`;
+    const result = await client.query(insertQuery, [userData.email, id, text]);
+    result.rows;
+    await client.query("COMMIT");
+    res.status(200).send({ message: "Comment Added" });
+  } catch (error) {
+    await client.query("ROLLBACK");
+    res.status(500).send("Error adding comment");
+  }
+});
+
+app.post("/api/watched/:movieId", async (req, res) => {
+  const movieId = req.params.movieId;
+  var userData = null;
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) return res.sendStatus(401);
+  try {
+    const searchToken = `SELECT * FROM Users WHERE oauth = $1;`;
+    const result = await client.query(searchToken, [token]);
+    if (result.rows.length !== 0) {
+      userData = result.rows[0];
+    }
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    return res.sendStatus(500);
+  }
+  if (!userData) return res.sendStatus(403);
+  const { text } = req.body;
+  await client.query("BEGIN");
+  try {
+    const searchMovie = `SELECT * FROM Movies WHERE imdbID = $1;`;
+    const movieResult = await client.query(searchMovie, [movieId]);
+    if (movieResult.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).send("Movie not found");
+    }
+    const id = movieResult.rows[0].movie_id;
+    const insertQuery = `INSERT INTO Comments (user_email, movie_id, content) VALUES ($1, $2, $3) RETURNING *;`;
+    const result = await client.query(insertQuery, [userData.email, id, text]);
+    result.rows;
+    await client.query("COMMIT");
+    res.status(200).send({ message: "Movie added to the watched movies list" });
+  } catch (error) {
+    await client.query("ROLLBACK");
+    res.status(500).send("Error adding comment");
+  }
+});
+
+app.post("/api/watch/:movieId", async (req, res) => {
+  const movieId = req.params.movieId;
+  var userData = null;
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) return res.sendStatus(401);
+  try {
+    const searchToken = `SELECT * FROM Users WHERE oauth = $1;`;
+    const result = await client.query(searchToken, [token]);
+    if (result.rows.length !== 0) {
+      userData = result.rows[0];
+    }
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    return res.sendStatus(500);
+  }
+  if (!userData) return res.sendStatus(403);
+  const { text } = req.body;
+  await client.query("BEGIN");
+  try {
+    const searchMovie = `SELECT * FROM Movies WHERE imdbID = $1;`;
+    const movieResult = await client.query(searchMovie, [movieId]);
+    if (movieResult.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).send("Movie not found");
+    }
+    const id = movieResult.rows[0].movie_id;
+    const insertQuery = `INSERT INTO Comments (user_email, movie_id, content) VALUES ($1, $2, $3) RETURNING *;`;
+    const result = await client.query(insertQuery, [userData.email, id, text]);
+    result.rows;
+    await client.query("COMMIT");
+    res.status(200).send({ message: "Movie Added to a watchlist" });
+  } catch (error) {
+    await client.query("ROLLBACK");
+    res.status(500).send("Error adding comment");
+  }
+});
+
+app.post("/api/clicked/:movieId", async (req, res) => {
+  const movieId = req.params.movieId;
+  var userData = null;
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) return res.sendStatus(401);
+  try {
+    const searchToken = `SELECT * FROM Users WHERE oauth = $1;`;
+    const result = await client.query(searchToken, [token]);
+    if (result.rows.length !== 0) {
+      userData = result.rows[0];
+    }
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    return res.sendStatus(500);
+  }
+  if (!userData) return res.sendStatus(403);
+  const { text } = req.body;
+  await client.query("BEGIN");
+  try {
+    const searchMovie = `SELECT * FROM Movies WHERE imdbID = $1;`;
+    const movieResult = await client.query(searchMovie, [movieId]);
+    if (movieResult.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).send("Movie not found");
+    }
+    const id = movieResult.rows[0].movie_id;
+    const insertQuery = `INSERT INTO Comments (user_email, movie_id, content) VALUES ($1, $2, $3) RETURNING *;`;
+    const result = await client.query(insertQuery, [userData.email, id, text]);
+    result.rows;
+    await client.query("COMMIT");
+    res.status(200).send({ message: "Movie added to clicked on list" });
+  } catch (error) {
+    await client.query("ROLLBACK");
+    res.status(500).send("Error adding comment");
   }
 });
 
