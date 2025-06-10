@@ -76,7 +76,16 @@ const Comments = ({ movie }) => {
                   <h3>Unknown User</h3>
                 </div>
               )}
-              <p>{comment.content}</p>
+			  <div className="centerComment">
+				<p>
+					{comment.content.match(/.{1,60}/g)?.map((line, index) => (
+						<React.Fragment key={index}>
+						{line}
+						<br />
+						</React.Fragment>
+					))}
+				</p>
+				</div>
             </div>
           </div>
         ))}

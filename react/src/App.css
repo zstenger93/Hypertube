@@ -281,11 +281,22 @@ body {
   flex-direction: row;
   background-color: #242222;
   width: 40vw;
-  height: 300px;
+  height: 120px;
   border: 2px solid #bfbfbf;
   min-width: 700px;
   margin: 10px;
 }
+
+.allComment {
+	display: flex;
+	flex-direction: row;
+	background-color: #242222;
+	width: 40vw;
+	height: 300px;
+	border: 2px solid #bfbfbf;
+	min-width: 700px;
+	margin: 10px;
+  }
 
 .comment p {
   font-size: 1rem;
@@ -295,8 +306,8 @@ body {
 }
 
 .comment button {
-  height: 300px;
-  width: 200px;
+  height: 200px;
+  width: 150px;
   border: 5px solid #bfbfbf;
   padding: 0;
   margin: 0;
@@ -307,6 +318,7 @@ body {
 .commentButton img {
   width: 100%;
   height: 100%;
+  margin: 0;
   size: cover;
   filter: grayscale(80%);
 }
