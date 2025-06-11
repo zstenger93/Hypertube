@@ -9,6 +9,8 @@ import http from 'http';
 import crypto from 'crypto';
 
 
+// https://allenkim67.github.io/programming/2016/05/04/how-to-make-your-own-bittorrent-client.html?ref=skerritt.blog
+
 
 const parseTorrentFile = (filePath) => {
   const torrent = bencode.decode(fs.readFileSync(filePath));
@@ -60,7 +62,8 @@ const downloadTorrent = (url, callback) => {
 
 const torrentUrl = "https://archive.org/download/CC_1916_09_04_TheCount/CC_1916_09_04_TheCount_archive.torrent";
 const filePath = "./CC_1916_09_04_TheCount_archive.torrent";
-
+// const filePath = "./ubuntu-22.04.3-desktop-amd64.iso.torrent";
+// react/src/utils/ubuntu-22.04.3-desktop-amd64.iso.torrent
 
 
 // downloadTorrent(torrentUrl, (filePath) => {
@@ -88,7 +91,7 @@ const createConnectionRequest = () => {
 
 
 const generatePeerId = () => {
-  return '-HY0001-' + crypto.randomBytes(12).toString('hex'); // Example peer ID
+  return '-HY0001-' + crypto.randomBytes(12).toString('hex');
 };
 
 const getPeersFromTracker = (trackerUrl, infoHash, totalSize) => {
@@ -206,33 +209,53 @@ const parseTrackerResponse = (response) => {
 };
 
 const encodeBinaryInfoHash = (infoHash) => {
-  return Buffer.from(infoHash, 'hex')
-    .toString('binary')
-    .split('')
-    .map((char) => `%${char.charCodeAt(0).toString(16).padStart(2, '0')}`)
-    .join('');
+  const rawHash = Buffer.from(infoHash, 'hex'); // Convert hex to binary Buffer
+  return rawHash.toString('binary') // Convert to binary string
+    .split('') // Split into individual bytes
+    .map((char) => {
+      const code = char.charCodeAt(0);
+      return code >= 0x20 && code <= 0x7E ? char : `%${code.toString(16).padStart(2, '0').toUpperCase()}`;
+    })
+    .join(''); // Rejoin into a properly escaped string
 };
-
 
 const testHttpTrackerConnection = (trackerUrl, infoHash, totalSize) => {
   const url = new URL(trackerUrl);
   const httpModule = url.protocol === 'http:' ? http : https;
-
-  // Add required query parameters
+  const options = {
+    headers: {
+      'User-Agent': 'qBittorrent/4.3.9', // Mimic a known client
+      'Accept-Encoding': 'gzip',
+      'Connection': 'keep-alive',
+    },
+  };
+  // Generate peer ID
   const peerId = generatePeerId();
-  const encodedInfoHash = encodeBinaryInfoHash(infoHash); // Properly encode info_hash in binary format
 
+  // Properly encode info_hash (raw SHA1 binary, URL-encoded)
+  // const infoHashBuffer = Buffer.from(infoHash, 'hex');
+  // const encodedInfoHash = encodeURIComponent(infoHashBuffer.toString('binary'));
+
+  const encodedInfoHash = encodeBinaryInfoHash(infoHash);
+  
+  // Add query parameters
   url.searchParams.append('info_hash', encodedInfoHash);
   url.searchParams.append('peer_id', peerId);
-  url.searchParams.append('port', '6881'); // Example port
+  url.searchParams.append('port', '6881');
   url.searchParams.append('uploaded', '0');
   url.searchParams.append('downloaded', '0');
   url.searchParams.append('left', totalSize.toString());
-  url.searchParams.append('compact', '1');
+  url.searchParams.append('compact', '0');
 
+  
+  // Manually construct the query string to avoid double-encoding
+  const query = `info_hash=${encodeBinaryInfoHash(infoHash)}&peer_id=${peerId}&port=6881&uploaded=0&downloaded=0&left=${totalSize}&compact=0&event=started`;
+  url.search = query;
+  
   console.log(`Testing connection to HTTP tracker: ${url.toString()}`);
+  
 
-  httpModule.get(url.toString(), (response) => {
+  httpModule.get(url.toString(), options, (response) => {
     console.log(`HTTP Tracker Response Status Code: ${response.statusCode}`);
     if (response.statusCode === 200) {
       console.log('HTTP tracker is reachable.');
@@ -248,9 +271,17 @@ const testHttpTrackerConnection = (trackerUrl, infoHash, totalSize) => {
 (async () => {
   try {
     const torrent = parseTorrentFile(filePath);
+    console.log('Is private torrent?', torrent.info.private === 1);
+
     console.log('Fetching peers from tracker...');
+    console.log("Torrent announce:");
     console.log(torrent.announce);
-    testHttpTrackerConnection(torrent.announce, torrent.infoHash, torrent.totalSize);    // const peers = await getPeersFromTracker("udp://bt1.archive.org:6969/announce'", torrent.infoHash, torrent.totalSize);
+    console.log("Torrent InfoHash:");
+    console.log(torrent.infoHash);
+    console.log("Torrent totalsize:");
+    console.log(torrent.totalSize);
+    testHttpTrackerConnection(torrent.announce, torrent.infoHash, torrent.totalSize);
+    // const peers = await getPeersFromTracker("udp://bt1.archive.org:6969/announce'", torrent.infoHash, torrent.totalSize);
     // const peers = await getPeersFromTracker(torrent.announce, torrent.infoHash, torrent.totalSize);
     // console.log('Peers:', peers);
   } catch (error) {
