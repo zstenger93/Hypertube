@@ -7,15 +7,18 @@ import { URL } from 'url';
 import http from 'http';
 import crypto from 'crypto';
 import parseTorrent from 'parse-torrent'
+// import Tracker from 'bittorrent-tracker';
+
 
 // ======================
 // 1. Parse Torrent File
 // ======================
 const parseTorrentFile = async (filePath) => {
     console.log('Parsing torrent file...');
-    const torrent2 = await parseTorrent(fs.readFileSync(filePath)); // Use await to resolve the promise
-    console.log('Parsed torrent:', torrent2.infoHash);
+    // const torrent2 = await parseTorrent(fs.readFileSync(filePath)); // Use await to resolve the promise
+    // console.log('Parsed torrent:', torrent2);
     const torrent = bencode.decode(fs.readFileSync(filePath));
+    // console.log('torrent infohash:', torrent.infoHash);
     // console.log('Parsed torrent:', torrent);
     const asciiNumbers = torrent.announce.toString().split(',').map(Number);
     const asciiNumbersName = torrent.info.name.toString().split(',').map(Number);
@@ -59,13 +62,14 @@ const encodeInfoHashForTracker = (info) => {
   // console.log('info (hex):', info);
   // Step 2: Generate SHA-1 hash
   const infoHash = crypto.createHash('sha1').update(bencodedInfo).digest();
-  console.log('my SHA-1 hash:', infoHash.toString('hex'));
-  // Step 3: URL encode the binary hash
-  // Step 3: URL encode the binary hash
+  // console.log('my SHA-1 hash:', infoHash.toString('hex'));
+  return infoHash; // Return as hex string
+};
+
+const urlEncodeInfoHashForTracker = (infoHash) => {
   const urlEncodedInfoHash = Array.from(infoHash)
     .map((byte) => `%${byte.toString(16).padStart(2, '0').toUpperCase()}`)
     .join('');
-
   return urlEncodedInfoHash;
 };
 
@@ -164,7 +168,7 @@ const parsePeers = (peersBuffer) => {
     }
 
     // Parse torrent and fetch peers
-    const torrent = parseTorrentFile(torrentFile);
+    const torrent = await parseTorrentFile(torrentFile);
     console.log('Torrent Metadata:', {
         name: torrent.name,
         size: (torrent.totalSize / 1e9).toFixed(2) + ' GB',
@@ -172,27 +176,63 @@ const parsePeers = (peersBuffer) => {
         announce: torrent.announce,
         files: torrent.files,
       });
+    
+    console.log(`\n =========== =========== ============ =============== ================ ======\n`);
+    console.log(`\ninfoHash: ${torrent.infoHash.toString('hex')}`);
+    const urlinfo = urlEncodeInfoHashForTracker(torrent.infoHash);
+    console.log(`\nEncoded infoHash for tracker: ${urlinfo}`);
 
-  // Try multiple trackers
-  const trackers = [
-    // 'http://tracker.opentrackr.org:1337/announce',
-    // 'https://tracker.tamersunion.org:443/announce',
-    // 'https://tracker.renfei.net:443/announce',
-    torrent.announce
-  ];
 
-  for (const tracker of trackers) {
-    try {
-      console.log(`\n =========== =========== ============ =============== ================ ======\n`);  
-      console.log(`\nTrying tracker: ${tracker}`);
-      const peers = await getPeersFromTracker(tracker, torrent.infoHash, torrent.totalSize);
-      console.log(`Found ${peers.length} peers from ${tracker}`);
-      console.log('First 5 peers:', peers.slice(0, 5));
-      break; // Stop after first successful tracker
-    } catch (err) {
-      console.log(`Failed with ${tracker}: ${err.message}`);
-    }
-  }
+    // Example of using outside lib
+    // build docker for this so we can avoid all mac related shit...
+    /* 
+
+    
+
+    const client = new Tracker({
+      infoHash: torrentInfoHash,
+      peerId: Buffer.from(peerId),
+      port: port,
+    });
+
+    client.start();
+
+    client.on('update', (data) => {
+      console.log('Tracker update:', data);
+      console.log(`Peers: ${data.peers}`);
+    });
+
+    client.on('error', (err) => {
+      console.error('Tracker error:', err.message);
+    });
+
+    client.on('warning', (warning) => {
+      console.warn('Tracker warning:', warning.message);
+    });
+    
+    */
+
+
+    // // Try multiple trackers
+    // const trackers = [
+    //   // 'http://tracker.opentrackr.org:1337/announce',
+    //   // 'https://tracker.tamersunion.org:443/announce',
+    //   // 'https://tracker.renfei.net:443/announce',
+    //   torrent.announce
+    // ];
+
+    // for (const tracker of trackers) {
+    //   try {
+    //     console.log(`\n =========== =========== ============ =============== ================ ======\n`);  
+    //     console.log(`\nTrying tracker: ${tracker}`);
+    //     const peers = await getPeersFromTracker(tracker, torrent.infoHash, torrent.totalSize);
+    //     console.log(`Found ${peers.length} peers from ${tracker}`);
+    //     console.log('First 5 peers:', peers.slice(0, 5));
+    //     break; // Stop after first successful tracker
+    //   } catch (err) {
+    //     console.log(`Failed with ${tracker}: ${err.message}`);
+    //   }
+    // }
 } catch (err) {
   console.error('Error:', err.message);
 }
