@@ -6,12 +6,17 @@ import dgram from 'dgram';
 import { URL } from 'url';
 import http from 'http';
 import crypto from 'crypto';
+import parseTorrent from 'parse-torrent'
 
 // ======================
 // 1. Parse Torrent File
 // ======================
-const parseTorrentFile = (filePath) => {
+const parseTorrentFile = async (filePath) => {
+    console.log('Parsing torrent file...');
+    const torrent2 = await parseTorrent(fs.readFileSync(filePath)); // Use await to resolve the promise
+    console.log('Parsed torrent:', torrent2.infoHash);
     const torrent = bencode.decode(fs.readFileSync(filePath));
+    // console.log('Parsed torrent:', torrent);
     const asciiNumbers = torrent.announce.toString().split(',').map(Number);
     const asciiNumbersName = torrent.info.name.toString().split(',').map(Number);
     const trackerName = asciiNumbersName.map((num) => String.fromCharCode(num)).join('');
@@ -22,9 +27,11 @@ const parseTorrentFile = (filePath) => {
     const name = trackerName
     const announce = trackerUrl
   
-    const infoHash = crypto.createHash('sha1')
-      .update(bencode.encode(torrent.info))
-      .digest('hex');
+    // const infoHash = crypto.createHash('sha1')
+    //   .update(bencode.encode(torrent.info))
+    //   .digest('hex');
+
+    const infoHash = encodeInfoHashForTracker(torrent.info);
   
     const totalSize = torrent.info.files?.reduce((acc, file) => acc + file.length, 0) 
       || torrent.info.length;
@@ -45,6 +52,23 @@ const parseTorrentFile = (filePath) => {
 // 1.1 encode shit
 // ======================
 
+const encodeInfoHashForTracker = (info) => {
+  // Step 1: Bencode the `info` object
+  const bencodedInfo = bencode.encode(info);
+  // console.log('Bencoded info:', bencodedInfo);
+  // console.log('info (hex):', info);
+  // Step 2: Generate SHA-1 hash
+  const infoHash = crypto.createHash('sha1').update(bencodedInfo).digest();
+  console.log('my SHA-1 hash:', infoHash.toString('hex'));
+  // Step 3: URL encode the binary hash
+  // Step 3: URL encode the binary hash
+  const urlEncodedInfoHash = Array.from(infoHash)
+    .map((byte) => `%${byte.toString(16).padStart(2, '0').toUpperCase()}`)
+    .join('');
+
+  return urlEncodedInfoHash;
+};
+
 const encodeBinaryInfoHash = (infoHash) => {
     const rawHash = Buffer.from(infoHash, 'hex'); // Convert hex to binary Buffer
     return rawHash.toString('binary') // Convert to binary string
@@ -59,37 +83,34 @@ const encodeBinaryInfoHash = (infoHash) => {
 // ======================
 // 2. Fetch Peers from Tracker
 // ======================
-const getPeersFromTracker = async (trackerUrl, rawInfoHash) => {
+const getPeersFromTracker = async (trackerUrl, rawInfoHash, size) => {
     return new Promise((resolve, reject) => {
       const peerId = '-HY0001-' + crypto.randomBytes(12).toString('hex');
       const url = new URL(trackerUrl);
       
       // Manually construct query string with proper encoding
       const query = [
-        `info_hash=${rawInfoHash.toString('binary').replace(/[^\w]/g, (c) => 
-          '%' + c.charCodeAt(0).toString(16).toUpperCase()
-        )}`,
+        `info_hash=${rawInfoHash}`,
         `peer_id=${peerId}`,
         'port=6881',
         'uploaded=0',
         'downloaded=0',
-        'left=5037662208', // Actual Ubuntu ISO size
-        'compact=1',
-        'event=started'
+        `left=${size}`, // Use the total size from torrent
+        'compact=0',
       ].join('&');
+
+      console.log('Raw infohash:', rawInfoHash);
   
       url.search = query;
   
       const options = {
         headers: {
-          'User-Agent': 'qBittorrent/4.3.9',
-          'Accept': '*/*',
-          'Connection': 'close'
+          'User-Agent': 'myagent/0.1',
         },
         timeout: 10000
       };
   
-      console.log('Requesting:', url.toString().split('?')[0] + '?info_hash=...');
+      console.log('Requesting:', url.toString());
   
       https.get(url.toString(), options, (res) => {
         let data = [];
@@ -154,10 +175,9 @@ const parsePeers = (peersBuffer) => {
 
   // Try multiple trackers
   const trackers = [
-    'http://tracker.opentrackr.org:1337/announce',
-    'http://tracker.openbittorrent.com:80/announce',
-    'https://tracker.tamersunion.org:443/announce',
-    'https://tracker.renfei.net:443/announce',
+    // 'http://tracker.opentrackr.org:1337/announce',
+    // 'https://tracker.tamersunion.org:443/announce',
+    // 'https://tracker.renfei.net:443/announce',
     torrent.announce
   ];
 
@@ -165,7 +185,7 @@ const parsePeers = (peersBuffer) => {
     try {
       console.log(`\n =========== =========== ============ =============== ================ ======\n`);  
       console.log(`\nTrying tracker: ${tracker}`);
-      const peers = await getPeersFromTracker(tracker, torrent.infoHash);
+      const peers = await getPeersFromTracker(tracker, torrent.infoHash, torrent.totalSize);
       console.log(`Found ${peers.length} peers from ${tracker}`);
       console.log('First 5 peers:', peers.slice(0, 5));
       break; // Stop after first successful tracker
