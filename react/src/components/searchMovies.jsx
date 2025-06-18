@@ -7,6 +7,7 @@ import poster from "../assets/poster.jpg";
 const SearchComponent = () => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
+  const [moviedClicked, setMoviedClicked] = useState([]);
   const [filter, setFilter] = useState("year");
   const navigate = useNavigate();
 
@@ -132,7 +133,30 @@ const SearchComponent = () => {
                   navigate(`/movie/${movie.imdbID ?? movie.imdbid}`)
                 }
               >
-                <img src={thePoster} alt={movie.Title ?? movie.title} />
+                <div style={{ position: "relative", display: "inline-block" }}>
+                  <img
+                    src={thePoster}
+                    alt={movie.Title ?? movie.title}
+                    style={{ width: "100%", borderRadius: "8px" }}
+                  />
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "16px",
+                      right: "8px",
+                      backgroundColor: "rgba(0,0,0,0.6)",
+                      color: "white",
+                      padding: "6px 10px",
+                      borderRadius: "20px",
+                      display: "flex",
+                      alignItems: "center",
+                      fontSize: "16px",
+                    }}
+                  >
+                    <span style={{ marginRight: "5px" }}>📈</span>{" "}
+                    {movie.click_count}
+                  </div>
+                </div>{" "}
                 <h3>{movie.Title ?? movie.title}</h3>
                 <p>{movie.Year ?? movie.year}</p>
               </button>
