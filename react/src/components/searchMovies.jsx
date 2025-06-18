@@ -15,6 +15,10 @@ const SearchComponent = () => {
     const fetchInitialMovies = async () => {
       try {
         const response = await fetch(`http://localhost:3000/movies`);
+        // const token = localStorage.getItem("accessToken");
+        // if (token) {
+        //   const fetchWatchedMovies = await fetch("http://localhost:3000/user");
+        // }
         const data = await response.json();
         if (data.Search) {
           setResults(data.Search || []);
