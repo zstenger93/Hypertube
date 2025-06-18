@@ -9,7 +9,7 @@ const AllComments = () => {
 
   const getAllComments = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/api/comments`);
+      const response = await fetch(`http://localhost:3000/comments`);
       const data = await response.json();
 
       console.log(data);
@@ -53,13 +53,13 @@ const AllComments = () => {
             </h3>
             <h3>{comment.user.username}</h3>
             <p>
-				{comment.content.match(/.{1,60}/g)?.map((line, index) => (
-					<React.Fragment key={index}>
-					{line}
-					<br />
-					</React.Fragment>
-				))}
-			</p>
+              {comment.content.match(/.{1,60}/g)?.map((line, index) => (
+                <React.Fragment key={index}>
+                  {line}
+                  <br />
+                </React.Fragment>
+              ))}
+            </p>
           </div>
         </div>
       ))}

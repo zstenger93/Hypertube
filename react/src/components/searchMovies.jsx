@@ -13,7 +13,7 @@ const SearchComponent = () => {
   useEffect(() => {
     const fetchInitialMovies = async () => {
       try {
-        const response = await fetch(`http://localhost:3000/api/movies`);
+        const response = await fetch(`http://localhost:3000/movies`);
         const data = await response.json();
         if (data.Search) {
           setResults(data.Search || []);
@@ -33,9 +33,7 @@ const SearchComponent = () => {
     setQuery(value);
     if (value) {
       try {
-        const response = await fetch(
-          `http://localhost:3000/api/movies/${value}`
-        );
+        const response = await fetch(`http://localhost:3000/movies/${value}`);
         const data = await response.json();
         if (data.Search) {
           setResults(data.Search || []);
@@ -50,7 +48,7 @@ const SearchComponent = () => {
       }
     } else {
       try {
-        const response = await fetch(`http://localhost:3000/api/movies`);
+        const response = await fetch(`http://localhost:3000/movies`);
         const data = await response.json();
         if (data.Search) {
           setResults(data.Search || []);
