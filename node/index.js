@@ -152,7 +152,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get("/api/movies", async (req, res) => {
+app.get("/movies", async (req, res) => {
   try {
     const fetchAllMovies = `
         SELECT * FROM Movies LIMIT 50;
@@ -164,7 +164,7 @@ app.get("/api/movies", async (req, res) => {
   }
 });
 
-app.get("/api/movies/:title", async (req, res) => {
+app.get("/movies/:title", async (req, res) => {
   const { title } = req.params;
   if (!title || title.length === 0) {
     try {
@@ -241,7 +241,7 @@ app.get("/api/movies/:title", async (req, res) => {
   }
 });
 
-app.get("/api/watchTheMovie/:id", async (req, res) => {
+app.get("/watchTheMovie/:id", async (req, res) => {
   const { id } = req.params;
   const url = `http://www.omdbapi.com/?apikey=${apiKey}&i=${id}`;
   if (!id || id.length === 0) {
@@ -309,7 +309,7 @@ app.get("/api/watchTheMovie/:id", async (req, res) => {
   }
 });
 
-app.get("/api/youtubeRequests/:title", async (req, res) => {
+app.get("/youtubeRequests/:title", async (req, res) => {
   const { title } = req.params;
   if (!title || title.length === 0) {
     return res.status(400).send("Potato");
@@ -443,7 +443,7 @@ app.get("/auth/validate", async (req, res) => {
   }
 });
 
-app.get("/api/comments", async (req, res) => {
+app.get("/comments", async (req, res) => {
   try {
     const searchComments = `SELECT * FROM Comments;`;
     const commentsResult = await client.query(searchComments);
@@ -465,7 +465,7 @@ app.get("/api/comments", async (req, res) => {
   }
 });
 
-app.get("/api/comments/:movieId", async (req, res) => {
+app.get("/comments/:movieId", async (req, res) => {
   const { movieId } = req.params;
   if (!movieId || movieId.length === 0) {
     return res.status(400).send("Potato");
@@ -495,7 +495,7 @@ app.get("/api/comments/:movieId", async (req, res) => {
   }
 });
 
-app.post("/api/like/:movieId", async (req, res) => {
+app.post("/like/:movieId", async (req, res) => {
   const movieId = req.params.movieId;
   var userData = null;
   const token = req.headers.authorization?.split(" ")[1];
@@ -516,7 +516,7 @@ app.post("/api/like/:movieId", async (req, res) => {
   try {
     const searchMovie = `SELECT * FROM Movies WHERE imdbID = $1;`;
     const movieResult = await client.query(searchMovie, [movieId]);
-    
+
     if (movieResult.rows.length === 0) {
       await client.query("ROLLBACK");
       return res.status(404).send("Movie not found");
@@ -533,7 +533,7 @@ app.post("/api/like/:movieId", async (req, res) => {
   }
 });
 
-app.post("/api/watched/:movieId", async (req, res) => {
+app.post("/watched/:movieId", async (req, res) => {
   const movieId = req.params.movieId;
   var userData = null;
   const token = req.headers.authorization?.split(" ")[1];
@@ -570,7 +570,7 @@ app.post("/api/watched/:movieId", async (req, res) => {
   }
 });
 
-app.post("/api/watch/:movieId", async (req, res) => {
+app.post("/watch/:movieId", async (req, res) => {
   const movieId = req.params.movieId;
   var userData = null;
   const token = req.headers.authorization?.split(" ")[1];
@@ -607,7 +607,7 @@ app.post("/api/watch/:movieId", async (req, res) => {
   }
 });
 
-app.get("/api/users/:user", async (req, res) => {
+app.get("/users/:user", async (req, res) => {
   const { user } = req.params;
   if (!user || user.length === 0) {
     return res.status(400).send("Potato");
@@ -637,7 +637,38 @@ app.get("/api/users/:user", async (req, res) => {
   }
 });
 
-app.post("/api/comments/:movieId", async (req, res) => {
+app.post("/click/:movieId", async (req, res) => {
+  const movieId = req.params.movieId;
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) return res.sendStatus(401);
+  try {
+    const { rows } = await client.query(
+      "SELECT * FROM Users WHERE oauth = $1",
+      [token]
+    );
+    if (rows.length === 0) return res.sendStatus(403);
+    const user = rows[0];
+    await client.query("BEGIN");
+    const updateClicked = `
+      UPDATE Users 
+      SET clicked_movies = array_append(clicked_movies, $1) 
+      WHERE email = $2 AND NOT ($1 = ANY(clicked_movies));
+    `;
+    await client.query(updateClicked, [movieId, user.email]);
+    const updateClick = `
+      UPDATE Movies SET click_count = click_count + 1 WHERE imdbID = $1;
+    `;
+    await client.query(updateClick, [movieId]);
+    await client.query("COMMIT");
+    res.status(200).send({ message: "Clicked" });
+  } catch (err) {
+    await client.query("ROLLBACK");
+    console.error("Error tracking click:", err);
+    res.sendStatus(500);
+  }
+});
+
+app.post("/comments/:movieId", async (req, res) => {
   const movieId = req.params.movieId;
   var userData = null;
   const token = req.headers.authorization?.split(" ")[1];

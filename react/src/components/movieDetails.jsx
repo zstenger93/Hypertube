@@ -16,7 +16,7 @@ const MovieDetails = () => {
   const fetchYoutube = async (title) => {
     try {
       const response = await fetch(
-        `http://localhost:3000/api/youtubeRequests/${title}`
+        `http://localhost:3000/youtubeRequests/${title}`
       );
       if (!response.ok) throw new Error("Failed to fetch youtube video");
       const data = await response.json();
@@ -34,13 +34,18 @@ const MovieDetails = () => {
     const fetchMovieDetails = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3000/api/watchTheMovie/${id}`
+          `http://localhost:3000/watchTheMovie/${id}`
         );
         if (!response.ok) throw new Error("Failed to fetch movie details");
         const data = await response.json();
-        console.log(data);
         setMovie(data);
         if (data.Title ?? data.title) fetchYoutube(data.Title ?? data.title);
+        await fetch(`http://localhost:3000/click/${id}`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        });
       } catch (error) {
       } finally {
         setLoading(false);
@@ -62,10 +67,24 @@ const MovieDetails = () => {
   return (
     <div className="center">
       <Logout />
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-		<img src="/Pirate-Flag.svg" alt="Left SVG" style={{ width: '148px', height: '148px', marginRight: '10px' }} />
-		<h1 className="lastColor">HyperCrime</h1>
-		<img src="/Pirate-Flag.svg" alt="Right SVG" style={{ width: '148px', height: '148px', marginLeft: '10px' }} />
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <img
+          src="/Pirate-Flag.svg"
+          alt="Left SVG"
+          style={{ width: "148px", height: "148px", marginRight: "10px" }}
+        />
+        <h1 className="lastColor">HyperCrime</h1>
+        <img
+          src="/Pirate-Flag.svg"
+          alt="Right SVG"
+          style={{ width: "148px", height: "148px", marginLeft: "10px" }}
+        />
       </div>
       {movie ? (
         <div>
@@ -105,7 +124,7 @@ const MovieDetails = () => {
       ) : (
         <p>Movie details not found.</p>
       )}
-	  <Comments movie={id} />
+      <Comments movie={id} />
     </div>
   );
 };

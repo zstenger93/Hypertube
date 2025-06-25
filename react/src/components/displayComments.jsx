@@ -7,9 +7,7 @@ const Comments = ({ movie }) => {
 
   const getComments = async () => {
     try {
-      const response = await fetch(
-        `http://localhost:3000/api/comments/${movie}`
-      );
+      const response = await fetch(`http://localhost:3000/comments/${movie}`);
       const data = await response.json();
       return data;
     } catch (error) {
@@ -33,19 +31,16 @@ const Comments = ({ movie }) => {
     const text = event.target.comment.value;
     const movieId = movie;
     try {
-      await fetch(
-        `http://localhost:3000/api/comments/${movieId}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ text }),
-        }
-      );
-	  const data = await getComments();
-	  setComments(data);
+      await fetch(`http://localhost:3000/comments/${movieId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ text }),
+      });
+      const data = await getComments();
+      setComments(data);
     } catch (error) {
       console.log(error.message);
     }
@@ -76,16 +71,16 @@ const Comments = ({ movie }) => {
                   <h3>Unknown User</h3>
                 </div>
               )}
-			  <div className="centerComment">
-				<p>
-					{comment.content.match(/.{1,60}/g)?.map((line, index) => (
-						<React.Fragment key={index}>
-						{line}
-						<br />
-						</React.Fragment>
-					))}
-				</p>
-				</div>
+              <div className="centerComment">
+                <p>
+                  {comment.content.match(/.{1,60}/g)?.map((line, index) => (
+                    <React.Fragment key={index}>
+                      {line}
+                      <br />
+                    </React.Fragment>
+                  ))}
+                </p>
+              </div>
             </div>
           </div>
         ))}
