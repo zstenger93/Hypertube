@@ -41,7 +41,7 @@ async function dropTables() {
 
 async function createTables() {
   try {
-    //await dropTables();
+    await dropTables();
     await client.query("BEGIN");
     await client.query(`
       CREATE TABLE IF NOT EXISTS public.Users (
@@ -535,75 +535,54 @@ app.post("/like/:movieId", async (req, res) => {
 
 app.post("/watched/:movieId", async (req, res) => {
   const movieId = req.params.movieId;
-  var userData = null;
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) return res.sendStatus(401);
+
   try {
     const searchToken = `SELECT * FROM Users WHERE oauth = $1;`;
-    const result = await client.query(searchToken, [token]);
-    if (result.rows.length !== 0) {
-      userData = result.rows[0];
+
+    const { rows } = await client.query(searchToken, [token]);
+    if (rows.length === 0) {
+      return res.sendStatus(403);
     }
-  } catch (error) {
-    console.error("Error fetching user:", error);
-    return res.sendStatus(500);
-  }
-  if (!userData) return res.sendStatus(403);
-  const { text } = req.body;
-  await client.query("BEGIN");
-  try {
-    const searchMovie = `SELECT * FROM Movies WHERE imdbID = $1;`;
-    const movieResult = await client.query(searchMovie, [movieId]);
-    if (movieResult.rows.length === 0) {
-      await client.query("ROLLBACK");
-      return res.status(404).send("Movie not found");
-    }
-    const id = movieResult.rows[0].movie_id;
-    const insertQuery = `INSERT INTO Comments (user_email, movie_id, content) VALUES ($1, $2, $3) RETURNING *;`;
-    const result = await client.query(insertQuery, [userData.email, id, text]);
-    result.rows;
+    const user = rows[0];
+    await client.query("BEGIN");
+    const insertQuery = `UPDATE Users 
+      SET watched_movies = array_append(watched_movies, $1)
+      WHERE email = $2 AND NOT ($1 = ANY(watched_movies));`;
+    await client.query(insertQuery, [movieId, user.email]);
     await client.query("COMMIT");
-    res.status(200).send({ message: "Movie added to the watched movies list" });
-  } catch (error) {
+    res.status(200).send({ message: "Watched" });
+  } catch (err) {
     await client.query("ROLLBACK");
-    res.status(500).send("Error adding comment");
+    console.error("Error", err);
+    res.sendStatus(500);
   }
 });
 
-app.post("/watch/:movieId", async (req, res) => {
+app.post("/watchlist/:movieId", async (req, res) => {
   const movieId = req.params.movieId;
-  var userData = null;
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) return res.sendStatus(401);
   try {
     const searchToken = `SELECT * FROM Users WHERE oauth = $1;`;
-    const result = await client.query(searchToken, [token]);
-    if (result.rows.length !== 0) {
-      userData = result.rows[0];
-    }
-  } catch (error) {
-    console.error("Error fetching user:", error);
-    return res.sendStatus(500);
-  }
-  if (!userData) return res.sendStatus(403);
-  const { text } = req.body;
-  await client.query("BEGIN");
-  try {
-    const searchMovie = `SELECT * FROM Movies WHERE imdbID = $1;`;
-    const movieResult = await client.query(searchMovie, [movieId]);
-    if (movieResult.rows.length === 0) {
-      await client.query("ROLLBACK");
-      return res.status(404).send("Movie not found");
-    }
-    const id = movieResult.rows[0].movie_id;
-    const insertQuery = `INSERT INTO Comments (user_email, movie_id, content) VALUES ($1, $2, $3) RETURNING *;`;
-    const result = await client.query(insertQuery, [userData.email, id, text]);
-    result.rows;
+
+    const { rows } = await client.query(searchToken, [token]);
+    if (rows.length === 0) return res.sendStatus(403);
+    const user = rows[0];
+    await client.query("BEGIN");
+    const insertQuery = `
+        UPDATE Users 
+        SET watch_list = array_append(watch_list, $1)
+        WHERE email = $2 AND NOT ($1 = ANY(watch_list));
+      `;
+    await client.query(insertQuery, [movieId, user.email]);
     await client.query("COMMIT");
     res.status(200).send({ message: "Movie Added to a watchlist" });
   } catch (error) {
     await client.query("ROLLBACK");
-    res.status(500).send("Error adding comment");
+    console.error("Error adding to watch list:", err);
+    res.status(500).send("Error adding watchlist");
   }
 });
 
