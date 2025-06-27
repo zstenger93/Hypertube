@@ -14,7 +14,7 @@ session = lt.session({
 })
 
 # Enable debug logging
-session.set_alert_mask(lt.alert.category_t.all_categories)
+# session.set_alert_mask(lt.alert.category_t.all_categories)
 
 # Load the test video torrent
 torrent_info = lt.torrent_info(test_torrent_file)
@@ -41,9 +41,9 @@ try:
         print(f" - State: {status.state}, Progress: {status.progress * 100:.2f}%, Peers: {status.num_peers}")
         
         # Print debug alerts
-        alerts = session.pop_alerts()
-        for alert in alerts:
-            print(alert)
+        # alerts = session.pop_alerts()
+        # for alert in alerts:
+        #     print(alert)
         
         time.sleep(5)
 except KeyboardInterrupt:

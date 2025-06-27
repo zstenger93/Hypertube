@@ -18,7 +18,7 @@ services:
     volumes:
       - ./torrent-downloader:/app
     working_dir: /app
-    command: ["python3", "libtorrent_test.py"]
+    # command: ["python3", "libtorrent_test.py"]
     networks:
       - hypertube-network
 
