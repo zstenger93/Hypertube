@@ -31,7 +31,7 @@ for i in range(10):  # Check status every 5 seconds
     print(f" - State: {status.state}, Progress: {status.progress * 100:.2f}%, Peers: {status.num_peers}")
     time.sleep(5)
 
-# Get peer information
+# Get peer information0
 print("\nPeer Information:")
 peers = handle.get_peer_info()
 if peers:
