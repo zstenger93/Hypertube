@@ -3,9 +3,9 @@ FROM ubuntu:20.04
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
 
-# Install Python and necessary packages
+# Install Python, necessary packages, and libtorrent
 RUN apt-get update && \
-    apt-get install -y python3 python3-pip python3-venv && \
+    apt-get install -y python3 python3-pip python3-venv python3-libtorrent && \
     apt-get clean
 
 # Set the working directory

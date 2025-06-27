@@ -1,9 +1,0 @@
-version: '3.8'
-
-services:
-  torrent-server:
-    build: .
-    ports:
-      - "6881:6881"
-    volumes:
-      - ./video_test:/app/video_test

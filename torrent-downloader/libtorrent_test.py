@@ -1,7 +1,7 @@
 import libtorrent as lt
 import time
-
-file_path = './src/temp_torrent/ubuntu-22.04.3-desktop-amd64.iso.torrent'
+# file_path = './src/temp_torrent/ubuntu-22.04.3-desktop-amd64.iso.torrent'
+file_path = './src/temp_torrent/testmovie_short.torrent'
 
 # Create a session with modern API
 session = lt.session({
