@@ -18,4 +18,5 @@ RUN python3 -m venv venv && \
     pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-CMD ["/bin/bash"]
+# CMD ["/bin/bash"]
+CMD ["tail", "-f", "/dev/null"]
