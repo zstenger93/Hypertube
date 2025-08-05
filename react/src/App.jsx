@@ -50,7 +50,7 @@ export default function App() {
                 <WatchMovie />
               </ProtectedRoute>
             }
-          />
+            />
         </Routes>
       </div>
     </Router>

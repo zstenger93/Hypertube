@@ -1,3 +1,5 @@
 node_modules
 data
 .env
+torrent-downloader/download
+torrent-downloader/venv

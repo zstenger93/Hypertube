@@ -1,5 +1,8 @@
 {
   "dependencies": {
-    "cors": "^2.8.5"
+    "bencode": "^4.0.0",
+    "cors": "^2.8.5",
+    "simple-peer": "^9.11.1",
+    "torrent-search-api": "^2.1.4"
   }
 }

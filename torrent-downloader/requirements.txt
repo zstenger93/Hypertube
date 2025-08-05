@@ -1,0 +1,4 @@
+bencodepy
+requests
+cryptography==3.4.7
+urllib3
