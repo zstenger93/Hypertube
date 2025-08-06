@@ -4,7 +4,6 @@ import cors from "cors";
 import axios from "axios";
 import crypto from "crypto";
 import fs from "fs";
-import TorrentSearchApi from 'torrent-search-api';
 import { exec } from 'child_process';
 import path from 'path';
 import { profile } from "console";
