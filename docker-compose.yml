@@ -25,3 +25,6 @@ services:
 networks:
   hypertube-network:
     driver: bridge
+
+
+    # curl -X POST -F "file=@./src/temp_torrent/testmovie_short.torrent" http://localhost:5000/upload-torrent

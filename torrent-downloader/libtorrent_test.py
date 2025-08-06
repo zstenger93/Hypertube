@@ -12,10 +12,10 @@ session = lt.session({
     'enable_natpmp': True
 })
 
-upload_rate_limit = 5 * 1024  # 5 KB/s
-download_rate_limit = 5 * 1024  # 5 KB/s
-session.set_upload_rate_limit(upload_rate_limit)
-session.set_download_rate_limit(download_rate_limit)
+# upload_rate_limit = 5 * 1024  # 5 KB/s
+# download_rate_limit = 5 * 1024  # 5 KB/s
+# session.set_upload_rate_limit(upload_rate_limit)
+# session.set_download_rate_limit(download_rate_limit)
 
 # Load the torrent
 torrent_info = lt.torrent_info(file_path)

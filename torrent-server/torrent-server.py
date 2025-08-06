@@ -14,10 +14,10 @@ session = lt.session({
 })
 
 # Set upload and download rate limits (in bytes per second)
-upload_rate_limit = 5 * 1024  # 5 KB/s
-download_rate_limit = 5 * 1024  # 5 KB/s
-session.set_upload_rate_limit(upload_rate_limit)
-session.set_download_rate_limit(download_rate_limit)
+# upload_rate_limit = 5 * 1024  # 5 KB/s
+# download_rate_limit = 5 * 1024  # 5 KB/s
+# session.set_upload_rate_limit(upload_rate_limit)
+# session.set_download_rate_limit(download_rate_limit)
 
 # Enable debug logging
 # session.set_alert_mask(lt.alert.category_t.all_categories)
@@ -51,7 +51,7 @@ try:
         # for alert in alerts:
         #     print(alert)
         
-        time.sleep(5)
+        time.sleep(30)  # Check status every 30 seconds
 except KeyboardInterrupt:
     print("\nSeeding stopped manually.")
 
