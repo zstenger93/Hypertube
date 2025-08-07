@@ -7,66 +7,57 @@ app = Flask(__name__)
 
 @app.route('/upload-torrent', methods=['POST'])
 def upload_torrent():
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file uploaded'}), 400
 
-    torrent_file = request.files['file']
-    save_path = './src/temp_torrent'
-    os.makedirs(save_path, exist_ok=True)
-    file_path = os.path.join(save_path, torrent_file.filename)
-    torrent_file.save(file_path)
+    # Check if 42_NETWORK environment variable is set to true
+    network_42_workaround = os.getenv('42_NETWORK', 'false').lower() == 'true'
 
-    # Create a session with modern API
-    session = lt.session({
-        'listen_interfaces': '0.0.0.0:6881',  # Listen on all interfaces on port 6881
-        'enable_dht': True,
-        'enable_lsd': True,
-        'enable_upnp': True,
-        'enable_natpmp': True
-    })
-
-    upload_rate_limit = 5 * 1024  # 5 KB/s
-    download_rate_limit = 5 * 1024  # 5 KB/s
-    session.set_upload_rate_limit(upload_rate_limit)
-    session.set_download_rate_limit(download_rate_limit)
-
-    # Load the torrent
-    torrent_info = lt.torrent_info(file_path)
-    params = {
-        'save_path': './download',
-        'storage_mode': lt.storage_mode_t.storage_mode_sparse,
-        'ti': torrent_info
-    }
-    handle = session.add_torrent(params)
-
-    print("\nTracker Status:")
-    for tracker in handle.trackers():
-        print(f" - URL: {tracker['url']}, Status: {tracker['message']}")
-    # Start downloading and monitor status
-    print("Starting torrent download...")
-    for i in range(10):  # Check status every 5 seconds
-        status = handle.status()
-        print(f" - State: {status.state}, Progress: {status.progress * 100:.2f}%, Peers: {status.num_peers}")
-        time.sleep(5)
-
-    # Get peer information0
-    print("\nPeer Information:")
-    peers = handle.get_peer_info()
-    if peers:
-        for peer in peers:
-            print(f" - IP: {peer.ip}, Client: {peer.client}, Flags: {peer.flags}")
+    if network_42_workaround:
+        predefined_torrent_path = './src/temp_torrent/testmovie_short.torrent'
+        if not os.path.exists(predefined_torrent_path):
+            return jsonify({'error': 'Predefined torrent file not found'}), 400
+        file_path = predefined_torrent_path
     else:
-        print("No peers connected.")
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file uploaded'}), 400
 
+        torrent_file = request.files['file']
+        save_path = './src/temp_torrent'
+        os.makedirs(save_path, exist_ok=True)
+        file_path = os.path.join(save_path, torrent_file.filename)
+        torrent_file.save(file_path)
 
-    # Stop the session
-    session.pause()
+    try:
+        session = lt.session({
+            'listen_interfaces': '0.0.0.0:6881',
+            'enable_dht': True,
+            'enable_lsd': True,
+            'enable_upnp': True,
+            'enable_natpmp': True
+        })
 
-    return jsonify({
-        'tracker_status': [{'url': tracker['url'], 'status': tracker['message']} for tracker in handle.trackers()],
-        'download_status': "status_list",
-        'peer_info': "peer_info"
-    })
+        torrent_info = lt.torrent_info(file_path)
+        params = {
+            'save_path': './download',
+            'storage_mode': lt.storage_mode_t.storage_mode_sparse,
+            'ti': torrent_info
+        }
+        handle = session.add_torrent(params)
+
+        print("\nTracker Status:")
+        for tracker in handle.trackers():
+            print(f" - URL: {tracker['url']}, Status: {tracker['message']}")
+
+        print("Starting torrent download...")
+        time.sleep(2)  # Allow some time for the torrent to initialize
+
+        status = handle.status()
+        if status.state == lt.torrent_status.downloading or status.state == lt.torrent_status.seeding:
+            return jsonify({'message': 'Download started'})
+        else:
+            return jsonify({'error': 'Failed to start download. State: {}'.format(status.state)}), 500
+
+    except Exception as e:
+        return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)

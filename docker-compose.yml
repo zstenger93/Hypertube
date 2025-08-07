@@ -15,16 +15,15 @@ services:
   torrent-downloader:
     build:
       context: ./torrent-downloader
+    ports:
+      - "5000:5000"  # Flask app port
     volumes:
       - ./torrent-downloader:/app
     working_dir: /app
-    # command: ["python3", "libtorrent_test.py"]
     networks:
       - hypertube-network
 
 networks:
   hypertube-network:
+    name: hypertube-network
     driver: bridge
-
-
-    # curl -X POST -F "file=@./src/temp_torrent/testmovie_short.torrent" http://localhost:5000/upload-torrent
