@@ -1,6 +1,82 @@
-version: '3.8'
+version: "3.8"
 
 services:
+  backend:
+    build:
+      context: node
+    container_name: backend
+    working_dir: /usr/src/app
+    networks:
+      - hypertube-network
+    volumes:
+      - ./node:/usr/src/app
+      - /usr/src/app/node_modules
+    tty: true
+    ports:
+      - "3000:3000"
+    command: npm run start
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+
+  frontend:
+    build:
+      context: react
+    container_name: frontend
+    working_dir: /usr/src/app
+    networks:
+      - hypertube-network
+    volumes:
+      - ./react:/usr/src/app
+      - /usr/src/app/node_modules
+    tty: true
+    ports:
+      - "5173:5173"
+    command: npm run dev
+    env_file:
+      - .env
+
+  db:
+    image: postgres
+    container_name: db
+    restart: always
+    tty: true
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    ports:
+      - "5432:5432"
+    networks:
+      - hypertube-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 4s
+      timeout: 8s
+      retries: 6
+
+  nginx:
+    build:
+      context: nginx
+    container_name: nginx
+    restart: always
+    tty: true
+    ports:
+      - "80:80"
+    networks:
+      - hypertube-network
+    depends_on:
+      - backend
+      - frontend
+    env_file:
+      - .env
+
   torrent-server:
     build:
       context: ./torrent-server
