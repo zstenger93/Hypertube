@@ -3,11 +3,11 @@ import express, { request } from "express";
 import cors from "cors";
 import axios from "axios";
 import crypto from "crypto";
-import fs from "fs";
-import { exec } from 'child_process';
-import path from 'path';
-import { profile } from "console";
-import { parse } from "path";
+// import fs from "fs";
+// import { exec } from 'child_process';
+// import path from 'path';
+// import { profile } from "console";
+// import { parse } from "path";
 
 const intraSecret = process.env.INTRA_SECRET;
 const intraUUID = process.env.INTRA_UUID;
@@ -378,7 +378,7 @@ app.post("/auth/intra/callback", async (req, res) => {
   }
 });
 
-app.get("/auth/intra/callback", async (req, res) => {
+app.get("/  intra/callback", async (req, res) => {
   const code = req.query.code;
 });
 

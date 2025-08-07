@@ -5,6 +5,7 @@ import Logout from "./logout";
 import { useNavigate } from "react-router-dom";
 import poster from "../assets/poster.jpg";
 import { Comments } from "./displayComments";
+import { getCookie } from "../utils/cookie";
 
 const MovieDetails = () => {
   const { id } = useParams();
@@ -43,7 +44,7 @@ const MovieDetails = () => {
         await fetch(`http://localhost:3000/click/${id}`, {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            Authorization: `Bearer ${getCookie("accessToken")}`,
           },
         });
       } catch (error) {

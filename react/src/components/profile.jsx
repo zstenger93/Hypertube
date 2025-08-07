@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import "../App.css";
 import Logout from "./logout";
 import profile from "../assets/pesant.jpg";
+import { getCookie } from "../utils/cookie";
 
 const Profile = () => {
   const [user, setUser] = useState(null);
@@ -14,7 +15,7 @@ const Profile = () => {
         const response = await fetch("http://localhost:3000/auth/validate", {
           method: "GET",
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            Authorization: `Bearer ${getCookie("accessToken")}`,
           },
         });
         if (!response.ok) throw new Error("Failed to fetch user details");

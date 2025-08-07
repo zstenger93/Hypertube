@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { deleteCookie, getCookie, setCookie } from "../utils/cookie";
 
 const ProtectedRoute = ({ children }) => {
   const [isValid, setIsValid] = useState(null);
@@ -7,7 +8,7 @@ const ProtectedRoute = ({ children }) => {
 
   useEffect(() => {
     const checkToken = async () => {
-      const token = localStorage.getItem("accessToken");
+      const token = getCookie("accessToken");
       try {
         const response = await fetch("http://localhost:3000/auth/validate", {
           method: "GET",
@@ -17,16 +18,16 @@ const ProtectedRoute = ({ children }) => {
         });
         if (response.ok) {
           const data = await response.json();
-          localStorage.setItem("accessToken", data.user.oauth);
+          setCookie("accessToken", data.user.oauth);
           setIsValid(true);
         } else {
           setIsValid(false);
-          localStorage.removeItem("accessToken");
+          deleteCookie("accessToken");
           navigate("/");
         }
       } catch (error) {
         setIsValid(false);
-        localStorage.removeItem("accessToken");
+        deleteCookie("accessToken");
         navigate("/");
       }
     };

@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon index.js"
+    "start": "nodemon --legacy-watch index.js"
   },
   "keywords": [],
   "author": "",
@@ -20,7 +20,7 @@
     "jsonwebtoken": "^9.0.2",
     "nodemon": "^3.1.7",
     "pg": "^8.13.0",
-    "torrent-search-api": "^2.1.0" 
+    "torrent-search-api": "^2.1.0"
   },
   "type": "module"
 }

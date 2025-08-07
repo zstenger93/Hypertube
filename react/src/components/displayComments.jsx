@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "../App.css";
+import { getCookie } from "../utils/cookie";
 
 const Comments = ({ movie }) => {
   const [comments, setComments] = useState([]);
@@ -27,7 +28,8 @@ const Comments = ({ movie }) => {
 
   const sendComment = async (event) => {
     event.preventDefault();
-    const token = localStorage.getItem("accessToken");
+    //const token = localStorage.getItem("accessToken");
+    const token = getCookie("accessToken")
     const text = event.target.comment.value;
     const movieId = movie;
     try {

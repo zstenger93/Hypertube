@@ -11,6 +11,7 @@ import {
 
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { getCookie, setCookie, deleteCookie } from "../utils/cookie";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDdCQbBKuVCKAR67luHVd_WyxpEGVvRfNI",
@@ -60,6 +61,8 @@ function Login() {
 
   const handleLoginWithIntra = () => {
     window.location.href = "http://localhost:3000/auth/intra";
+    try {
+    } catch {}
   };
 
   const handleGoogleLogin = async () => {
@@ -67,9 +70,25 @@ function Login() {
     try {
       const result = await signInWithPopup(auth, provider);
       const token = await result.user.getIdToken();
-      localStorage.setItem("accessToken", token);
+      // localStorage.setItem("accessToken", token);
+      setCookie("accessToken", token);
+    } catch (error) {
+      return;
+    }
+    try {
+      const response = await fetch("http://localhost:3000/auth/validate", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${getCookie("accessToken")}`,
+        },
+      });
+      if (!response.ok) {
+        deleteCookie("accessToken");
+        // localStorage.removeItem("accessToken");
+        return;
+      }
       navigate("/search");
-    } catch (error) {}
+    } catch {}
   };
 
   const handleForgotPassword = async () => {
@@ -99,10 +118,11 @@ function Login() {
         );
       }
       const token = await userCredential.user.getIdToken();
-      localStorage.setItem("accessToken", token);
+      //localStorage.setItem("accessToken", token);
+      setCookie("accessToken", token);
       navigate("/search");
     } catch (error) {
-      console.error("Authentication Error:", error);
+      //console.error("Authentication Error:", error);
     }
   };
 
