@@ -16,7 +16,7 @@ const MovieDetails = () => {
   const fetchYoutube = async (title) => {
     try {
       const response = await fetch(
-        `http://localhost:3000/api/youtubeRequests/${title}`
+        // `http://localhost:3000/api/youtubeRequests/${title}`
       );
       if (!response.ok) throw new Error("Failed to fetch youtube video");
       const data = await response.json();
@@ -38,8 +38,11 @@ const MovieDetails = () => {
         );
         if (!response.ok) throw new Error("Failed to fetch movie details");
         const data = await response.json();
+        console.log(data);
         setMovie(data);
-        if (data.Title ?? data.title) fetchYoutube(data.Title ?? data.title);
+        if (data.Title ?? data.title) {
+          fetchYoutube(data.Title ?? data.title);
+        }
       } catch (error) {
       } finally {
         setLoading(false);
@@ -71,7 +74,7 @@ const MovieDetails = () => {
           <div className="movieBox">
             <button
               className="movieFrame1"
-              onClick={() => navigate(`/movie/${movie.imdbID}/watch`)}
+              onClick={() => navigate(`/movie/${id}/watch`,  { state: { movie } })}
             >
               <img src={thePoster} alt={movie.Title ?? movie.title} />
             </button>

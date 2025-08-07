@@ -10,7 +10,7 @@ import {
 } from "firebase/auth";
 
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDdCQbBKuVCKAR67luHVd_WyxpEGVvRfNI",
@@ -26,6 +26,30 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+
+const WarningPopup = () => {
+  const [showPopup, setShowPopup] = useState(false);
+
+  useEffect(() => {
+    const hasVisited = localStorage.getItem("hasVisited");
+    if (!hasVisited) {
+      setShowPopup(true);
+      localStorage.setItem("hasVisited", "true");
+    }
+  }, []);
+
+  return (
+    showPopup && (
+      <div>
+        <div className="popup">
+          <h1>WARNING!!!!</h1>
+          <p>THIS PROJECT IS MADE FOR EDUCATIONAL PURPOSES</p>
+          <button onClick={() => setShowPopup(false)}>Close</button>
+        </div>
+      </div>
+    )
+  );
+};
 
 function Login() {
   const [showInputs, setShowInputs] = useState(false);
@@ -89,12 +113,13 @@ function Login() {
   };
 
   return (
-    <div className="centerScreen" >
-		 <div
+    <div className="centerScreen">
+      <WarningPopup />
+      <div
         style={{
           backgroundImage: "url('/Pirate-Flag.svg')",
           backgroundSize: "calc(100% - 40px) calc(100% - 40px)",
-		  backgroundRepeat: "no-repeat",
+          backgroundRepeat: "no-repeat",
           backgroundPosition: "center",
           position: "absolute",
           top: 0,

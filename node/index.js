@@ -49,6 +49,11 @@ async function createTables() {
       CREATE TABLE IF NOT EXISTS public.Users (
         user_id SERIAL PRIMARY KEY,
         username VARCHAR(100) NOT NULL,
+        name VARCHAR(100) NOT NULL,
+        surename VARCHAR(100) NOT NULL,
+        watched_movies VARCHAR(50)[],
+        watch_list VARCHAR(50)[],
+        liked_movies VARCHAR(50)[],
         email VARCHAR(100) UNIQUE NOT NULL,
         profile_pic VARCHAR(255),
         oauth VARCHAR(255) UNIQUE,
@@ -71,6 +76,8 @@ async function createTables() {
           imdbRating VARCHAR(10),
           imdbVotes VARCHAR(20),
           videos JSON,
+          click_count INT DEFAULT 0,
+          comment_count INT DEFAULT 0,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
@@ -108,15 +115,17 @@ async function addUser(userData) {
   try {
     await client.query("BEGIN");
     const query = `
-    INSERT INTO Users (username, email, profile_pic, oauth) 
-    VALUES ($1, $2, $3, $4)
+    INSERT INTO Users (username, email, profile_pic, oauth, name, surename) 
+    VALUES ($1, $2, $3, $4, $5, $6)
     RETURNING *;
     `;
     let values = [
-      userData.displayname ?? userData.displayName ?? "Anonymous",
+      userData.login ?? userData.displayName ?? "Anonymous",
       userData.email ?? "No email provided",
       userData.image?.versions?.medium ?? null,
       crypto.randomBytes(32).toString("hex"),
+      userData.first_name ?? "Anonymous",
+      userData.last_name ?? "Anonymous",
     ];
     const result = await client.query(query, values);
     await client.query("COMMIT");
@@ -246,18 +255,17 @@ app.get("/api/watchTheMovie/:id", async (req, res) => {
     `;
     const movieResult = await client.query(searchMoviesInDb, [id]);
     if (movieResult.rows.length > 0 && movieResult.rows[0].imdbrating) {
-      res.json(movieResult.rows[0]);
-      return;
+      return res.json(movieResult.rows[0]);
     }
+    console.log("Fetching from OMDB API");
     const response = await axios.get(url);
     if (response.data.Response === "False") {
       return res.status(404).send("Movie not found in OMDB API");
     }
 
-    var parseYear = parseInt(response?.data?.year, 10) || 1900;
     const movieData = {
       title: response.data.Title ?? "N/A",
-      year: parseYear ?? "N/A",
+      year: response?.data?.Year ?? "N/A",
       genre: response.data.Genre ?? "N/A",
       plot: response.data.Plot ?? "N/A",
       director: response.data.Director ?? "N/A",
@@ -296,8 +304,7 @@ app.get("/api/watchTheMovie/:id", async (req, res) => {
     ]);
     insertResult.rows;
     await client.query("COMMIT");
-    res.json(response.data);
-    return;
+    return res.json(response.data);
   } catch (error) {
     console.error("Error fetching data:", error);
     res.status(500).send("Error fetching data from OMDB API");
@@ -438,6 +445,28 @@ app.get("/auth/validate", async (req, res) => {
   }
 });
 
+app.get("/api/comments", async (req, res) => {
+  try {
+    const searchComments = `SELECT * FROM Comments;`;
+    const commentsResult = await client.query(searchComments);
+    for (let comment of commentsResult.rows) {
+      const userQuery = `SELECT * FROM Users WHERE email = $1;`;
+      const userResult = await client.query(userQuery, [comment.user_email]);
+      comment.user = userResult.rows[0];
+      comment.user_email = null;
+      comment.user.oauth = null;
+      comment.user.email = null;
+      comment.user.user_email = null;
+      const movieQuery = `SELECT * FROM Movies WHERE movie_id = $1;`;
+      const movieResult = await client.query(movieQuery, [comment.movie_id]);
+      comment.movieData = movieResult.rows[0];
+    }
+    res.json(commentsResult.rows);
+  } catch (error) {
+    res.status(500).send("Error fetching comments");
+  }
+});
+
 app.get("/api/comments/:movieId", async (req, res) => {
   const { movieId } = req.params;
   if (!movieId || movieId.length === 0) {
@@ -456,7 +485,40 @@ app.get("/api/comments/:movieId", async (req, res) => {
       const userQuery = `SELECT * FROM Users WHERE email = $1;`;
       const userResult = await client.query(userQuery, [comment.user_email]);
       comment.user = userResult.rows[0];
+      comment.user_email = null;
       comment.user.oauth = null;
+      comment.user.email = null;
+      comment.user.user_email = null;
+    }
+    res.json(commentsResult.rows);
+  } catch (error) {
+    console.error("Error fetching comments:", error);
+    res.status(500).send("Error fetching comments");
+  }
+});
+
+app.get("/api/users/:user", async (req, res) => {
+  const { user } = req.params;
+  if (!user || user.length === 0) {
+    return res.status(400).send("Potato");
+  }
+  try {
+    const searchMovie = `SELECT * FROM Users WHERE username = $1;`;
+    const movieResult = await client.query(searchMovie, [movieId]);
+    if (movieResult.rows.length === 0) {
+      return res.status(404).send("User not found");
+    }
+    const id = movieResult.rows[0].movie_id;
+    const searchComments = `SELECT * FROM Comments WHERE movie_id = $1;`;
+    const commentsResult = await client.query(searchComments, [id]);
+    for (let comment of commentsResult.rows) {
+      const userQuery = `SELECT * FROM Users WHERE email = $1;`;
+      const userResult = await client.query(userQuery, [comment.user_email]);
+      comment.user = userResult.rows[0];
+      comment.user_email = null;
+      comment.user.oauth = null;
+      comment.user.email = null;
+      comment.user.user_email = null;
     }
     res.json(commentsResult.rows);
   } catch (error) {
