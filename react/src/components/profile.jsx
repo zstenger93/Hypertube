@@ -12,7 +12,7 @@ const Profile = () => {
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        const response = await fetch("http://localhost:3000/auth/validate", {
+        const response = await fetch("http://localhost/auth/validate", {
           method: "GET",
           headers: {
             Authorization: `Bearer ${getCookie("accessToken")}`,
@@ -22,12 +22,13 @@ const Profile = () => {
         const data = await response.json();
         setUser(data.user);
       } catch (error) {
+        console.error("Error fetching user:", error);
       } finally {
         setLoading(false);
       }
     };
     fetchUserDetails();
-  });
+  }, []);
 
   if (loading) return <p>Loading...</p>;
 

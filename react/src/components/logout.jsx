@@ -41,9 +41,9 @@ function Logout() {
     <nav>
       <div className="hoverTop">
         <button onClick={() => navigate("/search")}>Search</button>
-        <button onClick={() => navigate("/comments")}>Comments</button>
+        <button onClick={() => navigate("/x")}>Comments</button>
         {isAuthenticated && (
-          <button onClick={() => navigate("/profile")}>Profile</button>
+          <button onClick={() => navigate("/prof")}>Profile</button>
         )}
         {isAuthenticated && <button onClick={handleLogout}>Logout</button>}
         {!isAuthenticated && (

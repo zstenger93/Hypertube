@@ -10,7 +10,7 @@ const ProtectedRoute = ({ children }) => {
     const checkToken = async () => {
       const token = getCookie("accessToken");
       try {
-        const response = await fetch("http://localhost:3000/auth/validate", {
+        const response = await fetch("http://localhost/auth/validate", {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,

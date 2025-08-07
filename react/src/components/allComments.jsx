@@ -9,10 +9,8 @@ const AllComments = () => {
 
   const getAllComments = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/comments`);
+      const response = await fetch(`http://localhost/comments`);
       const data = await response.json();
-
-      console.log(data);
       return data;
     } catch (error) {
       console.log(error.message);

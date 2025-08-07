@@ -38,7 +38,7 @@ const SearchComponent = () => {
     setQuery(value);
     if (value) {
       try {
-        const response = await fetch(`http://localhost:3000/movies/${value}`);
+        const response = await fetch(`http://localhost/movies/${value}`);
         const data = await response.json();
         if (data.Search) {
           setResults(data.Search || []);

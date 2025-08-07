@@ -4,7 +4,7 @@ export function getCookie(name) {
 }
 
 export function deleteCookie(name) {
-  document.cookie = "${name}=; path=/; max-age=0";
+  document.cookie = `${name}=; path=/; max-age=0`;
 }
 
 export function setCookie(name, token) {

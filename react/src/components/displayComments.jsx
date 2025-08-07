@@ -8,7 +8,7 @@ const Comments = ({ movie }) => {
 
   const getComments = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/comments/${movie}`);
+      const response = await fetch(`http://localhost/comments/${movie}`);
       const data = await response.json();
       return data;
     } catch (error) {
@@ -33,7 +33,7 @@ const Comments = ({ movie }) => {
     const text = event.target.comment.value;
     const movieId = movie;
     try {
-      await fetch(`http://localhost:3000/comments/${movieId}`, {
+      await fetch(`http://localhost/comments/${movieId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

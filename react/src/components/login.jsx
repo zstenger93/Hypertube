@@ -60,7 +60,7 @@ function Login() {
   const navigate = useNavigate();
 
   const handleLoginWithIntra = () => {
-    window.location.href = "http://localhost:3000/auth/intra";
+    window.location.href = "http://localhost/auth/intra";
     try {
     } catch {}
   };
@@ -76,7 +76,7 @@ function Login() {
       return;
     }
     try {
-      const response = await fetch("http://localhost:3000/auth/validate", {
+      const response = await fetch("http://localhost/auth/validate", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${getCookie("accessToken")}`,
@@ -150,7 +150,7 @@ function Login() {
         }}
       ></div>
       <button onClick={() => navigate("/search")}>Seach</button>
-      <button onClick={() => navigate("/comments")}>Comments</button>
+      <button onClick={() => navigate("/x")}>Comments</button>
       <button onClick={handleLoginWithIntra}>Login with Intra</button>
       <button onClick={handleGoogleLogin}>Login with Google</button>
       <button onClick={handleShowHideInputs}>

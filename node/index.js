@@ -357,7 +357,7 @@ app.get("/auth/intra", (req, res) => {
   res.redirect(authURL);
 });
 
-app.post("/auth/intra/callback", async (req, res) => {
+app.post("/api/auth/intra/callback", async (req, res) => {
   const code = req.body.code;
   const tokenURL = "https://api.intra.42.fr/oauth/token";
 
@@ -378,7 +378,7 @@ app.post("/auth/intra/callback", async (req, res) => {
   }
 });
 
-app.get("/  intra/callback", async (req, res) => {
+app.get("/intra/callback", async (req, res) => {
   const code = req.query.code;
 });
 
@@ -716,7 +716,7 @@ client
       console.error("Error tables:", error);
       process.exit(1);
     }
-    app.listen(3000, () => {
+    app.listen(3000, "0.0.0.0", () => {
       console.log("App running on port 3000.");
     });
   })
