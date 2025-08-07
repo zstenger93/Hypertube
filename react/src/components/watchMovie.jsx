@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef } from "react";
 import "../App.css";
 import Logout from "./logout";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-// import WebTorrent from "webtorrent";
 // import videojs from "video.js";
 // import "video.js/dist/video-js.css";
 
@@ -35,23 +34,38 @@ const WatchMovie = () => {
     fetchTorrent();
   }, [id, movie]);
 
-  // useEffect(() => {
-  //   if (torrents) {
-  //     const client = new WebTorrent();
-  //     const torrentId = `https://archive.org/download/${torrents}/${torrents}_archive.torrent`;
 
-  //     client.add(torrentId, (torrent) => {
-  //       const file = torrent.files.find((file) => file.name.endsWith(".mp4"));
-  //       if (file) {
-  //         file.renderTo("video#player");
-  //       }
-  //     });
+  useEffect(() => {
+    const uploadTorrent = async () => {
+      if (torrents) {
+        const torrentLink = `https://archive.org/download/${torrents}/${torrents}_archive.torrent`;
+        try {
+          const response = await fetch("http://localhost:5000/upload-torrent", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              id,
+              torrentLink,
+            }),
+          });
+  
+          if (!response.ok) {
+            throw new Error("Failed to upload torrent");
+          }
+  
+          const result = await response.json();
+          console.log("Torrent uploaded successfully:", result);
+        } catch (error) {
+          console.error("Error uploading torrent:", error);
+        }
+      }
+    };
+  
+    uploadTorrent();
+  }, [torrents, id]);
 
-  //     return () => {
-  //       client.destroy();
-  //     };
-  //   }
-  // }, [torrents]);
 
   // useEffect(() => {
   //   if (videoRef.current) {

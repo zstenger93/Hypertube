@@ -10,16 +10,36 @@ def upload_torrent():
 
     # Check if 42_NETWORK environment variable is set to true
     network_42_workaround = os.getenv('42_NETWORK', 'false').lower() == 'true'
-
+    
     if network_42_workaround:
         predefined_torrent_path = './src/temp_torrent/testmovie_short.torrent'
         if not os.path.exists(predefined_torrent_path):
             return jsonify({'error': 'Predefined torrent file not found'}), 400
         file_path = predefined_torrent_path
     else:
-        if 'file' not in request.files:
-            return jsonify({'error': 'No file uploaded'}), 400
+        data = request.get_json()
+        if not data or 'id' not in data or 'link' not in data:
+            return jsonify({'error': 'Invalid request. Missing id or link.'}), 400
 
+        movie_id = data['id']
+        torrent_link = data['link']
+
+        # Download the torrent file from the provided link
+        save_path = './src/temp_torrent'
+        os.makedirs(save_path, exist_ok=True)
+        file_path = os.path.join(save_path, f"{movie_id}.torrent")
+
+        try:
+            import requests
+            response = requests.get(torrent_link)
+            if response.status_code != 200:
+                return jsonify({'error': 'Failed to download torrent file from the provided link.'}), 400
+
+            with open(file_path, 'wb') as f:
+                f.write(response.content)
+        except Exception as e:
+            return jsonify({'error': f'Failed to fetch torrent file: {str(e)}'}), 500
+  
         torrent_file = request.files['file']
         save_path = './src/temp_torrent'
         os.makedirs(save_path, exist_ok=True)
@@ -36,8 +56,11 @@ def upload_torrent():
         })
 
         torrent_info = lt.torrent_info(file_path)
+        movie_save_path = os.path.join('./download', movie_id)
+        os.makedirs(movie_save_path, exist_ok=True) 
+
         params = {
-            'save_path': './download',
+            'save_path': movie_save_path,
             'storage_mode': lt.storage_mode_t.storage_mode_sparse,
             'ti': torrent_info
         }
