@@ -186,7 +186,7 @@ body {
   font-weight: bold;
   margin-bottom: 10px;
   text-transform: capitalize;
-  border-bottom: 2px solid #ddd;
+  border-bottom: 2px solid #bfbfbf;
   padding-bottom: 5px;
   word-wrap: break-word;
 }
@@ -196,7 +196,7 @@ body {
   font-weight: bold;
   margin-bottom: 10px;
   text-transform: capitalize;
-  border-bottom: 2px solid #ddd;
+  border-bottom: 2px solid #bfbfbf;
   padding-bottom: 5px;
 }
 
@@ -288,15 +288,15 @@ body {
 }
 
 .allComment {
-	display: flex;
-	flex-direction: row;
-	background-color: #242222;
-	width: 40vw;
-	height: 300px;
-	border: 2px solid #bfbfbf;
-	min-width: 700px;
-	margin: 10px;
-  }
+  display: flex;
+  flex-direction: row;
+  background-color: #242222;
+  width: 40vw;
+  height: 300px;
+  border: 2px solid #bfbfbf;
+  min-width: 700px;
+  margin: 10px;
+}
 
 .comment p {
   font-size: 1rem;

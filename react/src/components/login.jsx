@@ -61,8 +61,6 @@ function Login() {
 
   const handleLoginWithIntra = () => {
     window.location.href = "http://localhost/auth/intra";
-    try {
-    } catch {}
   };
 
   const handleGoogleLogin = async () => {

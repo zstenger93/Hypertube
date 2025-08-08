@@ -12,13 +12,14 @@ const MovieDetails = () => {
   const [movie, setMovie] = useState(null);
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [watched, setWatched] = useState(false);
+  const [liked, setLiked] = useState(false);
+
   const navigate = useNavigate();
 
   const fetchYoutube = async (title) => {
     try {
-      const response = await fetch(
-        `http://localhost:3000/youtubeRequests/${title}`
-      );
+      const response = await fetch(`http://localhost/youtubeRequests/${title}`);
       if (!response.ok) throw new Error("Failed to fetch youtube video");
       const data = await response.json();
       if (data.items) {
@@ -31,17 +32,31 @@ const MovieDetails = () => {
     }
   };
 
+  const handleWatched = async () => {
+    try {
+      const response = await fetch(`http://localhost/watched/${id}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${getCookie("accessToken")}`,
+        },
+      });
+      if (!response.ok) throw new Error("Not Matched");
+      const data = await response.json();
+      setWatched(data.isWatched);
+    } catch (error) {
+      setWatched(false);
+    }
+  };
+
   useEffect(() => {
     const fetchMovieDetails = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:3000/watchTheMovie/${id}`
-        );
+        const response = await fetch(`http://localhost/watchTheMovie/${id}`);
         if (!response.ok) throw new Error("Failed to fetch movie details");
         const data = await response.json();
         setMovie(data);
         if (data.Title ?? data.title) fetchYoutube(data.Title ?? data.title);
-        await fetch(`http://localhost:3000/click/${id}`, {
+        await fetch(`http://localhost/click/${id}`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${getCookie("accessToken")}`,
@@ -52,7 +67,6 @@ const MovieDetails = () => {
         setLoading(false);
       }
     };
-
     fetchMovieDetails();
   }, [id]);
 
@@ -103,6 +117,15 @@ const MovieDetails = () => {
               <p>Genre: {movie.Genre ?? movie.genre}</p>
               <p>Director: {movie.Director ?? movie.director}</p>
               <p>IMDB Raiting: {movie.imdbRating ?? movie.imdbrating}</p>
+              <div>
+                <button> Like </button>
+                {watched ? (
+                  <button onClick={() => handleWatched()}> Watched </button>
+                ) : (
+                  <button onClick={() => handleWatched()}> Not Watched </button>
+                )}
+                <button> Watch List</button>
+              </div>
             </div>
           </div>
           <h3>Related Videos:</h3>
