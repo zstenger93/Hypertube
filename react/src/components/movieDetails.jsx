@@ -13,6 +13,7 @@ const MovieDetails = () => {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [watched, setWatched] = useState(false);
+  const [watch, setWatch] = useState(false);
   const [liked, setLiked] = useState(false);
 
   const navigate = useNavigate();
@@ -33,6 +34,38 @@ const MovieDetails = () => {
   };
 
   const handleWatched = async () => {
+    try {
+      const response = await fetch(`http://localhost/watched/${id}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${getCookie("accessToken")}`,
+        },
+      });
+      if (!response.ok) throw new Error("Not Matched");
+      const data = await response.json();
+      setWatched(data.isWatched);
+    } catch (error) {
+      setWatched(false);
+    }
+  };
+
+  const handleLike = async () => {
+    try {
+      const response = await fetch(`http://localhost/watched/${id}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${getCookie("accessToken")}`,
+        },
+      });
+      if (!response.ok) throw new Error("Not Matched");
+      const data = await response.json();
+      setWatched(data.isWatched);
+    } catch (error) {
+      setWatched(false);
+    }
+  };
+
+  const handleWatch = async () => {
     try {
       const response = await fetch(`http://localhost/watched/${id}`, {
         method: "POST",
@@ -118,13 +151,21 @@ const MovieDetails = () => {
               <p>Director: {movie.Director ?? movie.director}</p>
               <p>IMDB Raiting: {movie.imdbRating ?? movie.imdbrating}</p>
               <div>
-                <button> Like </button>
+                {liked ? (
+                  <button onClick={() => handleLike()}> Liked </button>
+                ) : (
+                  <button onClick={() => handleLike()}> Not Liked </button>
+                )}
                 {watched ? (
                   <button onClick={() => handleWatched()}> Watched </button>
                 ) : (
                   <button onClick={() => handleWatched()}> Not Watched </button>
                 )}
-                <button> Watch List</button>
+                {watch ? (
+                  <button onClick={() => handleWatch()}> Watch List </button>
+                ) : (
+                  <button onClick={() => handleWatch()}> Remove From Watch List </button>
+                )}
               </div>
             </div>
           </div>
