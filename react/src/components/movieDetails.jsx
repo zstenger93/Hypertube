@@ -51,7 +51,7 @@ const MovieDetails = () => {
 
   const handleLike = async () => {
     try {
-      const response = await fetch(`http://localhost/watched/${id}`, {
+      const response = await fetch(`http://localhost/like/${id}`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${getCookie("accessToken")}`,
@@ -59,15 +59,15 @@ const MovieDetails = () => {
       });
       if (!response.ok) throw new Error("Not Matched");
       const data = await response.json();
-      setWatched(data.isWatched);
+      setLiked(data.isWatched);
     } catch (error) {
-      setWatched(false);
+      setLiked(false);
     }
   };
 
   const handleWatch = async () => {
     try {
-      const response = await fetch(`http://localhost/watched/${id}`, {
+      const response = await fetch(`http://localhost/watch/${id}`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${getCookie("accessToken")}`,
@@ -75,9 +75,9 @@ const MovieDetails = () => {
       });
       if (!response.ok) throw new Error("Not Matched");
       const data = await response.json();
-      setWatched(data.isWatched);
+      setWatch(data.isWatched);
     } catch (error) {
-      setWatched(false);
+      setWatch(false);
     }
   };
 
