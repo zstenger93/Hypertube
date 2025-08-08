@@ -57,9 +57,10 @@ const WatchMovie = () => {
           const result = await response.json();
           console.log("Torrent uploaded successfully:", result);
 
-          // Start playing the movie after the download begins
+          // Start playing the movie after the download begins torrent-downloader/download/testmovie_short.mp4
           if (videoRef.current) {
-            const videoPath = `http://localhost:5000/torrent-downloader/download/${id}/movie.mp4`; // Adjust filename if necessary
+            // const videoPath = `http://localhost:5000/torrent-downloader/download/${id}/movie.mp4`; // Adjust filename if necessary
+            const videoPath = `http://localhost:3000/torrent-downloader/download/testmovie_short.mp4`; // Adjust filename if necessary
             playerRef.current = videojs(videoRef.current, {
               controls: true,
               autoplay: true,

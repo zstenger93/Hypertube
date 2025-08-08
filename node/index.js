@@ -9,6 +9,7 @@ import { exec } from 'child_process';
 import path from 'path';
 import { profile } from "console";
 import { parse } from "path";
+import { fileURLToPath } from "url";
 
 const intraSecret = process.env.INTRA_SECRET;
 const intraUUID = process.env.INTRA_UUID;
@@ -153,6 +154,13 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Get the current file's directory
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+// Serve the entire torrent-downloader directory
+app.use("/torrent-downloader/download", express.static(path.join(__dirname, "../torrent-downloader/download")));
+
+
 
 app.get("/api/movies", async (req, res) => {
   try {
