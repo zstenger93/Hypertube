@@ -2,8 +2,8 @@ import React, { useEffect, useState, useRef } from "react";
 import "../App.css";
 import Logout from "./logout";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-// import videojs from "video.js";
-// import "video.js/dist/video-js.css";
+import videojs from "video.js";
+import "video.js/dist/video-js.css";
 
 const WatchMovie = () => {
   const { id } = useParams();
@@ -14,7 +14,7 @@ const WatchMovie = () => {
   const playerRef = useRef(null);
 
   useEffect(() => {
-    const fetchTorrent = async () => {
+    const fetchTorrentfile = async () => {
       try {
         const response = await fetch(
           `https://archive.org/advancedsearch.php?q=${id}&fl%5B%5D=identifier&sort%5B%5D=&sort%5B%5D=&sort%5B%5D=&rows=50&page=1&output=json&save=yes#raw`
@@ -31,12 +31,11 @@ const WatchMovie = () => {
         setTorrents("");
       }
     };
-    fetchTorrent();
+    fetchTorrentfile();
   }, [id, movie]);
 
-
   useEffect(() => {
-    const uploadTorrent = async () => {
+    const startTorrentDownload = async () => {
       if (torrents) {
         const torrentLink = `https://archive.org/download/${torrents}/${torrents}_archive.torrent`;
         try {
@@ -50,38 +49,43 @@ const WatchMovie = () => {
               torrentLink,
             }),
           });
-  
+
           if (!response.ok) {
             throw new Error("Failed to upload torrent");
           }
-  
+
           const result = await response.json();
           console.log("Torrent uploaded successfully:", result);
+
+          // Start playing the movie after the download begins
+          if (videoRef.current) {
+            const videoPath = `http://localhost:5000/torrent-downloader/download/${id}/movie.mp4`; // Adjust filename if necessary
+            playerRef.current = videojs(videoRef.current, {
+              controls: true,
+              autoplay: true,
+              preload: "auto",
+              sources: [
+                {
+                  src: videoPath,
+                  type: "video/mp4",
+                },
+              ],
+            });
+          }
         } catch (error) {
           console.error("Error uploading torrent:", error);
         }
       }
     };
-  
-    uploadTorrent();
+
+    startTorrentDownload();
+
+    return () => {
+      if (playerRef.current) {
+        playerRef.current.dispose();
+      }
+    };
   }, [torrents, id]);
-
-
-  // useEffect(() => {
-  //   if (videoRef.current) {
-  //     playerRef.current = videojs(videoRef.current, {
-  //       controls: true,
-  //       autoplay: false,
-  //       preload: "auto",
-  //     });
-  //   }
-
-  //   return () => {
-  //     if (playerRef.current) {
-  //       playerRef.current.dispose();
-  //     }
-  //   };
-  // }, [videoRef]);
 
   return (
     <div>
@@ -98,14 +102,14 @@ const WatchMovie = () => {
               <div className="torrentItem">
                 <p>Name: {torrents}</p>
                 <h2>torrent link: https://archive.org/download/{torrents}/{torrents}_archive.torrent</h2>
-                {/* <video
+                <video
                   id="player"
                   className="video-js vjs-default-skin"
                   ref={videoRef}
                   width="640"
                   height="360"
                   controls
-                ></video> */}
+                ></video>
               </div>
             ) : (
               <p>No torrents found.</p>
