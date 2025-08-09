@@ -1,28 +1,25 @@
 from flask import Flask, request, jsonify
 import libtorrent as lt
+from flask_cors import CORS
 import time
 import os
 
 app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "http://localhost"}})
 
 @app.route('/upload-torrent', methods=['POST'])
 def upload_torrent():
-
-    # Check if 42_NETWORK environment variable is set to true
-    network_42_workaround = os.getenv('42_NETWORK', 'false').lower() == 'true'
-    
-    if network_42_workaround:
-        predefined_torrent_path = './src/temp_torrent/testmovie_short.torrent'
-        if not os.path.exists(predefined_torrent_path):
-            return jsonify({'error': 'Predefined torrent file not found'}), 400
-        file_path = predefined_torrent_path
-    else:
+    try:
+        # Parse JSON data from the request
+        print("Parsing JSON data...")
         data = request.get_json()
         if not data or 'id' not in data or 'link' not in data:
+            print("Invalid request. Missing id or link.")
             return jsonify({'error': 'Invalid request. Missing id or link.'}), 400
 
         movie_id = data['id']
         torrent_link = data['link']
+        print(f"Received movie_id: {movie_id}, torrent_link: {torrent_link}")
 
         # Download the torrent file from the provided link
         save_path = './src/temp_torrent'
@@ -31,58 +28,77 @@ def upload_torrent():
 
         try:
             import requests
+            print(f"Downloading torrent from: {torrent_link}")
             response = requests.get(torrent_link)
+            print(f"Response status code: {response.status_code}")
             if response.status_code != 200:
+                print("Failed to download torrent file.")
                 return jsonify({'error': 'Failed to download torrent file from the provided link.'}), 400
 
             with open(file_path, 'wb') as f:
                 f.write(response.content)
+            print(f"Torrent file saved at: {file_path}")
         except Exception as e:
+            print(f"Failed to fetch torrent file: {str(e)}")
             return jsonify({'error': f'Failed to fetch torrent file: {str(e)}'}), 500
-  
-        torrent_file = request.files['file']
-        save_path = './src/temp_torrent'
-        os.makedirs(save_path, exist_ok=True)
-        file_path = os.path.join(save_path, torrent_file.filename)
-        torrent_file.save(file_path)
 
-    try:
-        session = lt.session({
-            'listen_interfaces': '0.0.0.0:6881',
-            'enable_dht': True,
-            'enable_lsd': True,
-            'enable_upnp': True,
-            'enable_natpmp': True
-        })
+        # Validate the torrent file
+        print("Validating torrent file...")
+        if not os.path.exists(file_path):
+            print("Torrent file not found.")
+            return jsonify({'error': 'Torrent file not found.'}), 500
 
-        torrent_info = lt.torrent_info(file_path)
-        if not torrent_info.is_valid():
-            return jsonify({'error': 'Invalid torrent file.'}), 400
-        print(f"Torrent Name: {torrent_info.name()}")
-        movie_save_path = os.path.join('./downloads', movie_id)
-        os.makedirs(movie_save_path, exist_ok=True) 
+        try:
+            torrent_info = lt.torrent_info(file_path)
+            if not torrent_info.is_valid():
+                print("Invalid torrent file.")
+                return jsonify({'error': 'Invalid torrent file.'}), 400
+            print(f"Torrent Name: {torrent_info.name()}")
+        except Exception as e:
+            print(f"Error validating torrent file: {str(e)}")
+            return jsonify({'error': f'Error validating torrent file: {str(e)}'}), 500
 
-        params = {
-            'save_path': movie_save_path,
-            'storage_mode': lt.storage_mode_t.storage_mode_sparse,
-            'ti': torrent_info
-        }
-        handle = session.add_torrent(params)
+        # Proceed with libtorrent logic
+        print("Initializing libtorrent session...")
+        try:
+            session = lt.session({
+                'listen_interfaces': '0.0.0.0:6881',
+                'enable_dht': True,
+                'enable_lsd': True,
+                'enable_upnp': True,
+                'enable_natpmp': True
+            })
 
-        print("\nTracker Status:")
-        for tracker in handle.trackers():
-            print(f" - URL: {tracker['url']}, Status: {tracker['message']}")
+            movie_save_path = os.path.join('./downloads', movie_id)
+            os.makedirs(movie_save_path, exist_ok=True)
 
-        print("Starting torrent download...")
-        time.sleep(2)  # Allow some time for the torrent to initialize
+            params = {
+                'save_path': movie_save_path,
+                'storage_mode': lt.storage_mode_t.storage_mode_sparse,
+                'ti': torrent_info
+            }
+            handle = session.add_torrent(params)
 
-        status = handle.status()
-        if status.state == lt.torrent_status.downloading or status.state == lt.torrent_status.seeding:
-            return jsonify({'message': 'Download started'}, {'torrent_name':  {torrent_info.name()}})
-        else:
-            return jsonify({'error': 'Failed to start download. State: {}'.format(status.state)}), 500
+            print("\nTracker Status:")
+            for tracker in handle.trackers():
+                print(f" - URL: {tracker['url']}, Status: {tracker['message']}")
+
+            print("Starting torrent download...")
+            time.sleep(2)  # Allow some time for the torrent to initialize
+
+            status = handle.status()
+            if status.state == lt.torrent_status.downloading or status.state == lt.torrent_status.seeding:
+                print("Download started successfully.")
+                return jsonify({'message': 'Download started', 'torrent_name': torrent_info.name()})
+            else:
+                print(f"Failed to start download. State: {status.state}")
+                return jsonify({'error': 'Failed to start download. State: {}'.format(status.state)}), 500
+        except Exception as e:
+            print(f"Error initializing libtorrent session: {str(e)}")
+            return jsonify({'error': f'Error initializing libtorrent session: {str(e)}'}), 500
 
     except Exception as e:
+        print(f"An error occurred: {str(e)}")
         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
 if __name__ == '__main__':

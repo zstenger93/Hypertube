@@ -45,42 +45,47 @@ const WatchMovie = () => {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              id,
-              torrentLink,
+              'id': id,
+              'link': torrentLink,
             }),
           });
-
+  
           if (!response.ok) {
             throw new Error("Failed to upload torrent");
           }
-
+  
           const result = await response.json();
           console.log("Torrent uploaded successfully:", result);
-
-          // Start playing the movie after the download begins torrent-downloader/download/testmovie_short.mp4
+  
+          // Initialize video.js player
           if (videoRef.current) {
-            // const videoPath = `http://localhost:3000/stream/${id}.mp4; // Adjust filename if necessary
             const videoPath = `http://localhost:3000/stream/testmovie_short.mp4`; // Adjust filename if necessary
-            playerRef.current = videojs(videoRef.current, {
-              controls: true,
-              autoplay: true,
-              preload: "auto",
-              sources: [
-                {
-                  src: videoPath,
-                  type: "video/mp4",
-                },
-              ],
-            });
+            if (!playerRef.current) {
+              playerRef.current = videojs(videoRef.current, {
+                controls: true,
+                autoplay: true,
+                preload: "auto",
+                sources: [
+                  {
+                    src: videoPath,
+                    type: "video/mp4",
+                  },
+                ],
+              });
+            } else {
+              // Update the source if the player already exists
+              playerRef.current.src({ src: videoPath, type: "video/mp4" });
+              playerRef.current.play();
+            }
           }
         } catch (error) {
           console.error("Error uploading torrent:", error);
         }
       }
     };
-
+  
     startTorrentDownload();
-
+  
     return () => {
       if (playerRef.current) {
         playerRef.current.dispose();

@@ -3,4 +3,5 @@ requests
 cryptography==3.4.7
 urllib3
 Flask
+flask_cors
 libtorrent
