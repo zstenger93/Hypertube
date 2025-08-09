@@ -166,8 +166,7 @@ app.get("/stream/:filename", (req, res) => {
   const videoPath = path.resolve(
     "/usr/src/app/downloads",
     filename
-  ); // Use absolute path to the video directory
-
+  ); // Use absolute path to the video directory  downloads
   // Check if the file exists
   if (!fs.existsSync(videoPath)) {
     return res.status(404).send("Video not found");
