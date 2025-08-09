@@ -13,18 +13,21 @@ function CallbackComponent() {
         const code = new URLSearchParams(window.location.search).get("code");
         if (code) {
           const response = await axios.post(
-            "http://localhost/api/auth/intra/callback",
+            `http://${import.meta.env.VITE_IP}/api/auth/intra/callback`,
             { code }
           );
           const token = response.data.accessToken;
           if (token) {
             setCookie("accessToken", token);
-            const response = await fetch("http://localhost/auth/validate", {
-              method: "GET",
-              headers: {
-                Authorization: `Bearer ${getCookie("accessToken")}`,
-              },
-            });
+            const response = await fetch(
+              `http://${import.meta.env.VITE_IP}/auth/validate`,
+              {
+                method: "GET",
+                headers: {
+                  Authorization: `Bearer ${getCookie("accessToken")}`,
+                },
+              }
+            );
             if (!response.ok) throw new Error("Failed to fetch user details");
             navigate("/search");
           } else {

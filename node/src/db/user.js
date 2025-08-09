@@ -1,7 +1,6 @@
 import { client } from "../../index.js";
 import crypto from "crypto";
 
-
 export async function checkUser(email) {
   try {
     const query = `SELECT * FROM Users WHERE email = $1`;

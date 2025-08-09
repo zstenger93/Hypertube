@@ -1,10 +1,10 @@
 import "../App.css";
 import Logout from "./logout";
-import React, { useState, useRef } from 'react';
-import axios from 'axios';
+import React, { useState, useRef } from "react";
+import axios from "axios";
 
 const WatchMovie = () => {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [torrents, setTorrents] = useState([]);
   const videoRef = useRef(null);
 
@@ -19,7 +19,9 @@ const WatchMovie = () => {
   const downloadTorrent = async (magnetURI) => {
     await axios.get(`/api/download?magnetURI=${encodeURIComponent(magnetURI)}`);
     if (videoRef.current) {
-      videoRef.current.src = `http://localhost:3000/api/stream`;
+      videoRef.current.src = `http://${
+        import.meta.env.VITE_IP
+      }:3000/api/stream`;
     }
   };
 
@@ -36,11 +38,13 @@ const WatchMovie = () => {
         {torrents.map((torrent) => (
           <li key={torrent.magnet}>
             {torrent.title}
-            <button onClick={() => downloadTorrent(torrent.magnet)}>Watch Movie</button>
+            <button onClick={() => downloadTorrent(torrent.magnet)}>
+              Watch Movie
+            </button>
           </li>
         ))}
       </ul>
-      <video ref={videoRef} controls autoPlay style={{ width: '100%' }} />
+      <video ref={videoRef} controls autoPlay style={{ width: "100%" }} />
     </div>
   );
 };

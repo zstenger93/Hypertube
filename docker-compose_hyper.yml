@@ -34,10 +34,9 @@ services:
     ports:
       - "5173:5173"
     command: npm run dev
-    env_file:
-      - .env
     environment:
       - CHOKIDAR_USEPOLLING=true
+      - VITE_IP=localhost
 
   db:
     image: postgres

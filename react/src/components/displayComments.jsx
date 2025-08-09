@@ -8,7 +8,9 @@ const Comments = ({ movie }) => {
 
   const getComments = async () => {
     try {
-      const response = await fetch(`http://localhost/comments/${movie}`);
+      const response = await fetch(
+        `http://${import.meta.env.VITE_IP}/comments/${movie}`
+      );
       const data = await response.json();
       return data;
     } catch (error) {
@@ -29,11 +31,11 @@ const Comments = ({ movie }) => {
   const sendComment = async (event) => {
     event.preventDefault();
     //const token = localStorage.getItem("accessToken");
-    const token = getCookie("accessToken")
+    const token = getCookie("accessToken");
     const text = event.target.comment.value;
     const movieId = movie;
     try {
-      await fetch(`http://localhost/comments/${movieId}`, {
+      await fetch(`http://${import.meta.env.VITE_IP}/comments/${movieId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

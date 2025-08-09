@@ -14,11 +14,9 @@ const SearchComponent = () => {
   useEffect(() => {
     const fetchInitialMovies = async () => {
       try {
-        const response = await fetch(`http://localhost:3000/movies`);
-        // const token = localStorage.getItem("accessToken");
-        // if (token) {
-        //   const fetchWatchedMovies = await fetch("http://localhost:3000/user");
-        // }
+        const response = await fetch(
+          `http://${import.meta.env.VITE_IP}:3000/movies`
+        );
         const data = await response.json();
         if (data.Search) {
           setResults(data.Search || []);
@@ -38,7 +36,9 @@ const SearchComponent = () => {
     setQuery(value);
     if (value) {
       try {
-        const response = await fetch(`http://localhost/movies/${value}`);
+        const response = await fetch(
+          `http://${import.meta.env.VITE_IP}/movies/${value}`
+        );
         const data = await response.json();
         if (data.Search) {
           setResults(data.Search || []);
@@ -53,7 +53,9 @@ const SearchComponent = () => {
       }
     } else {
       try {
-        const response = await fetch(`http://localhost:3000/movies`);
+        const response = await fetch(
+          `http://${import.meta.env.VITE_IP}:3000/movies`
+        );
         const data = await response.json();
         if (data.Search) {
           setResults(data.Search || []);

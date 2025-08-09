@@ -2,7 +2,6 @@ import express from "express";
 import axios from "axios";
 const router = express.Router();
 
-
 router.post("/", async (req, res) => {
   const code = req.body.code;
   const tokenURL = "https://api.intra.42.fr/oauth/token";
@@ -13,7 +12,7 @@ router.post("/", async (req, res) => {
       client_id: process.env.INTRA_UUID,
       client_secret: process.env.INTRA_SECRET,
       code,
-      redirect_uri: process.env.REDIRECT_URI,
+      redirect_uri: `http://${process.env.REACT_APP_IP}/auth/intra/callback`,
     });
 
     const accessToken = response.data.access_token;

@@ -60,7 +60,7 @@ function Login() {
   const navigate = useNavigate();
 
   const handleLoginWithIntra = () => {
-    window.location.href = "http://localhost/auth/intra";
+    window.location.href = `http://${import.meta.env.VITE_IP}/auth/intra`;
   };
 
   const handleGoogleLogin = async () => {
@@ -74,12 +74,15 @@ function Login() {
       return;
     }
     try {
-      const response = await fetch("http://localhost/auth/validate", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${getCookie("accessToken")}`,
-        },
-      });
+      const response = await fetch(
+        `http://${import.meta.env.VITE_IP}/auth/validate`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${getCookie("accessToken")}`,
+          },
+        }
+      );
       if (!response.ok) {
         deleteCookie("accessToken");
         // localStorage.removeItem("accessToken");
