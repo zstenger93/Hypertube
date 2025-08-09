@@ -11,6 +11,8 @@ services:
     volumes:
       - ./node:/usr/src/app
       - /usr/src/app/node_modules
+      - downloads:/usr/src/app/downloads
+
     tty: true
     ports:
       - "3000:3000"
@@ -95,6 +97,7 @@ services:
       - "5000:5000"  # Flask app port
     volumes:
       - ./torrent-downloader:/app
+      - downloads:/app/downloads
     working_dir: /app
     networks:
       - hypertube-network
@@ -103,3 +106,6 @@ networks:
   hypertube-network:
     name: hypertube-network
     driver: bridge
+
+volumes:
+  downloads: # Define the downloads volume

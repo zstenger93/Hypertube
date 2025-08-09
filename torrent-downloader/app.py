@@ -56,7 +56,10 @@ def upload_torrent():
         })
 
         torrent_info = lt.torrent_info(file_path)
-        movie_save_path = os.path.join('./download', movie_id)
+        if not torrent_info.is_valid():
+            return jsonify({'error': 'Invalid torrent file.'}), 400
+        print(f"Torrent Name: {torrent_info.name()}")
+        movie_save_path = os.path.join('./downloads', movie_id)
         os.makedirs(movie_save_path, exist_ok=True) 
 
         params = {
@@ -75,7 +78,7 @@ def upload_torrent():
 
         status = handle.status()
         if status.state == lt.torrent_status.downloading or status.state == lt.torrent_status.seeding:
-            return jsonify({'message': 'Download started'})
+            return jsonify({'message': 'Download started'}, {'torrent_name':  {torrent_info.name()}})
         else:
             return jsonify({'error': 'Failed to start download. State: {}'.format(status.state)}), 500
 
