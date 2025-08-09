@@ -3,3 +3,4 @@ data
 .env
 torrent-downloader/download
 torrent-downloader/venv
+downloads/

@@ -164,7 +164,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 app.get("/stream/:filename", (req, res) => {
   const { filename } = req.params;
   const videoPath = path.resolve(
-    "/usr/src/app/download",
+    "/usr/src/app/downloads",
     filename
   ); // Use absolute path to the video directory
 
