@@ -39,7 +39,7 @@ export default function App() {
             path="/prof/:id"
             element={
               <ProtectedRoute>
-                <MovieDetails />
+                <Profile />
               </ProtectedRoute>
             }
           />
