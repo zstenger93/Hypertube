@@ -75,6 +75,12 @@ const SearchComponent = () => {
     setFilter(e.target.value);
   };
 
+  const onErrorImage = (e) => {
+    if (!e.target.complete || e.target.naturalHeight < 50 || e.target.naturalWidth < 50) {
+      e.target.src = poster;
+    }
+  };
+
   const filteredResults = results.sort((a, b) => {
     if (filter === "year") {
       return (b.Year ?? b.year) - (a.Year ?? a.year);
@@ -144,6 +150,7 @@ const SearchComponent = () => {
                     src={thePoster}
                     alt={movie.Title ?? movie.title}
                     style={{ width: "100%", borderRadius: "8px" }}
+                    onError={onErrorImage}
                   />
                   <div
                     style={{
