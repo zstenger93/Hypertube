@@ -26,15 +26,15 @@ router.get("/:movieId", async (req, res) => {
       return res.status(404).send("Movie not found");
     }
     const isWatchSearch = `
-      SELECT watch_list @> ARRAY[$1::VARCHAR] AS is_watched 
+      SELECT watch_list @> ARRAY[$1::VARCHAR] AS state 
       FROM Users WHERE email = $2
     `;
     const isWatchedSearch = `
-    SELECT watched_movies @> ARRAY[$1::VARCHAR] AS is_watched 
+    SELECT watched_movies @> ARRAY[$1::VARCHAR] AS state 
     FROM Users WHERE email = $2
     `;
     const isLikedSearch = `
-    SELECT watched_movies @> ARRAY[$1::VARCHAR] AS is_watched 
+    SELECT liked_movies @> ARRAY[$1::VARCHAR] AS state 
     FROM Users WHERE email = $2
     `;
     const checkResultWatch = await client.query(isWatchSearch, [
@@ -49,9 +49,9 @@ router.get("/:movieId", async (req, res) => {
       movieId,
       userData.email,
     ]);
-    const Watch = checkResultWatch.rows[0].is_watched;
-    const Watched = checkResultWatched.rows[0].is_watched;
-    const Liked = checkLikedSearch.rows[0].is_watched;
+    const Watch = checkResultWatch.rows[0].state;
+    const Watched = checkResultWatched.rows[0].state;
+    const Liked = checkLikedSearch.rows[0].state;
     res.status(200).send({
       isWatched: Watched,
       isLiked: Liked,

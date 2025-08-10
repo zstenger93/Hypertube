@@ -25,17 +25,17 @@ router.post("/:movieId", async (req, res) => {
       await client.query("ROLLBACK");
       return res.status(404).send("Movie not found");
     }
-    const isWatchedSearch = `
-      SELECT liked_movies @> ARRAY[$1::VARCHAR] AS is_watched 
+    const isLikedSearch = `
+      SELECT liked_movies @> ARRAY[$1::VARCHAR] AS state 
       FROM Users WHERE email = $2
     `;
-    const checkResult = await client.query(isWatchedSearch, [
+    const checkResult = await client.query(isLikedSearch, [
       movieId,
       userData.email,
     ]);
-    const isWatched = checkResult.rows[0].is_watched;
+    const isLiked = checkResult.rows[0].state;
     let updateDB;
-    if (isWatched) {
+    if (isLiked) {
       updateDB = `
         UPDATE Users 
         SET liked_movies = array_remove(liked_movies, $1)
@@ -51,7 +51,7 @@ router.post("/:movieId", async (req, res) => {
     await client.query(updateDB, [movieId, userData.email]);
     await client.query("COMMIT");
     res.status(200).send({
-      isWatched: !isWatched,
+      isLiked: !isLiked,
     });
   } catch (error) {
     await client.query("ROLLBACK");

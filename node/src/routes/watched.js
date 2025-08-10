@@ -26,14 +26,14 @@ router.post("/:movieId", async (req, res) => {
       return res.status(404).send("Movie not found");
     }
     const isWatchedSearch = `
-      SELECT watched_movies @> ARRAY[$1::VARCHAR] AS is_watched 
+      SELECT watched_movies @> ARRAY[$1::VARCHAR] AS state 
       FROM Users WHERE email = $2
     `;
     const checkResult = await client.query(isWatchedSearch, [
       movieId,
       userData.email,
     ]);
-    const isWatched = checkResult.rows[0].is_watched;
+    const isWatched = checkResult.rows[0].state;
     let updateDB;
     if (isWatched) {
       updateDB = `

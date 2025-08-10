@@ -4,7 +4,7 @@ import { dropTables } from "../db/dropTables.js";
 
 export async function createTables() {
   try {
-    //await dropTables();
+    await dropTables();
     await client.query("BEGIN");
     await client.query(`
       CREATE TABLE IF NOT EXISTS public.Users (

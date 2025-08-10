@@ -66,8 +66,8 @@ const MovieDetails = () => {
         }
       );
       if (!response.ok) throw new Error("Not Matched");
-      const data = await response.json();
-      setLiked(data.isWatched);
+      const data = await res.json();
+      setLiked(data.isLiked);
     } catch (error) {
       setLiked(false);
     }
@@ -86,7 +86,7 @@ const MovieDetails = () => {
       );
       if (!response.ok) throw new Error("Not Matched");
       const data = await response.json();
-      setWatch(data.isWatched);
+      setWatch(data.isWatch);
     } catch (error) {
       setWatch(false);
     }
@@ -121,8 +121,8 @@ const MovieDetails = () => {
         if (!state.ok) throw new Error("Failed to get state");
         const stateData = await state.json();
         setWatched(stateData.isWatched);
-        setWatch(stateData.isLiked);
-        setLiked(stateData.isWatch);
+        setWatch(stateData.isWatch);
+        setLiked(stateData.isLiked);
       } catch (error) {
       } finally {
         setLoading(false);
