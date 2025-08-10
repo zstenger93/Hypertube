@@ -51,7 +51,7 @@ router.post("/:movieId", async (req, res) => {
     await client.query(updateDB, [movieId, userData.email]);
     await client.query("COMMIT");
     res.status(200).send({
-      isWatched: isWatched,
+      isWatched: !isWatched,
     });
   } catch (error) {
     await client.query("ROLLBACK");

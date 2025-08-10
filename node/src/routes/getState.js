@@ -2,7 +2,7 @@ import express from "express";
 import { client } from "../../index.js";
 const router = express.Router();
 
-router.post("/:movieId", async (req, res) => {
+router.get("/:movieId", async (req, res) => {
   const movieId = req.params.movieId;
   let userData = null;
   const token = req.headers.authorization?.split(" ")[1];
@@ -25,33 +25,37 @@ router.post("/:movieId", async (req, res) => {
       await client.query("ROLLBACK");
       return res.status(404).send("Movie not found");
     }
-    const isWatchedSearch = `
-      SELECT watched_movies @> ARRAY[$1::VARCHAR] AS is_watched 
+    const isWatchSearch = `
+      SELECT watch_list @> ARRAY[$1::VARCHAR] AS is_watched 
       FROM Users WHERE email = $2
     `;
-    const checkResult = await client.query(isWatchedSearch, [
+    const isWatchedSearch = `
+    SELECT watched_movies @> ARRAY[$1::VARCHAR] AS is_watched 
+    FROM Users WHERE email = $2
+    `;
+    const isLikedSearch = `
+    SELECT watched_movies @> ARRAY[$1::VARCHAR] AS is_watched 
+    FROM Users WHERE email = $2
+    `;
+    const checkResultWatch = await client.query(isWatchSearch, [
       movieId,
       userData.email,
     ]);
-    const isWatched = checkResult.rows[0].is_watched;
-    let updateDB;
-    if (isWatched) {
-      updateDB = `
-        UPDATE Users 
-        SET watched_movies = array_remove(watched_movies, $1)
-        WHERE email = $2
-      `;
-    } else {
-      updateDB = `
-        UPDATE Users 
-        SET watched_movies = array_append(watched_movies, $1)
-        WHERE email = $2
-      `;
-    }
-    await client.query(updateDB, [movieId, userData.email]);
-    await client.query("COMMIT");
+    const checkResultWatched = await client.query(isWatchedSearch, [
+      movieId,
+      userData.email,
+    ]);
+    const checkLikedSearch = await client.query(isLikedSearch, [
+      movieId,
+      userData.email,
+    ]);
+    const Watch = checkResultWatch.rows[0].is_watched;
+    const Watched = checkResultWatched.rows[0].is_watched;
+    const Liked = checkLikedSearch.rows[0].is_watched;
     res.status(200).send({
-      isWatched: !isWatched,
+      isWatched: Watched,
+      isLiked: Liked,
+      isWatch: Watch,
     });
   } catch (error) {
     await client.query("ROLLBACK");
@@ -60,5 +64,4 @@ router.post("/:movieId", async (req, res) => {
   }
 });
 
-
-export default router
+export default router;

@@ -20,6 +20,7 @@ import watchedRoute from "./src/routes/watched.js";
 import otherUsersRoute from "./src/routes/otherUsers.js";
 import clickRoute from "./src/routes/click.js";
 import addComment from "./src/routes/addComment.js";
+import getStateRoute from "./src/routes/getState.js";
 
 const { Client } = pg;
 
@@ -50,9 +51,8 @@ app.use("/watch", watchRoute);
 app.use("/watched", watchedRoute);
 app.use("/click", clickRoute);
 app.use("/comments", addComment);
+app.use("/state", getStateRoute);
 // app.use("/users", otherUsersRoute); TODO
-
-
 
 client
   .connect()

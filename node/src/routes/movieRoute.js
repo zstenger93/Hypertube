@@ -1,7 +1,6 @@
-import express from 'express';
-import { client } from '../../index.js';
+import express from "express";
+import { client } from "../../index.js";
 const router = express.Router();
-
 
 router.get("/", async (req, res) => {
   try {
@@ -11,7 +10,7 @@ router.get("/", async (req, res) => {
     const movieResult = await client.query(fetchAllMovies);
     res.json(movieResult.rows);
   } catch (error) {
-    res.status(500).send("Error fetching movies");
+    res.status(500).send("Error");
   }
 });
 

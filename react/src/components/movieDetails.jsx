@@ -98,6 +98,7 @@ const MovieDetails = () => {
         const response = await fetch(
           `http://${import.meta.env.VITE_IP}/watchTheMovie/${id}`
         );
+
         if (!response.ok) throw new Error("Failed to fetch movie details");
         const data = await response.json();
         setMovie(data);
@@ -108,6 +109,20 @@ const MovieDetails = () => {
             Authorization: `Bearer ${getCookie("accessToken")}`,
           },
         });
+        const state = await fetch(
+          `http://${import.meta.env.VITE_IP}/state/${id}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${getCookie("accessToken")}`,
+            },
+          }
+        );
+        if (!state.ok) throw new Error("Failed to get state");
+        const stateData = await state.json();
+        setWatched(stateData.isWatched);
+        setWatch(stateData.isLiked);
+        setLiked(stateData.isWatch);
       } catch (error) {
       } finally {
         setLoading(false);
