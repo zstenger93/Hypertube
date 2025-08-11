@@ -1,6 +1,6 @@
-![EducationalPurpose](./educationalPurpose.png)
-![Login](./login.png)
-![Search](./search.png)
+![EducationalPurpose](./doc/educationalPurpose.png)
+![Login](./doc/login.png)
+![Search](./doc/search.png)
 
 ❌ Mandatory Part
 
