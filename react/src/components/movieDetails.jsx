@@ -46,7 +46,7 @@ const MovieDetails = () => {
           },
         }
       );
-      if (!response.ok) throw new Error("Not Matched");
+      if (!response.ok) throw new Error("No Match In Array ");
       const data = await response.json();
       setWatched(data.isWatched);
     } catch (error) {
@@ -56,6 +56,7 @@ const MovieDetails = () => {
 
   const handleLike = async () => {
     try {
+      console.log("I am here");
       const response = await fetch(
         `http://${import.meta.env.VITE_IP}/like/${id}`,
         {
@@ -65,7 +66,8 @@ const MovieDetails = () => {
           },
         }
       );
-      if (!response.ok) throw new Error("Not Matched");
+
+      if (!response.ok) throw new Error("No Match In Array");
       const data = await res.json();
       setLiked(data.isLiked);
     } catch (error) {
@@ -84,7 +86,7 @@ const MovieDetails = () => {
           },
         }
       );
-      if (!response.ok) throw new Error("Not Matched");
+      if (!response.ok) throw new Error("No Match In Array");
       const data = await response.json();
       setWatch(data.isWatch);
     } catch (error) {
