@@ -56,7 +56,7 @@ const MovieDetails = () => {
 
   const handleLike = async () => {
     try {
-      console.log("I am here");
+      console.log;
       const response = await fetch(
         `http://${import.meta.env.VITE_IP}/like/${id}`,
         {
@@ -68,7 +68,7 @@ const MovieDetails = () => {
       );
 
       if (!response.ok) throw new Error("No Match In Array");
-      const data = await res.json();
+      const data = await response.json();
       setLiked(data.isLiked);
     } catch (error) {
       setLiked(false);
