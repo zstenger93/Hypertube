@@ -21,8 +21,6 @@ const SearchComponent = () => {
         const data = await response.json();
         const content = data.results || data || [];
         if (content.length === 0) {
-          console.log("Conent len false");
-          console.log(data);
           moreConent(false);
           return;
         }

@@ -8,7 +8,6 @@ router.get("/", async (req, res) => {
     const limit = 20;
     const page = parseInt(inputPage, 10) || 1;
     const offset = (page - 1) * limit + 1;
-    console.log(limit, offset);
     const fetchMoviesFromLimitToLimit = `
         SELECT * FROM Movies
         ORDER BY year DESC
