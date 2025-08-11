@@ -7,7 +7,8 @@ import poster from "../assets/poster.jpg";
 const SearchComponent = () => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
-  const [moviedClicked, setMoviedClicked] = useState([]);
+  const [page, setPage] = useState(1);
+  const [hasMoreConent, moreConent] = useState(true);
   const [filter, setFilter] = useState("year");
   const navigate = useNavigate();
 
@@ -15,21 +16,46 @@ const SearchComponent = () => {
     const fetchInitialMovies = async () => {
       try {
         const response = await fetch(
-          `http://${import.meta.env.VITE_IP}:3000/movies`
+          `http://${import.meta.env.VITE_IP}/movies?page=${page}`
         );
         const data = await response.json();
+        const content = data.results || data || [];
+        if (content.length === 0) {
+          console.log("Conent len false");
+          console.log(data);
+          moreConent(false);
+          return;
+        }
+
         if (data.Search) {
-          setResults(data.Search || []);
+          setResults((prev) => (page === 1 ? content : [...prev, ...content]));
         } else if (data) {
-          setResults(data || []);
+          setResults((prev) => [...prev, ...(data || [])]);
+
+          // setResults(data || []);
         }
       } catch (error) {
-        setResults([]);
+        //setResults([]);
       }
     };
 
     fetchInitialMovies();
-  }, []);
+  }, [page]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!hasMoreConent) return;
+      if (
+        window.innerHeight + document.documentElement.scrollTop >=
+        document.documentElement.offsetHeight - 1500
+      ) {
+        setPage((prev) => prev + 1);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [hasMoreConent]);
 
   const handleApiRequest = async (e) => {
     const value = e.target.value;
@@ -54,7 +80,7 @@ const SearchComponent = () => {
     } else {
       try {
         const response = await fetch(
-          `http://${import.meta.env.VITE_IP}:3000/movies`
+          `http://${import.meta.env.VITE_IP}/movies?${page}`
         );
         const data = await response.json();
         if (data.Search) {
@@ -76,7 +102,11 @@ const SearchComponent = () => {
   };
 
   const onErrorImage = (e) => {
-    if (!e.target.complete || e.target.naturalHeight < 50 || e.target.naturalWidth < 50) {
+    if (
+      !e.target.complete ||
+      e.target.naturalHeight < 50 ||
+      e.target.naturalWidth < 50
+    ) {
       e.target.src = poster;
     }
   };
