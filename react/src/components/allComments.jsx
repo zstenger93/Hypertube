@@ -9,9 +9,7 @@ const AllComments = () => {
 
   const getAllComments = async () => {
     try {
-      const response = await fetch(
-        `http://${REACT_IP}/comments`
-      );
+      const response = await fetch(`http://${import.meta.env.VITE_IP}/comments`);
       const data = await response.json();
       return data;
     } catch (error) {
