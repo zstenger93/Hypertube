@@ -89,6 +89,10 @@ def upload_torrent():
             status = handle.status()
             if status.state == lt.torrent_status.downloading or status.state == lt.torrent_status.seeding:
                 print("Download started successfully.")
+                for i in range(10):  # Monitor for 10 iterations
+                    status = handle.status()
+                    print(f"State: {status.state}, Progress: {status.progress * 100:.2f}%, Peers: {status.num_peers}")
+                    time.sleep(5)
                 return jsonify({'message': 'Download started', 'torrent_name': torrent_info.name()})
             else:
                 print(f"Failed to start download. State: {status.state}")
