@@ -161,12 +161,15 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // app.use("/torrent-downloader/download", express.static(path.join(__dirname, "../torrent-downloader/download")));
 
 // Route for streaming video files
-app.get("/stream/:filename", (req, res) => {
-  const { filename } = req.params;
+app.get("/stream/:id/:moviename/:filename", (req, res) => {
+  const { id, moviename, filename } = req.params;
   const videoPath = path.resolve(
     "/usr/src/app/downloads",
+    id,
+    moviename,
     filename
-  ); // Use absolute path to the video directory  downloads
+  ); // Construct the full path dynamically
+  
   // Check if the file exists
   if (!fs.existsSync(videoPath)) {
     return res.status(404).send("Video not found");

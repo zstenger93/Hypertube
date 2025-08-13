@@ -59,7 +59,7 @@ const WatchMovie = () => {
   
           // Initialize video.js player
           if (videoRef.current) {
-            const videoPath = `http://localhost:3000/stream/testmovie_short.mp4`; // Adjust filename if necessary
+            const videoPath = `http://localhost:3000/stream/${id}/${torrents}/${torrents}_512kb.mp4`;
             if (!playerRef.current) {
               playerRef.current = videojs(videoRef.current, {
                 controls: true,

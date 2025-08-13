@@ -82,21 +82,33 @@ def upload_torrent():
             print("\nTracker Status:")
             for tracker in handle.trackers():
                 print(f" - URL: {tracker['url']}, Status: {tracker['message']}")
-
+                
             print("Starting torrent download...")
             time.sleep(2)  # Allow some time for the torrent to initialize
 
-            status = handle.status()
-            if status.state == lt.torrent_status.downloading or status.state == lt.torrent_status.seeding:
-                print("Download started successfully.")
-                for i in range(10):  # Monitor for 10 iterations
-                    status = handle.status()
-                    print(f"State: {status.state}, Progress: {status.progress * 100:.2f}%, Peers: {status.num_peers}")
+            for i in range(10):  # Monitor for 10 iterations
+                status = handle.status()
+                print(f"State: {status.state}, Progress: {status.progress * 100:.2f}%, Peers: {status.num_peers}")
+
+                # Handle the 'checking_files' state
+                if status.state == lt.torrent_status.checking_files:
+                    print("Torrent is checking files. Waiting...")
                     time.sleep(5)
-                return jsonify({'message': 'Download started', 'torrent_name': torrent_info.name()})
-            else:
-                print(f"Failed to start download. State: {status.state}")
-                return jsonify({'error': 'Failed to start download. State: {}'.format(status.state)}), 500
+                    continue
+
+                # Proceed if the torrent is downloading or seeding
+                if status.state == lt.torrent_status.downloading or status.state == lt.torrent_status.seeding:
+                    print("Download started successfully.")
+                    for _ in range(10):  # Monitor for 10 iterations
+                        status = handle.status()
+                        print(f"State: {status.state}, Progress: {status.progress * 100:.2f}%, Peers: {status.num_peers}")
+                        time.sleep(5)
+                    return jsonify({'message': 'Download started', 'torrent_name': torrent_info.name()})
+
+                time.sleep(5)
+
+            print(f"Failed to start download. Final State: {status.state}")
+            return jsonify({'error': 'Failed to start download. Final State: {}'.format(status.state)}), 500
         except Exception as e:
             print(f"Error initializing libtorrent session: {str(e)}")
             return jsonify({'error': f'Error initializing libtorrent session: {str(e)}'}), 500
