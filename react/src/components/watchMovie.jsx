@@ -5,6 +5,103 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import videojs from "video.js";
 import "video.js/dist/video-js.css";
 
+const startTorrentDownload = async (id, torrents) => {
+  const torrentLink = `https://archive.org/download/${torrents}/${torrents}_archive.torrent`;
+  try {
+    const response = await fetch("http://localhost:5000/upload-torrent", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id: id,
+        link: torrentLink,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to upload torrent");
+    }
+
+    const result = await response.json();
+    console.log("Torrent uploaded successfully:", result);
+  } catch (error) {
+    console.error("Error uploading torrent:", error);
+  }
+};
+
+const initializeVideoPlayer = async (videoRef, playerRef, videoPath, setIsBuffering, setError, id, torrents, retryCount = 0) => {
+  try {
+    const fileName = `${torrents}_512kb.mp4`;
+    const response = await fetch(`http://localhost:3000/check-file/${id}/${torrents}/${fileName}`);
+    const data = await response.json();
+
+    if (data.exists) {
+      console.log("File is available. Initializing video player...");
+      setIsBuffering(false); // Stop buffering
+      setError(false); // Clear any error state
+
+      if (!playerRef.current) {
+        playerRef.current = videojs(videoRef.current, {
+          controls: true,
+          autoplay: true,
+          preload: "auto",
+          sources: [
+            {
+              src: videoPath,
+              type: "video/mp4",
+            },
+          ],
+        });
+
+        // Add event listeners for buffering
+        playerRef.current.on("waiting", () => {
+          setIsBuffering(true);
+        });
+
+        playerRef.current.on("playing", () => {
+          setIsBuffering(false);
+        });
+
+        // Retry loading the video if an error occurs
+        playerRef.current.on("error", () => {
+          console.error("Error loading video. Retrying...");
+          setTimeout(() => {
+            playerRef.current.src({ src: videoPath, type: "video/mp4" });
+            playerRef.current.play();
+          }, 5000); // Retry after 5 seconds
+        });
+      } else {
+        // Update the source if the player already exists
+        playerRef.current.src({ src: videoPath, type: "video/mp4" });
+        playerRef.current.play();
+      }
+    } else {
+      console.log(`File not available yet. Retrying... (Attempt ${retryCount + 1})`);
+      setIsBuffering(true); // Show buffering screen
+
+      if (retryCount < 10) { // Retry up to 10 times
+        setTimeout(() => initializeVideoPlayer(videoRef, playerRef, videoPath, setIsBuffering, setError, id, torrents, retryCount + 1), 5000); // Retry after 5 seconds
+      } else {
+        console.error("File not available after multiple attempts.");
+        setIsBuffering(false); // Stop buffering
+        setError(true); // Show error message
+      }
+    }
+  } catch (error) {
+    console.error("Error checking file availability:", error);
+    setIsBuffering(true); // Show buffering screen
+
+    if (retryCount < 10) { // Retry up to 10 times
+      setTimeout(() => initializeVideoPlayer(videoRef, playerRef, videoPath, setIsBuffering, setError, id, torrents, retryCount + 1), 5000); // Retry after 5 seconds
+    } else {
+      console.error("Error checking file availability after multiple attempts.");
+      setIsBuffering(false); // Stop buffering
+      setError(true); // Show error message
+    }
+  }
+};
+
 const WatchMovie = () => {
   const { id } = useParams();
   const location = useLocation();
@@ -12,29 +109,9 @@ const WatchMovie = () => {
   const [torrents, setTorrents] = useState("");
   const [isPublicorNot, setIsPublicorNot] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false); // State for buffering
+  const [error, setError] = useState(false); // State for error
   const videoRef = useRef(null);
   const playerRef = useRef(null);
-
-  // useEffect(() => {
-  //   const fetchTorrentfile = async () => {
-  //     try {
-  //       const response = await fetch(
-  //         `https://archive.org/advancedsearch.php?q=${id}&fl%5B%5D=identifier&sort%5B%5D=&sort%5B%5D=&sort%5B%5D=&rows=50&page=1&output=json&save=yes#raw`
-  //       );
-  //       if (!response.ok) throw new Error("Failed to fetch torrents");
-  //       const data = await response.json();
-  //       if (data.response && data.response.docs && data.response.docs.length > 0) {
-  //         const identifier = data.response.docs[0].identifier;
-  //         setTorrents(identifier);
-  //       } else {
-  //         setTorrents("");
-  //       }
-  //     } catch (error) {
-  //       setTorrents("");
-  //     }
-  //   };
-  //   fetchTorrentfile();
-  // }, [id, movie]);
 
   useEffect(() => {
     const fetchTorrentfile = async () => {
@@ -44,7 +121,6 @@ const WatchMovie = () => {
         );
         if (!response.ok) throw new Error("Failed to fetch torrents");
         const data = await response.json();
-        console.log(data);
         if (data.response && data.response.docs && data.response.docs[0].licenseurl) {
           if (data.response.docs[0].licenseurl == "http://creativecommons.org/licenses/publicdomain/") {
             setIsPublicorNot(true);
@@ -52,7 +128,7 @@ const WatchMovie = () => {
               setTorrents(data.response.docs[0].identifier);
             } else {
               setTorrents(movie.title.replace(/\s/g, "_"));
-            } 
+            }
           }
         } else {
           setIsPublicorNot(false);
@@ -66,75 +142,24 @@ const WatchMovie = () => {
     fetchTorrentfile();
   }, [id, movie]);
 
-  // https://archive.org/download/Lady_Frankenstein/Lady_Frankenstein_archive.torrent
   useEffect(() => {
-    const startTorrentDownload = async () => {
-      if (torrents) {
-        const torrentLink = `https://archive.org/download/${torrents}/${torrents}_archive.torrent`;
-        try {
-          const response = await fetch("http://localhost:5000/upload-torrent", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              id: id,
-              link: torrentLink,
-            }),
-          });
+    if (torrents) {
+      startTorrentDownload(id, torrents); // Start torrent download in the background
+    }
+  }, [torrents, id]);
 
-          if (!response.ok) {
-            throw new Error("Failed to upload torrent");
-          }
-
-          const result = await response.json();
-          console.log("Torrent uploaded successfully:", result);
-
-          // Initialize video.js player
-
-          if (isPublicorNot && videoRef.current) {
-            const videoPath = `http://localhost:3000/stream/${id}/${torrents}/${torrents}_512kb.mp4`;
-            if (!playerRef.current) {
-              playerRef.current = videojs(videoRef.current, {
-                controls: true,
-                autoplay: true,
-                preload: "auto",
-                sources: [
-                  {
-                    src: videoPath,
-                    type: "video/mp4",
-                  },
-                ],
-              });
-
-              // Add event listeners for buffering
-              playerRef.current.on("waiting", () => {
-                setIsBuffering(true);
-              });
-
-              playerRef.current.on("playing", () => {
-                setIsBuffering(false);
-              });
-            } else {
-              // Update the source if the player already exists
-              playerRef.current.src({ src: videoPath, type: "video/mp4" });
-              playerRef.current.play();
-            }
-          }
-        } catch (error) {
-          console.error("Error uploading torrent:", error);
-        }
-      }
-    };
-
-    startTorrentDownload();
+  useEffect(() => {
+    if (isPublicorNot && videoRef.current && torrents) {
+      const videoPath = `http://localhost:3000/stream/${id}/${torrents}/${torrents}_512kb.mp4`;
+      initializeVideoPlayer(videoRef, playerRef, videoPath, setIsBuffering, setError, id, torrents); // Initialize video player with file check
+    }
 
     return () => {
       if (playerRef.current) {
         playerRef.current.dispose();
       }
     };
-  }, [torrents, id, isPublicorNot]);
+  }, [isPublicorNot, videoRef, torrents, id]);
 
   return (
     <div>
@@ -156,21 +181,24 @@ const WatchMovie = () => {
                 {isPublicorNot ? (
                   <>
                     {isBuffering && <p>Buffering...</p>} {/* Show buffering indicator */}
-                    <video
-                      id="player"
-                      className="video-js vjs-default-skin"
-                      ref={videoRef}
-                      width="640"
-                      height="360"
-                      controls
-                    ></video>
+                    {error && <p>Error: Unable to load video after multiple attempts.</p>} {/* Show error message */}
+                    {!error && (
+                      <video
+                        id="player"
+                        className="video-js vjs-default-skin"
+                        ref={videoRef}
+                        width="640"
+                        height="360"
+                        controls
+                      ></video>
+                    )}
                   </>
                 ) : (
                   <p>This movie is protected by copyright or missing copyright information.</p>
                 )}
               </div>
             ) : (
-              <p>No torrents found.</p>
+              <p>No torrents found or missing copyright information.</p>
             )}
           </div>
         </div>

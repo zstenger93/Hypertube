@@ -160,6 +160,24 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Serve the entire torrent-downloader directory
 // app.use("/torrent-downloader/download", express.static(path.join(__dirname, "../torrent-downloader/download")));
 
+app.get("/check-file/:id/:moviename/:filename", (req, res) => {
+  const { id, moviename, filename } = req.params;
+  const videoPath = path.resolve(
+    "/usr/src/app/downloads",
+    id,
+    moviename,
+    filename
+  );
+
+  // Check if the file exists
+  if (fs.existsSync(videoPath)) {
+    return res.status(200).json({ exists: true });
+  } else {
+    return res.status(404).json({ exists: false });
+  }
+});
+
+
 // Route for streaming video files
 app.get("/stream/:id/:moviename/:filename", (req, res) => {
   const { id, moviename, filename } = req.params;
