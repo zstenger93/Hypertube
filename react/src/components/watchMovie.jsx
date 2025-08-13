@@ -5,6 +5,16 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import videojs from "video.js";
 import "video.js/dist/video-js.css";
 
+const updateBufferedProgress = (videoRef, setBufferedProgress) => {
+  const video = videoRef.current;
+  if (video && video.buffered.length > 0) {
+    const bufferedEnd = video.buffered.end(video.buffered.length - 1); // End of the last buffered range
+    const duration = video.duration;
+    const bufferedPercentage = (bufferedEnd / duration) * 100;
+    setBufferedProgress(bufferedPercentage);
+  }
+};
+
 const startTorrentDownload = async (id, torrents) => {
   const torrentLink = `https://archive.org/download/${torrents}/${torrents}_archive.torrent`;
   try {
@@ -108,8 +118,9 @@ const WatchMovie = () => {
   const { movie } = location.state || {};
   const [torrents, setTorrents] = useState("");
   const [isPublicorNot, setIsPublicorNot] = useState(false);
-  const [isBuffering, setIsBuffering] = useState(false); // State for buffering
-  const [error, setError] = useState(false); // State for error
+  const [isBuffering, setIsBuffering] = useState(false);
+  const [error, setError] = useState(false);
+  const [bufferedProgress, setBufferedProgress] = useState(0); // State for buffered progress
   const videoRef = useRef(null);
   const playerRef = useRef(null);
 
@@ -152,13 +163,19 @@ const WatchMovie = () => {
     if (isPublicorNot && videoRef.current && torrents) {
       const videoPath = `http://localhost:3000/stream/${id}/${torrents}/${torrents}_512kb.mp4`;
       initializeVideoPlayer(videoRef, playerRef, videoPath, setIsBuffering, setError, id, torrents); // Initialize video player with file check
-    }
 
-    return () => {
-      if (playerRef.current) {
-        playerRef.current.dispose();
-      }
-    };
+      // Update buffered progress on 'progress' event
+      const video = videoRef.current;
+      const handleProgress = () => updateBufferedProgress(videoRef, setBufferedProgress);
+      video.addEventListener("progress", handleProgress);
+
+      return () => {
+        video.removeEventListener("progress", handleProgress);
+        if (playerRef.current) {
+          playerRef.current.dispose();
+        }
+      };
+    }
   }, [isPublicorNot, videoRef, torrents, id]);
 
   return (
@@ -183,14 +200,22 @@ const WatchMovie = () => {
                     {isBuffering && <p>Buffering...</p>} {/* Show buffering indicator */}
                     {error && <p>Error: Unable to load video after multiple attempts.</p>} {/* Show error message */}
                     {!error && (
-                      <video
-                        id="player"
-                        className="video-js vjs-default-skin"
-                        ref={videoRef}
-                        width="640"
-                        height="360"
-                        controls
-                      ></video>
+                      <>
+                        <video
+                          id="player"
+                          className="video-js vjs-default-skin"
+                          ref={videoRef}
+                          width="640"
+                          height="360"
+                          controls
+                        ></video>
+                        <div className="buffered-progress">
+                          <div
+                            className="buffered-bar"
+                            style={{ width: `${bufferedProgress}%` }}
+                          ></div>
+                        </div>
+                      </>
                     )}
                   </>
                 ) : (

@@ -80,8 +80,8 @@ def upload_torrent():
                     'ti': torrent_info
                 }
 
-                upload_rate_limit = 50 * 1024  # 5 KB/s
-                download_rate_limit = 50 * 1024  # 5 KB/s
+                upload_rate_limit = 80 * 1024  # 80 KB/s
+                download_rate_limit = 80 * 1024  # 80 KB/s
                 session.set_upload_rate_limit(upload_rate_limit)
                 session.set_download_rate_limit(download_rate_limit)
                 handle = session.add_torrent(params)
