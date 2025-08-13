@@ -79,6 +79,11 @@ def upload_torrent():
                     'storage_mode': lt.storage_mode_t.storage_mode_sparse,
                     'ti': torrent_info
                 }
+
+                upload_rate_limit = 50 * 1024  # 5 KB/s
+                download_rate_limit = 50 * 1024  # 5 KB/s
+                session.set_upload_rate_limit(upload_rate_limit)
+                session.set_download_rate_limit(download_rate_limit)
                 handle = session.add_torrent(params)
 
                 print("\nTracker Status:")

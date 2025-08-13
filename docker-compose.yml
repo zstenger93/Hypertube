@@ -87,6 +87,7 @@ services:
       - "6969:6969"  # Tracker port
     volumes:
       - ./torrent-server/video_test:/app/video_test
+      - ./downloads:/app/downloads
     networks:
       - hypertube-network
 
