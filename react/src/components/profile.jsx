@@ -4,6 +4,7 @@ import "../App.css";
 import Logout from "./logout";
 import profile from "../assets/pesant.jpg";
 import { getCookie } from "../utils/cookie";
+import ChangeDetails from "./changeDetails";
 
 const Profile = () => {
   const [user, setUser] = useState(null);
@@ -46,7 +47,8 @@ const Profile = () => {
           <img src={user.profile_pic} alt="profile" />
           <img src={"/src/assets/jail.png"} alt="overlay" className="overlay" />
         </div>
-        <h3>{user.username}</h3>
+        <ChangeDetails name="Username" currentValue={user.username} api="" />
+        <ChangeDetails name="Email" currentValue={user.email} api="" />
       </div>
     </div>
   );
