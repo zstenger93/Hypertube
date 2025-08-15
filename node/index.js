@@ -52,7 +52,7 @@ app.use("/watched", watchedRoute);
 app.use("/click", clickRoute);
 app.use("/comments", addComment);
 app.use("/state", getStateRoute);
-// app.use("/users", otherUsersRoute); TODO
+app.use("/users", otherUsersRoute);
 
 client
   .connect()

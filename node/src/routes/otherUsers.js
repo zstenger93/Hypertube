@@ -7,6 +7,19 @@ router.get("/:user", async (req, res) => {
   if (!user || user.length === 0) {
     return res.status(400).send("Potato");
   }
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) return res.sendStatus(401);
+  try {
+    const searchToken = `SELECT * FROM Users WHERE oauth = $1;`;
+    const result = await client.query(searchToken, [token]);
+    if (result.rows.length === 0) {
+      userData = result.rows[0];
+      return res.status(500).send({ message: "The Token Is expired" });
+    }
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    return res.sendStatus(500);
+  }
   try {
     const searchUser = `SELECT * FROM Users WHERE username = $1;`;
     const userResults = await client.query(searchUser, [user]);
@@ -19,4 +32,4 @@ router.get("/:user", async (req, res) => {
   }
 });
 
-export default router
+export default router;
