@@ -11,6 +11,7 @@ import {
 
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { getCookie, setCookie, deleteCookie } from "../utils/cookie";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDdCQbBKuVCKAR67luHVd_WyxpEGVvRfNI",
@@ -59,7 +60,7 @@ function Login() {
   const navigate = useNavigate();
 
   const handleLoginWithIntra = () => {
-    window.location.href = "http://localhost:3000/auth/intra";
+    window.location.href = `http://${import.meta.env.VITE_IP}/auth/intra`;
   };
 
   const handleGoogleLogin = async () => {
@@ -67,9 +68,28 @@ function Login() {
     try {
       const result = await signInWithPopup(auth, provider);
       const token = await result.user.getIdToken();
-      localStorage.setItem("accessToken", token);
+      // localStorage.setItem("accessToken", token);
+      setCookie("accessToken", token);
+    } catch (error) {
+      return;
+    }
+    try {
+      const response = await fetch(
+        `http://${import.meta.env.VITE_IP}/auth/validate`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${getCookie("accessToken")}`,
+          },
+        }
+      );
+      if (!response.ok) {
+        deleteCookie("accessToken");
+        // localStorage.removeItem("accessToken");
+        return;
+      }
       navigate("/search");
-    } catch (error) {}
+    } catch {}
   };
 
   const handleForgotPassword = async () => {
@@ -99,10 +119,11 @@ function Login() {
         );
       }
       const token = await userCredential.user.getIdToken();
-      localStorage.setItem("accessToken", token);
+      //localStorage.setItem("accessToken", token);
+      setCookie("accessToken", token);
       navigate("/search");
     } catch (error) {
-      console.error("Authentication Error:", error);
+      //console.error("Authentication Error:", error);
     }
   };
 
@@ -130,7 +151,7 @@ function Login() {
         }}
       ></div>
       <button onClick={() => navigate("/search")}>Seach</button>
-      <button onClick={() => navigate("/comments")}>Comments</button>
+      <button onClick={() => navigate("/x")}>Comments</button>
       <button onClick={handleLoginWithIntra}>Login with Intra</button>
       <button onClick={handleGoogleLogin}>Login with Google</button>
       <button onClick={handleShowHideInputs}>

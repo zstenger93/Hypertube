@@ -2,6 +2,7 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { getCookie, setCookie } from "../utils/cookie";
 
 function CallbackComponent() {
   const navigate = useNavigate();
@@ -10,15 +11,24 @@ function CallbackComponent() {
     const fetchToken = async () => {
       try {
         const code = new URLSearchParams(window.location.search).get("code");
-
         if (code) {
           const response = await axios.post(
-            "http://localhost:3000/auth/intra/callback",
+            `http://${import.meta.env.VITE_IP}/api/auth/intra/callback`,
             { code }
           );
           const token = response.data.accessToken;
           if (token) {
-            localStorage.setItem("accessToken", token);
+            setCookie("accessToken", token);
+            const response = await fetch(
+              `http://${import.meta.env.VITE_IP}/auth/validate`,
+              {
+                method: "GET",
+                headers: {
+                  Authorization: `Bearer ${getCookie("accessToken")}`,
+                },
+              }
+            );
+            if (!response.ok) throw new Error("Failed to fetch user details");
             navigate("/search");
           } else {
             navigate("/");

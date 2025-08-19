@@ -7,26 +7,53 @@ import poster from "../assets/poster.jpg";
 const SearchComponent = () => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
+  const [page, setPage] = useState(1);
+  const [hasMoreConent, moreConent] = useState(true);
   const [filter, setFilter] = useState("year");
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchInitialMovies = async () => {
       try {
-        const response = await fetch(`http://localhost:3000/api/movies`);
+        const response = await fetch(
+          `http://${import.meta.env.VITE_IP}/movies?page=${page}`
+        );
         const data = await response.json();
+        const content = data.results || data || [];
+        if (content.length === 0) {
+          moreConent(false);
+          return;
+        }
+
         if (data.Search) {
-          setResults(data.Search || []);
+          setResults((prev) => (page === 1 ? content : [...prev, ...content]));
         } else if (data) {
-          setResults(data || []);
+          setResults((prev) => [...prev, ...(data || [])]);
+
+          // setResults(data || []);
         }
       } catch (error) {
-        setResults([]);
+        //setResults([]);
       }
     };
 
     fetchInitialMovies();
-  }, []);
+  }, [page]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!hasMoreConent) return;
+      if (
+        window.innerHeight + document.documentElement.scrollTop >=
+        document.documentElement.offsetHeight - 1500
+      ) {
+        setPage((prev) => prev + 1);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [hasMoreConent]);
 
   const handleApiRequest = async (e) => {
     const value = e.target.value;
@@ -34,7 +61,7 @@ const SearchComponent = () => {
     if (value) {
       try {
         const response = await fetch(
-          `http://localhost:3000/api/movies/${value}`
+          `http://${import.meta.env.VITE_IP}/movies/${value}`
         );
         const data = await response.json();
         if (data.Search) {
@@ -50,7 +77,9 @@ const SearchComponent = () => {
       }
     } else {
       try {
-        const response = await fetch(`http://localhost:3000/api/movies`);
+        const response = await fetch(
+          `http://${import.meta.env.VITE_IP}/movies?${page}`
+        );
         const data = await response.json();
         if (data.Search) {
           setResults(data.Search || []);
@@ -68,6 +97,16 @@ const SearchComponent = () => {
 
   const handleFilterChange = (e) => {
     setFilter(e.target.value);
+  };
+
+  const onErrorImage = (e) => {
+    if (
+      !e.target.complete ||
+      e.target.naturalHeight < 50 ||
+      e.target.naturalWidth < 50
+    ) {
+      e.target.src = poster;
+    }
   };
 
   const filteredResults = results.sort((a, b) => {
@@ -134,7 +173,31 @@ const SearchComponent = () => {
                   navigate(`/movie/${movie.imdbID ?? movie.imdbid}`)
                 }
               >
-                <img src={thePoster} alt={movie.Title ?? movie.title} />
+                <div style={{ position: "relative", display: "inline-block" }}>
+                  <img
+                    src={thePoster}
+                    alt={movie.Title ?? movie.title}
+                    style={{ width: "100%", borderRadius: "8px" }}
+                    onError={onErrorImage}
+                  />
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "16px",
+                      right: "8px",
+                      backgroundColor: "rgba(0,0,0,0.6)",
+                      color: "white",
+                      padding: "6px 10px",
+                      borderRadius: "20px",
+                      display: "flex",
+                      alignItems: "center",
+                      fontSize: "16px",
+                    }}
+                  >
+                    <span style={{ marginRight: "5px" }}>📈</span>{" "}
+                    {movie.click_count}
+                  </div>
+                </div>{" "}
                 <h3>{movie.Title ?? movie.title}</h3>
                 <p>{movie.Year ?? movie.year}</p>
               </button>

@@ -3,6 +3,8 @@ import { useParams } from "react-router-dom";
 import "../App.css";
 import Logout from "./logout";
 import profile from "../assets/pesant.jpg";
+import { getCookie } from "../utils/cookie";
+import ChangeDetails from "./changeDetails";
 
 const Profile = () => {
   const [user, setUser] = useState(null);
@@ -11,22 +13,26 @@ const Profile = () => {
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        const response = await fetch("http://localhost:3000/auth/validate", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        });
+        const response = await fetch(
+          `http://${import.meta.env.VITE_IP}/auth/validate`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${getCookie("accessToken")}`,
+            },
+          }
+        );
         if (!response.ok) throw new Error("Failed to fetch user details");
         const data = await response.json();
         setUser(data.user);
       } catch (error) {
+        console.error("Error fetching user:", error);
       } finally {
         setLoading(false);
       }
     };
     fetchUserDetails();
-  });
+  }, []);
 
   if (loading) return <p>Loading...</p>;
 
@@ -41,7 +47,8 @@ const Profile = () => {
           <img src={user.profile_pic} alt="profile" />
           <img src={"/src/assets/jail.png"} alt="overlay" className="overlay" />
         </div>
-        <h3>{user.username}</h3>
+        <ChangeDetails name="Username" currentValue={user.username} api="" />
+        <ChangeDetails name="Email" currentValue={user.email} api="" />
       </div>
     </div>
   );

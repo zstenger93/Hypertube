@@ -18,7 +18,7 @@ export default function App() {
           <Route path="/" element={<Login />} />
           <Route path="/auth/intra/callback" element={<CallbackComponent />} />
           <Route path="/search" element={<SearchComponent />} />
-          <Route path="/comments" element={<AllComents />} />
+          <Route path="/x" element={<AllComents />} />
           <Route
             path="/movie/:id"
             element={
@@ -28,7 +28,7 @@ export default function App() {
             }
           />
           <Route
-            path="/profile"
+            path="/prof"
             element={
               <ProtectedRoute>
                 <Profile />
@@ -36,10 +36,10 @@ export default function App() {
             }
           />
           <Route
-            path="/profile/:id"
+            path="/prof/:id"
             element={
               <ProtectedRoute>
-                <MovieDetails />
+                <Profile />
               </ProtectedRoute>
             }
           />
@@ -50,7 +50,7 @@ export default function App() {
                 <WatchMovie />
               </ProtectedRoute>
             }
-            />
+          />
         </Routes>
       </div>
     </Router>

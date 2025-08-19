@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "../App.css";
+import { getCookie } from "../utils/cookie";
 
 const Comments = ({ movie }) => {
   const [comments, setComments] = useState([]);
@@ -8,7 +9,7 @@ const Comments = ({ movie }) => {
   const getComments = async () => {
     try {
       const response = await fetch(
-        `http://localhost:3000/api/comments/${movie}`
+        `http://${import.meta.env.VITE_IP}/comments/${movie}`
       );
       const data = await response.json();
       return data;
@@ -29,23 +30,21 @@ const Comments = ({ movie }) => {
 
   const sendComment = async (event) => {
     event.preventDefault();
-    const token = localStorage.getItem("accessToken");
+    //const token = localStorage.getItem("accessToken");
+    const token = getCookie("accessToken");
     const text = event.target.comment.value;
     const movieId = movie;
     try {
-      await fetch(
-        `http://localhost:3000/api/comments/${movieId}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ text }),
-        }
-      );
-	  const data = await getComments();
-	  setComments(data);
+      await fetch(`http://${import.meta.env.VITE_IP}/comments/${movieId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ text }),
+      });
+      const data = await getComments();
+      setComments(data);
     } catch (error) {
       console.log(error.message);
     }
@@ -76,7 +75,16 @@ const Comments = ({ movie }) => {
                   <h3>Unknown User</h3>
                 </div>
               )}
-              <p>{comment.content}</p>
+              <div className="centerComment">
+                <p>
+                  {comment.content.match(/.{1,60}/g)?.map((line, index) => (
+                    <React.Fragment key={index}>
+                      {line}
+                      <br />
+                    </React.Fragment>
+                  ))}
+                </p>
+              </div>
             </div>
           </div>
         ))}

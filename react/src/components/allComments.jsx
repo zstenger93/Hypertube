@@ -9,10 +9,8 @@ const AllComments = () => {
 
   const getAllComments = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/api/comments`);
+      const response = await fetch(`http://${import.meta.env.VITE_IP}/comments`);
       const data = await response.json();
-
-      console.log(data);
       return data;
     } catch (error) {
       console.log(error.message);
@@ -37,22 +35,29 @@ const AllComments = () => {
       <Logout />
       <h1>All Comments</h1>
       {comments.map((comment) => (
-        <div className="comment" key={comment.comment_id}>
+        <div className="allComment" key={comment.comment_id}>
           <button
             className="commentButton"
             onClick={() => navigate(`/movie/${comment.movieData.imdbid}`)}
           >
             <img src={comment.movieData.poster || "/src/assets/poster.jpg"} />
           </button>
-          <button className="commentButton">
+          {/* <button className="commentButton">
             <img src={comment.user.profile_pic} />
-          </button>
+          </button> */}
           <div className="centerComment">
             <h3>
               {comment.movieData.title} ({comment.movieData.year})
             </h3>
             <h3>{comment.user.username}</h3>
-            <p>{comment.content}</p>
+            <p>
+              {comment.content.match(/.{1,60}/g)?.map((line, index) => (
+                <React.Fragment key={index}>
+                  {line}
+                  <br />
+                </React.Fragment>
+              ))}
+            </p>
           </div>
         </div>
       ))}
