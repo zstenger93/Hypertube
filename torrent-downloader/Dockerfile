@@ -5,18 +5,22 @@ ENV PYTHONUNBUFFERED=1
 
 # Install Python, necessary packages, and libtorrent
 RUN apt-get update && \
-    apt-get install -y python3 python3-pip python3-venv python3-libtorrent && \
+    apt-get install -y python3 python3-pip python3-libtorrent && \
     apt-get clean
 
 # Set the working directory
 WORKDIR /app
 
-# Create a virtual environment and install dependencies
+# Install dependencies globally
 COPY requirements.txt .
-RUN python3 -m venv venv && \
-    . venv/bin/activate && \
-    pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+RUN pip3 install --no-cache-dir --upgrade pip && \
+    pip3 install --no-cache-dir -r requirements.txt
 
-# CMD ["/bin/bash"]
-CMD ["tail", "-f", "/dev/null"]
+# Copy the application code
+COPY . .
+
+# Expose the port Flask will run on
+EXPOSE 5000
+
+# Start the Flask application
+CMD ["python3", "app.py"]

@@ -1,5 +1,7 @@
 import libtorrent as lt
 import time
+import signal
+import sys
 
 # Path to the test video torrent file
 test_torrent_file = './video_test/testmovie_short.torrent'
@@ -12,15 +14,6 @@ session = lt.session({
     'enable_upnp': True,
     'enable_natpmp': True
 })
-
-# Set upload and download rate limits (in bytes per second)
-upload_rate_limit = 5 * 1024  # 5 KB/s
-download_rate_limit = 5 * 1024  # 5 KB/s
-session.set_upload_rate_limit(upload_rate_limit)
-session.set_download_rate_limit(download_rate_limit)
-
-# Enable debug logging
-# session.set_alert_mask(lt.alert.category_t.all_categories)
 
 # Load the test video torrent
 torrent_info = lt.torrent_info(test_torrent_file)
@@ -41,19 +34,27 @@ for tracker in handle.trackers():
 
 # Start seeding the test video
 print("Seeding the test video...")
+
+# Graceful shutdown flag
+shutdown_flag = False
+
+def signal_handler(sig, frame):
+    global shutdown_flag
+    print("\nReceived termination signal. Shutting down...")
+    shutdown_flag = True
+
+# Register signal handler for SIGTERM
+signal.signal(signal.SIGTERM, signal_handler)
+
 try:
-    while True:  # Keep the session open indefinitely
+    while not shutdown_flag:  # Keep the session open until shutdown_flag is set
         status = handle.status()
         print(f" - State: {status.state}, Progress: {status.progress * 100:.2f}%, Peers: {status.num_peers}")
-        
-        # Print debug alerts
-        # alerts = session.pop_alerts()
-        # for alert in alerts:
-        #     print(alert)
-        
-        time.sleep(5)
+        time.sleep(30)  # Check status every 30 seconds
 except KeyboardInterrupt:
     print("\nSeeding stopped manually.")
 
 # Stop the session
 session.pause()
+print("Torrent session paused. Exiting...")
+sys.exit(0)

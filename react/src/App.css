@@ -461,3 +461,17 @@ body {
   height: 240px;
   overflow: auto;
 }
+
+.buffered-progress {
+  position: relative;
+  width: 640px;
+  height: 5px;
+  background-color: #ccc;
+  margin-top: 10px;
+}
+
+.buffered-bar {
+  position: absolute;
+  height: 100%;
+  background-color: #76c7c0;
+}

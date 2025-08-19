@@ -3,19 +3,24 @@ import time
 # file_path = './src/temp_torrent/ubuntu-22.04.3-desktop-amd64.iso.torrent'
 file_path = './src/temp_torrent/testmovie_short.torrent'
 
-# Create a session with modern API
+
+# just for development remove in production TODO
+import shutil
+shutil.rmtree('./download', ignore_errors=True)
+
 session = lt.session({
     'listen_interfaces': '0.0.0.0:6881',  # Listen on all interfaces on port 6881
     'enable_dht': True,
     'enable_lsd': True,
     'enable_upnp': True,
-    'enable_natpmp': True
+    'enable_natpmp': True,
+    'alert_mask': lt.alert.category_t.status_notification | lt.alert.category_t.error_notification
 })
 
-upload_rate_limit = 5 * 1024  # 5 KB/s
-download_rate_limit = 5 * 1024  # 5 KB/s
-session.set_upload_rate_limit(upload_rate_limit)
-session.set_download_rate_limit(download_rate_limit)
+# upload_rate_limit = 5 * 1024  # 5 KB/s
+# download_rate_limit = 5 * 1024  # 5 KB/s
+# session.set_upload_rate_limit(upload_rate_limit)
+# session.set_download_rate_limit(download_rate_limit)
 
 # Load the torrent
 torrent_info = lt.torrent_info(file_path)
@@ -24,7 +29,14 @@ params = {
     'storage_mode': lt.storage_mode_t.storage_mode_sparse,
     'ti': torrent_info
 }
+
 handle = session.add_torrent(params)
+# handle.force_recheck()
+
+session.set_alert_mask(lt.alert.category_t.all_categories)
+alerts = session.pop_alerts()
+for alert in alerts:
+    print(alert.message())
 
 print("\nTracker Status:")
 for tracker in handle.trackers():

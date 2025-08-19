@@ -153,7 +153,7 @@ const MovieDetails = () => {
           <div className="movieBox">
             <button
               className="movieFrame1"
-              onClick={() => navigate(`/movie/${movie.imdbID}/watch`)}
+              onClick={() => navigate(`/movie/${id}/watch`,  { state: { movie } })}
             >
               <img src={thePoster} alt={movie.Title ?? movie.title} />
             </button>

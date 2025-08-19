@@ -32,13 +32,14 @@
 - [✅] Production year, length, IMDb rating
 - [✅] Cover image
 - [✅] Users can post & view comments
-- [❌] If not downloaded, start torrent download on the server
-- [❌] Initiate streaming as soon as enough data is available
-- [❌] Store downloaded movies to avoid re-downloading
+- [✅] If not downloaded, start torrent download on the server
+- [✅] Initiate streaming as soon as enough data is available
+- [✅] Store downloaded movies to avoid re-downloading
 - [❌] Delete movies if unwatched for one month
 - [❌] Download English subtitles if available
 - [❌] Auto-select subtitles if video language ≠ user’s preferred language
-- [❌] Convert videos on-the-fly if unsupported (at least mkv format)
+- [✅ ?? ❌] Convert videos on-the-fly if unsupported (at least mkv format) 
+<!-- TODO  archive.org use mp4 always. there is no point for this check-->
 - [✅] Develop a RESTful API with OAuth2 authentication
 - [❌] Retrieve/update user profiles
 - [✅] Access/post comments via /comments/:id and /movies/:id/comments
