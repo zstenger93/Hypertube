@@ -21,6 +21,8 @@ import otherUsersRoute from "./src/routes/otherUsers.js";
 import clickRoute from "./src/routes/click.js";
 import addComment from "./src/routes/addComment.js";
 import getStateRoute from "./src/routes/getState.js";
+import path from "path";
+import fs from "fs";
 
 const { Client } = pg;
 
@@ -54,7 +56,7 @@ app.use("/comments", addComment);
 app.use("/state", getStateRoute);
 app.use("/users", otherUsersRoute);
 
-app.get("/check-file/:id/:moviename/:filename", (req, res) => {
+app.get("/check-file/:id/:moviename/:filename", async (req, res) => {
   const { id, moviename, filename } = req.params;
   const videoPath = path.resolve(
     "/usr/src/app/downloads",
@@ -63,10 +65,10 @@ app.get("/check-file/:id/:moviename/:filename", (req, res) => {
     filename
   );
 
-  // Check if the file exists
-  if (fs.existsSync(videoPath)) {
+  try {
+    await fs.promises.access(videoPath);
     return res.status(200).json({ exists: true });
-  } else {
+  } catch (error) {
     return res.status(404).json({ exists: false });
   }
 });

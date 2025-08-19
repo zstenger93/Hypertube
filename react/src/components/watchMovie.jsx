@@ -5,16 +5,6 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import videojs from "video.js";
 import "video.js/dist/video-js.css";
 
-const updateBufferedProgress = (videoRef, setBufferedProgress) => {
-  const video = videoRef.current;
-  if (video && video.buffered.length > 0) {
-    const bufferedEnd = video.buffered.end(video.buffered.length - 1); // End of the last buffered range
-    const duration = video.duration;
-    const bufferedPercentage = (bufferedEnd / duration) * 100;
-    setBufferedProgress(bufferedPercentage);
-  }
-};
-
 const startTorrentDownload = async (id, torrents) => {
   const torrentLink = `https://archive.org/download/${torrents}/${torrents}_archive.torrent`;
   try {
@@ -162,12 +152,11 @@ const WatchMovie = () => {
   useEffect(() => {
     if (isPublicorNot && videoRef.current && torrents) {
       const videoPath = `http://localhost:3000/stream/${id}/${torrents}/${torrents}_512kb.mp4`;
+      console.log("Video Path:", videoPath);
       initializeVideoPlayer(videoRef, playerRef, videoPath, setIsBuffering, setError, id, torrents); // Initialize video player with file check
-
       // Update buffered progress on 'progress' event
       const video = videoRef.current;
-      const handleProgress = () => updateBufferedProgress(videoRef, setBufferedProgress);
-      video.addEventListener("progress", handleProgress);
+      // video.addEventListener("progress", handleProgress);
 
       return () => {
         video.removeEventListener("progress", handleProgress);
@@ -182,50 +171,30 @@ const WatchMovie = () => {
     <div>
       <Logout />
       <p>Here comes the movies</p>
-      <h1>{id}</h1>
+      {isPublicorNot ? (
+          <>
+            {isBuffering && <p>Buffering...</p>} {/* Show buffering indicator */}
+            {error && <p>Error: Unable to load video after multiple attempts.</p>} {/* Show error message */}
+            {!error && (
+              <>
+                <video
+                  id="player"
+                  className="video-js vjs-default-skin"
+                  ref={videoRef}
+                  width="640"
+                  height="360"
+                  controls
+                ></video>
+              </>
+            )}
+          </>
+        ) : (
+          <p>This movie is protected by copyright or missing copyright information.</p>
+        )}
       {movie && (
         <div>
           <h2>{movie.Title ?? movie.title}</h2>
           <p>{movie.Plot ?? movie.plot}</p>
-          <h3>Torrent Data:</h3>
-          <div className="torrentList">
-            {torrents !== "" ? (
-              <div className="torrentItem">
-                <p>Name: {torrents}</p>
-                <h2>
-                  torrent link: https://archive.org/download/{torrents}/{torrents}_archive.torrent
-                </h2>
-                {isPublicorNot ? (
-                  <>
-                    {isBuffering && <p>Buffering...</p>} {/* Show buffering indicator */}
-                    {error && <p>Error: Unable to load video after multiple attempts.</p>} {/* Show error message */}
-                    {!error && (
-                      <>
-                        <video
-                          id="player"
-                          className="video-js vjs-default-skin"
-                          ref={videoRef}
-                          width="640"
-                          height="360"
-                          controls
-                        ></video>
-                        <div className="buffered-progress">
-                          <div
-                            className="buffered-bar"
-                            style={{ width: `${bufferedProgress}%` }}
-                          ></div>
-                        </div>
-                      </>
-                    )}
-                  </>
-                ) : (
-                  <p>This movie is protected by copyright or missing copyright information.</p>
-                )}
-              </div>
-            ) : (
-              <p>No torrents found or missing copyright information.</p>
-            )}
-          </div>
         </div>
       )}
     </div>
