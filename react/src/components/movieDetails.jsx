@@ -20,9 +20,7 @@ const MovieDetails = () => {
 
   const fetchYoutube = async (title) => {
     try {
-      const response = await fetch(
-        `http://${import.meta.env.VITE_IP}/youtubeRequests/${title}`
-      );
+      const response = await fetch(`/youtubeRequests/${title}`);
       if (!response.ok) throw new Error("Failed to fetch youtube video");
       const data = await response.json();
       if (data.items) {
@@ -37,15 +35,12 @@ const MovieDetails = () => {
 
   const handleWatched = async () => {
     try {
-      const response = await fetch(
-        `http://${import.meta.env.VITE_IP}/watched/${id}`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${getCookie("accessToken")}`,
-          },
-        }
-      );
+      const response = await fetch(`/watched/${id}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${getCookie("accessToken")}`,
+        },
+      });
       if (!response.ok) throw new Error("No Match In Array ");
       const data = await response.json();
       setWatched(data.isWatched);
@@ -57,15 +52,12 @@ const MovieDetails = () => {
   const handleLike = async () => {
     try {
       console.log;
-      const response = await fetch(
-        `http://${import.meta.env.VITE_IP}/like/${id}`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${getCookie("accessToken")}`,
-          },
-        }
-      );
+      const response = await fetch(`/like/${id}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${getCookie("accessToken")}`,
+        },
+      });
 
       if (!response.ok) throw new Error("No Match In Array");
       const data = await response.json();
@@ -77,15 +69,12 @@ const MovieDetails = () => {
 
   const handleWatch = async () => {
     try {
-      const response = await fetch(
-        `http://${import.meta.env.VITE_IP}/watch/${id}`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${getCookie("accessToken")}`,
-          },
-        }
-      );
+      const response = await fetch(`/watch/${id}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${getCookie("accessToken")}`,
+        },
+      });
       if (!response.ok) throw new Error("No Match In Array");
       const data = await response.json();
       setWatch(data.isWatch);
@@ -97,29 +86,24 @@ const MovieDetails = () => {
   useEffect(() => {
     const fetchMovieDetails = async () => {
       try {
-        const response = await fetch(
-          `http://${import.meta.env.VITE_IP}/watchTheMovie/${id}`
-        );
+        const response = await fetch(`/watchTheMovie/${id}`);
 
         if (!response.ok) throw new Error("Failed to fetch movie details");
         const data = await response.json();
         setMovie(data);
         if (data.Title ?? data.title) fetchYoutube(data.Title ?? data.title);
-        await fetch(`http://${import.meta.env.VITE_IP}/click/${id}`, {
+        await fetch(`/click/${id}`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${getCookie("accessToken")}`,
           },
         });
-        const state = await fetch(
-          `http://${import.meta.env.VITE_IP}/state/${id}`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${getCookie("accessToken")}`,
-            },
-          }
-        );
+        const state = await fetch(`/state/${id}`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${getCookie("accessToken")}`,
+          },
+        });
         if (!state.ok) throw new Error("Failed to get state");
         const stateData = await state.json();
         setWatched(stateData.isWatched);

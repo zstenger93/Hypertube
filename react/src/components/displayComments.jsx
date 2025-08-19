@@ -8,9 +8,7 @@ const Comments = ({ movie }) => {
 
   const getComments = async () => {
     try {
-      const response = await fetch(
-        `http://${import.meta.env.VITE_IP}/comments/${movie}`
-      );
+      const response = await fetch(`/comments/${movie}`);
       const data = await response.json();
       return data;
     } catch (error) {
@@ -35,7 +33,7 @@ const Comments = ({ movie }) => {
     const text = event.target.comment.value;
     const movieId = movie;
     try {
-      await fetch(`http://${import.meta.env.VITE_IP}/comments/${movieId}`, {
+      await fetch(`/comments/${movieId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

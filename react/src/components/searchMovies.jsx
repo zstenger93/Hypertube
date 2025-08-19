@@ -15,9 +15,7 @@ const SearchComponent = () => {
   useEffect(() => {
     const fetchInitialMovies = async () => {
       try {
-        const response = await fetch(
-          `http://${import.meta.env.VITE_IP}/movies?page=${page}`
-        );
+        const response = await fetch(`/movies?page=${page}`);
         const data = await response.json();
         const content = data.results || data || [];
         if (content.length === 0) {
@@ -60,9 +58,7 @@ const SearchComponent = () => {
     setQuery(value);
     if (value) {
       try {
-        const response = await fetch(
-          `http://${import.meta.env.VITE_IP}/movies/${value}`
-        );
+        const response = await fetch(`/movies/${value}`);
         const data = await response.json();
         if (data.Search) {
           setResults(data.Search || []);
@@ -77,9 +73,7 @@ const SearchComponent = () => {
       }
     } else {
       try {
-        const response = await fetch(
-          `http://${import.meta.env.VITE_IP}/movies?${page}`
-        );
+        const response = await fetch(`/movies?${page}`);
         const data = await response.json();
         if (data.Search) {
           setResults(data.Search || []);

@@ -13,15 +13,12 @@ const Profile = () => {
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        const response = await fetch(
-          `http://${import.meta.env.VITE_IP}/auth/validate`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${getCookie("accessToken")}`,
-            },
-          }
-        );
+        const response = await fetch(`/auth/validate`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${getCookie("accessToken")}`,
+          },
+        });
         if (!response.ok) throw new Error("Failed to fetch user details");
         const data = await response.json();
         setUser(data.user);
