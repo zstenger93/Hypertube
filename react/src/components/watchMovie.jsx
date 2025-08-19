@@ -19,9 +19,7 @@ const WatchMovie = () => {
   const downloadTorrent = async (magnetURI) => {
     await axios.get(`/api/download?magnetURI=${encodeURIComponent(magnetURI)}`);
     if (videoRef.current) {
-      videoRef.current.src = `http://${
-        import.meta.env.VITE_IP
-      }:3000/api/stream`;
+      videoRef.current.src = `http://localhost:3000/api/stream`;
     }
   };
 

@@ -10,15 +10,12 @@ const ProtectedRoute = ({ children }) => {
     const checkToken = async () => {
       const token = getCookie("accessToken");
       try {
-        const response = await fetch(
-          `http://${import.meta.env.VITE_IP}/auth/validate`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await fetch(`/auth/validate`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         if (response.ok) {
           const data = await response.json();
           setCookie("accessToken", data.user.oauth);

@@ -11,15 +11,12 @@ const OtherProfile = () => {
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        const response = await fetch(
-          `http://${import.meta.env.VITE_IP}/auth/validate`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-          }
-        );
+        const response = await fetch(`/auth/validate`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        });
         if (!response.ok) throw new Error("Failed to fetch user details");
         setUser(data.user);
       } catch (error) {
