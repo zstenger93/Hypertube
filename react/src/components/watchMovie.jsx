@@ -169,18 +169,12 @@ const WatchMovie = () => {
       const handleProgress = () => updateBufferedProgress(videoRef, setBufferedProgress);
       video.addEventListener("progress", handleProgress);
 
-  const searchTorrents = async () => {
-    const url = `https://archive.org/metadata/${query}`;
-    const response = await axios.get(url);
-    // const torrent = data.files.find(file => file.name.endsWith('.torrent'));
-    console.log(response.data);
-    setTorrents(response.data);
-  };
-
-  const downloadTorrent = async (magnetURI) => {
-    await axios.get(`/api/download?magnetURI=${encodeURIComponent(magnetURI)}`);
-    if (videoRef.current) {
-      videoRef.current.src = `http://localhost:3000/api/stream`;
+      return () => {
+        video.removeEventListener("progress", handleProgress);
+        if (playerRef.current) {
+          playerRef.current.dispose();
+        }
+      };
     }
   }, [isPublicorNot, videoRef, torrents, id]);
 
