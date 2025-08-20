@@ -4,38 +4,36 @@ import axios from "axios";
 const router = express.Router();
 const apiKey = process.env.OMDBAPI_KEY;
 
-router.get("/:id", async (req, res) => {
-  const { id } = req.params;
-  const url = `http://www.omdbapi.com/?apikey=${apiKey}&i=${id}`;
-  if (!id || id.length === 0) {
-    return res.status(400).send("Potato");
-  }
-  try {
-    const searchMoviesInDb = `
+async function getMovieFromDB(id) {
+  const searchMoviesInDb = `
     SELECT * FROM Movies WHERE LOWER(imdbID) = LOWER($1) LIMIT 1;
-    `;
-    const movieResult = await client.query(searchMoviesInDb, [id]);
-    if (movieResult.rows.length > 0 && movieResult.rows[0].imdbrating) {
-      return res.json(movieResult.rows[0]);
-    }
-    const response = await axios.get(url);
-    if (response.data.Response === "False") {
-      return res.status(404).send("Movie not found in OMDB API");
-    }
+  `;
+  const movieResult = await client.query(searchMoviesInDb, [id]);
+  if (movieResult.rows.length > 0 && movieResult.rows[0].imdbrating) {
+    return movieResult.rows[0];
+  }
+  return null;
+}
 
-    const movieData = {
-      title: response.data.Title ?? "N/A",
-      year: response?.data?.Year ?? "N/A",
-      genre: response.data.Genre ?? "N/A",
-      plot: response.data.Plot ?? "N/A",
-      director: response.data.Director ?? "N/A",
-      poster: response.data.Poster === "N/A" ? null : response.data.Poster,
-      imdbID: response.data.imdbID ?? "N/A",
-      imdbRating: response.data.imdbRating ?? "N/A",
-      imdbVotes: response.data.imdbVotes ?? "N/A",
-    };
-    await client.query("BEGIN");
-    const insertQuery = `
+async function inserMovieInDb(id) {
+  const url = `http://www.omdbapi.com/?apikey=${apiKey}&i=${id}`;
+  const response = await axios.get(url);
+  if (response.data.Response === "False") {
+    return res.status(404).send("Movie not found in OMDB API");
+  }
+  const movieData = {
+    title: response.data.Title ?? "N/A",
+    year: response?.data?.Year ?? "N/A",
+    genre: response.data.Genre ?? "N/A",
+    plot: response.data.Plot ?? "N/A",
+    director: response.data.Director ?? "N/A",
+    poster: response.data.Poster === "N/A" ? null : response.data.Poster,
+    imdbID: response.data.imdbID ?? "N/A",
+    imdbRating: response.data.imdbRating ?? "N/A",
+    imdbVotes: response.data.imdbVotes ?? "N/A",
+  };
+  await client.query("BEGIN");
+  const insertQuery = `
     INSERT INTO Movies (Title, Year, Genre, Plot, Director, Poster, imdbID, imdbRating, imdbVotes)
     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
     ON CONFLICT (imdbID) DO UPDATE 
@@ -51,24 +49,40 @@ router.get("/:id", async (req, res) => {
     RETURNING *;
   `;
 
-    const insertResult = await client.query(insertQuery, [
-      movieData.title,
-      movieData.year,
-      movieData.genre,
-      movieData.plot,
-      movieData.director,
-      movieData.poster,
-      movieData.imdbID,
-      movieData.imdbRating,
-      movieData.imdbVotes,
-    ]);
-    insertResult.rows;
-    await client.query("COMMIT");
-    return res.json(response.data);
+  const insertResult = await client.query(insertQuery, [
+    movieData.title,
+    movieData.year,
+    movieData.genre,
+    movieData.plot,
+    movieData.director,
+    movieData.poster,
+    movieData.imdbID,
+    movieData.imdbRating,
+    movieData.imdbVotes,
+  ]);
+  insertResult.rows;
+  await client.query("COMMIT");
+  return insertResult.rows[0];
+}
+
+router.get("/:id", async (req, res) => {
+  const { id } = req.params;
+  if (!id || id.length === 0) {
+    return res.status(400).send("Error: Invalid ID");
+  }
+  try {
+    const resp = await getMovieFromDB(id);
+    if (resp !== null) {
+      return res.json(resp);
+    }
+    const newMovie = await inserMovieInDb(id);
+    return res.json(newMovie);
   } catch (error) {
     console.error("Error fetching data:", error);
+    if (error.message === "Movie not found in OMDB API") {
+      return res.status(404).send(error.message);
+    }
     res.status(500).send("Error fetching data from OMDB API");
   }
 });
-
 export default router;

@@ -73,7 +73,6 @@ app.get("/check-file/:id/:moviename/:filename", async (req, res) => {
   }
 });
 
-
 // Route for streaming video files
 app.get("/stream/:id/:moviename/:filename", (req, res) => {
   const { id, moviename, filename } = req.params;
@@ -83,7 +82,7 @@ app.get("/stream/:id/:moviename/:filename", (req, res) => {
     moviename,
     filename
   ); // Construct the full path dynamically
-  
+
   // Check if the file exists
   if (!fs.existsSync(videoPath)) {
     return res.status(404).send("Video not found");

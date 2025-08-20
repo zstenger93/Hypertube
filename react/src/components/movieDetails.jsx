@@ -33,6 +33,26 @@ const MovieDetails = () => {
     }
   };
 
+  const fetchState = async (title) => {
+    try {
+      const state = await fetch(`/state/${id}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${getCookie("accessToken")}`,
+        },
+      });
+      if (!state.ok) throw new Error("Failed to get state");
+      const stateData = await state.json();
+      setWatched(stateData.isWatched);
+      setWatch(stateData.isWatch);
+      setLiked(stateData.isLiked);
+    } catch {
+      setWatched(false);
+      setWatch(false);
+      setLiked(false);
+    }
+  };
+
   const handleWatched = async () => {
     try {
       const response = await fetch(`/watched/${id}`, {
@@ -51,7 +71,6 @@ const MovieDetails = () => {
 
   const handleLike = async () => {
     try {
-      console.log;
       const response = await fetch(`/like/${id}`, {
         method: "POST",
         headers: {
@@ -98,17 +117,7 @@ const MovieDetails = () => {
             Authorization: `Bearer ${getCookie("accessToken")}`,
           },
         });
-        const state = await fetch(`/state/${id}`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${getCookie("accessToken")}`,
-          },
-        });
-        if (!state.ok) throw new Error("Failed to get state");
-        const stateData = await state.json();
-        setWatched(stateData.isWatched);
-        setWatch(stateData.isWatch);
-        setLiked(stateData.isLiked);
+        fetchState();
       } catch (error) {
       } finally {
         setLoading(false);
@@ -153,7 +162,9 @@ const MovieDetails = () => {
           <div className="movieBox">
             <button
               className="movieFrame1"
-              onClick={() => navigate(`/movie/${id}/watch`,  { state: { movie } })}
+              onClick={() =>
+                navigate(`/movie/${id}/watch`, { state: { movie } })
+              }
             >
               <img src={thePoster} alt={movie.Title ?? movie.title} />
             </button>

@@ -1,9 +1,8 @@
-import express from 'express';
-import axios from 'axios';
-import { client } from '../../index.js';
+import express from "express";
+import axios from "axios";
+import { client } from "../../index.js";
 const router = express.Router();
 const apiKey = process.env.OMDBAPI_KEY;
-
 
 router.get("/:title", async (req, res) => {
   const { title } = req.params;
