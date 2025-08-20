@@ -1,48 +1,51 @@
 import express from "express";
 import axios from "axios";
 import { client } from "../../index.js";
+import { justGetUser } from "../utils/validate.js";
+
 const router = express.Router();
 const apiKey = process.env.OMDBAPI_KEY;
 
-router.get("/:title", async (req, res) => {
-  const { title } = req.params;
-  if (!title || title.length === 0) {
-    try {
-      const fetchAllMovies = `
-        SELECT * FROM Movies LIMIT 50;
-      `;
-      const movieResult = await client.query(fetchAllMovies);
-      res.json(movieResult.rows);
-    } catch (error) {
-      res.status(500).send("Error fetching movies");
-    }
-    return;
+async function getMovies(req, res, user) {
+  try {
+    const limit = 20;
+    const page = parseInt(req.query.page, 10) || 1;
+    const offset = (page - 1) * limit;
+    const query = `SELECT * FROM Movies ORDER BY year DESC LIMIT $1 OFFSET $2;`;
+    const result = await client.query(query, [limit, offset]);
+    res.json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error fetching movies");
   }
-  if (title.length < 3) {
-    try {
-      const searchMoviesInDb = `
-      SELECT * FROM Movies WHERE Title ILIKE '%' || $1 || '%';
-    `;
-      const movieResult = await client.query(searchMoviesInDb, [title]);
-      if (movieResult.rows.length > 0) {
-        res.json(movieResult.rows);
-        return;
-      }
-      return res.json([]);
-    } catch {
-      return res.json([]);
-    }
+}
+
+async function getMoviesByName(req, res, user) {
+  try {
+    const limit = 20;
+    const page = parseInt(req.query.page, 10) || 1;
+    const offset = (page - 1) * limit;
+    const query = `SELECT * FROM Movies WHERE Title ILIKE '%' || $1 || '%' ORDER BY year DESC LIMIT $2 OFFSET $3;`;
+    const result = await client.query(query, [limit, offset]);
+    return result;
+  } catch (error) {
+    return null;
+  }
+}
+
+router.get("/:title?", async (req, res) => {
+  const { title } = req.params;
+  var user = await justGetUser();
+  const page = parseInt(req.query.page, 10) || 1;
+  if (!title || title.length < 3) {
+    return getMovies(req, res, user);
   }
   try {
-    const searchMoviesInDb = `
-    SELECT * FROM Movies WHERE Title ILIKE '%' || $1 || '%';
-  `;
-    const movieResult = await client.query(searchMoviesInDb, [title]);
-    if (movieResult.rows.length > 0) {
-      res.json(movieResult.rows);
-      return;
-    }
-    const url = `http://www.omdbapi.com/?apikey=${apiKey}&s=${title}`;
+    var movieResult = getMoviesByName(req, res, user);
+    if (movieResult !== null && movieResult.rows.length > 0) return res.json(movieResult.rows);
+    const url = `http://www.omdbapi.com/?apikey=${apiKey}&s=${encodeURIComponent(
+      title
+    )}&page=${page}`;
     const response = await axios.get(url);
     if (response.data.Response === "False") {
       return res.status(404).send("Movie not found in OMDB API");
@@ -63,7 +66,6 @@ router.get("/:title", async (req, res) => {
         Poster = COALESCE(EXCLUDED.Poster, Movies.Poster)
       RETURNING *;
     `;
-
       await client.query(insertQuery, [
         movie.title,
         movie.year,
@@ -72,12 +74,10 @@ router.get("/:title", async (req, res) => {
       ]);
     }
     await client.query("COMMIT");
-    res.json(response.data);
+    return getMovies(req, res, user);
   } catch (error) {
     await client.query("ROLLBACK");
-
-    console.error("Error fetching data:", error);
-    res.status(500).send("Error fetching data from OMDB API");
+    return res.status(500).send("Error fetching data from OMDB API");
   }
 });
 

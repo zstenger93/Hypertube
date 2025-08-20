@@ -3,11 +3,12 @@ import "../App.css";
 import { useNavigate } from "react-router-dom";
 import Logout from "./logout";
 import poster from "../assets/poster.jpg";
+import { getCookie } from "../utils/cookie";
 
 const SearchComponent = () => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
   const [hasMoreConent, moreConent] = useState(true);
   const [filter, setFilter] = useState("year");
   const navigate = useNavigate();
@@ -15,29 +16,26 @@ const SearchComponent = () => {
   useEffect(() => {
     const fetchInitialMovies = async () => {
       try {
-        const response = await fetch(`/movies?page=${page}`);
+        const token = getCookie("accessToken");
+        const url = `/movies/${encodeURIComponent(query)}?page=${page}`;
+        const response = await fetch(url, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
         const data = await response.json();
         const content = data.results || data || [];
         if (content.length === 0) {
           moreConent(false);
           return;
         }
-
         if (data.Search) {
           setResults((prev) => (page === 1 ? content : [...prev, ...content]));
         } else if (data) {
           setResults((prev) => [...prev, ...(data || [])]);
-
-          // setResults(data || []);
         }
-      } catch (error) {
-        //setResults([]);
-      }
+      } catch (error) {}
     };
-
     fetchInitialMovies();
-  }, [page]);
-
+  }, [page, query]);
   useEffect(() => {
     const handleScroll = () => {
       if (!hasMoreConent) return;
@@ -48,45 +46,13 @@ const SearchComponent = () => {
         setPage((prev) => prev + 1);
       }
     };
-
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [hasMoreConent]);
-
-  const handleApiRequest = async (e) => {
+  const handleApiRequest = (e) => {
     const value = e.target.value;
     setQuery(value);
-    if (value) {
-      try {
-        const response = await fetch(`/movies/${value}`);
-        const data = await response.json();
-        if (data.Search) {
-          setResults(data.Search || []);
-        } else if (data) {
-          setResults(data || []);
-        }
-        if (data.error) {
-          return;
-        }
-      } catch (error) {
-        setResults([]);
-      }
-    } else {
-      try {
-        const response = await fetch(`/movies?${page}`);
-        const data = await response.json();
-        if (data.Search) {
-          setResults(data.Search || []);
-        } else if (data) {
-          setResults(data || []);
-        }
-        if (data.error) {
-          return;
-        }
-      } catch (error) {
-        setResults([]);
-      }
-    }
+    setPage(1);
   };
 
   const handleFilterChange = (e) => {
