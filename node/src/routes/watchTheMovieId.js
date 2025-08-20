@@ -1,19 +1,9 @@
 import express from "express";
 import { client } from "../../index.js";
 import axios from "axios";
+import { getMovieFromDB } from "../utils/getMovieFromDb.js";
 const router = express.Router();
 const apiKey = process.env.OMDBAPI_KEY;
-
-async function getMovieFromDB(id) {
-  const searchMoviesInDb = `
-    SELECT * FROM Movies WHERE LOWER(imdbID) = LOWER($1) LIMIT 1;
-  `;
-  const movieResult = await client.query(searchMoviesInDb, [id]);
-  if (movieResult.rows.length > 0 && movieResult.rows[0].imdbrating) {
-    return movieResult.rows[0];
-  }
-  return null;
-}
 
 async function inserMovieInDb(id) {
   const url = `http://www.omdbapi.com/?apikey=${apiKey}&i=${id}`;

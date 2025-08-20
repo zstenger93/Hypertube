@@ -5,7 +5,6 @@ import axios from "axios";
 import crypto from "crypto";
 import { createTables } from "./src/db/createTables.js";
 import { checkUser, addUser } from "./src/db/user.js";
-import moviesRoute from "./src/routes/movieRoute.js";
 import movieTitleRoute from "./src/routes/movieTitleRoute.js";
 import watchTheMovieRoute from "./src/routes/watchTheMovieId.js";
 import youtubeMovieRoute from "./src/routes/youtubeRequestsRoute.js";
@@ -39,7 +38,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/movies", moviesRoute);
 app.use("/movies", movieTitleRoute);
 app.use("/watchTheMovie", watchTheMovieRoute);
 app.use("/youtubeRequests", youtubeMovieRoute);

@@ -82,7 +82,6 @@ function Login() {
       });
       if (!response.ok) {
         deleteCookie("accessToken");
-        // localStorage.removeItem("accessToken");
         return;
       }
       navigate("/search");
