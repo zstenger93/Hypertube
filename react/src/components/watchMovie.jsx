@@ -5,6 +5,7 @@ import { useParams, useLocation } from "react-router-dom";
 import videojs from "video.js";
 import "video.js/dist/video-js.css";
 
+
 const initializeVideoPlayer = async (videoRef, playerRef, videoPath, setIsBuffering, setError, id, torrents, retryCount = 0) => {
   try {
     const fileName = `${torrents}_512kb.mp4`;
@@ -63,6 +64,24 @@ const WatchMovie = () => {
   const [error, setError] = useState(false);
   const videoRef = useRef(null);
   const playerRef = useRef(null);
+
+  useEffect(() => {
+    const fetchSubtitles = async (id) => {
+      try {
+        const response = await fetch(`https://api.opensubtitles.com/api/v1/subtitles?imdb_id=${id}`, {
+          headers: {
+            "Api-Key": "YOUR_API_KEY",
+          },
+        });
+        if (!response.ok) throw new Error("Failed to fetch subtitles");
+        const data = await response.json();
+        console.log(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchSubtitles();
+  }, [id]);
 
   useEffect(() => {
     const fetchTorrentFile = async () => {
