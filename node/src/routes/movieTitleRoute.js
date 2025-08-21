@@ -25,6 +25,7 @@ async function getMoviesByName(req, res, user) {
     const limit = 20;
     const page = parseInt(req.query.page, 10) || 1;
     const offset = (page - 1) * limit;
+    console.log("debug")
     const query = `SELECT * FROM Movies WHERE Title ILIKE '%' || $1 || '%' ORDER BY year DESC LIMIT $2 OFFSET $3;`;
     const result = await client.query(query, [limit, offset]);
     return result;
