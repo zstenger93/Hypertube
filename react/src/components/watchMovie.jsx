@@ -128,7 +128,7 @@ const WatchMovie = () => {
 
   useEffect(() => {
     if (isPublicorNot && videoRef.current && torrents) {
-      const videoPath = `http://localhost:3000/stream/${id}/${torrents}/${torrents}_512kb.mp4`;
+      const videoPath = `/stream/${id}/${torrents}/${torrents}_512kb.mp4`;
       initializeVideoPlayer(
         videoRef,
         playerRef,
