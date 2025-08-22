@@ -9,7 +9,7 @@ async function inserMovieInDb(id) {
   const url = `http://www.omdbapi.com/?apikey=${apiKey}&i=${id}`;
   const response = await axios.get(url);
   if (response.data.Response === "False") {
-    return res.status(404).send("Movie not found in OMDB API");
+    throw new Error("Movie not found in OMDB API");
   }
   const movieData = {
     title: response.data.Title ?? "N/A",
@@ -68,11 +68,7 @@ router.get("/:id", async (req, res) => {
     const newMovie = await inserMovieInDb(id);
     return res.json(newMovie);
   } catch (error) {
-    console.error("Error fetching data:", error);
-    if (error.message === "Movie not found in OMDB API") {
-      return res.status(404).send(error.message);
-    }
-    res.status(500).send("Error fetching data from OMDB API");
+    return res.status(404).send(error.message);
   }
 });
 export default router;

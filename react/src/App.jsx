@@ -9,6 +9,7 @@ import WatchMovie from "./components/watchMovie";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import Profile from "./components/profile";
+import FourOFour from "./components/fourOFour";
 import AllComents from "./components/allComments";
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
           <Route path="/auth/intra/callback" element={<CallbackComponent />} />
           <Route path="/search" element={<SearchComponent />} />
           <Route path="/x" element={<AllComents />} />
+          <Route path="*" element={<FourOFour />} />
           <Route
             path="/movie/:id"
             element={

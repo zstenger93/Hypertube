@@ -42,9 +42,6 @@ const AllComments = () => {
           >
             <img src={comment.movieData.poster || "/src/assets/poster.jpg"} />
           </button>
-          {/* <button className="commentButton">
-            <img src={comment.user.profile_pic} />
-          </button> */}
           <div className="centerComment">
             <h3>
               {comment.movieData.title} ({comment.movieData.year})

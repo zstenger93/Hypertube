@@ -17,7 +17,6 @@ router.get("/:user", async (req, res) => {
       return res.status(500).send({ message: "The Token Is expired" });
     }
   } catch (error) {
-    console.error("Error fetching user:", error);
     return res.sendStatus(500);
   }
   try {

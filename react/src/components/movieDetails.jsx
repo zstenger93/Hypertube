@@ -107,7 +107,10 @@ const MovieDetails = () => {
       try {
         const response = await fetch(`/watchTheMovie/${id}`);
 
-        if (!response.ok) throw new Error("Failed to fetch movie details");
+        if (!response.ok) {
+          navigate("/404");
+          return;
+        }
         const data = await response.json();
         setMovie(data);
         if (data.Title ?? data.title) fetchYoutube(data.Title ?? data.title);

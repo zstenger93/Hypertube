@@ -28,7 +28,6 @@ const Comments = ({ movie }) => {
 
   const sendComment = async (event) => {
     event.preventDefault();
-    //const token = localStorage.getItem("accessToken");
     const token = getCookie("accessToken");
     const text = event.target.comment.value;
     const movieId = movie;

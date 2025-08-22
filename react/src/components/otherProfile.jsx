@@ -10,14 +10,18 @@ const OtherProfile = () => {
 
   useEffect(() => {
     const fetchUserDetails = async () => {
+      const { name } = useParams();
       try {
-        const response = await fetch(`/auth/validate`, {
+        const response = await fetch(`/users/${name}`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
         });
-        if (!response.ok) throw new Error("Failed to fetch user details");
+        if (!response.ok) {
+          navigate("/404");
+          return;
+        }
         setUser(data.user);
       } catch (error) {
       } finally {
