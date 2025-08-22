@@ -119,7 +119,6 @@ function Login() {
         );
       }
       const token = await userCredential.user.getIdToken();
-      //localStorage.setItem("accessToken", token);
       setCookie("accessToken", token);
       navigate("/search");
     } catch (error) {

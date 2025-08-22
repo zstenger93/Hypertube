@@ -3,9 +3,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import "../App.css";
 import Logout from "./logout";
 import profile from "../assets/pesant.jpg";
+import { getCookie } from "../utils/cookie";
 
 const OtherProfile = () => {
-  const { name } = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -13,10 +14,10 @@ const OtherProfile = () => {
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        const response = await fetch(`/users/${name}`, {
+        const response = await fetch(`/users/${id}`, {
           method: "GET",
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            Authorization: `Bearer ${getCookie("accessToken")}`,
           },
         });
         if (!response.ok) {
