@@ -7,9 +7,9 @@ import "video.js/dist/video-js.css";
 
 const initializeVideoPlayer = async (videoRef, playerRef, videoPath, setIsBuffering, setError, id, torrents, subtitles, retryCount = 0) => {
   try {
-    // Ensure the videoRef DOM node exists
-    if (!videoRef.current) {
-      console.error("Video element is not available yet.");
+    // Ensure the videoRef DOM node exists and is in the DOM
+    if (!videoRef.current || !document.body.contains(videoRef.current)) {
+      console.warn("The video element is not yet in the DOM.");
       return;
     }
 
@@ -135,8 +135,14 @@ const WatchMovie = () => {
   useEffect(() => {
     if (isPublicorNot && videoRef.current && torrents) {
       const videoPath = `http://localhost:3000/stream/${id}/${torrents}/${torrents}_512kb.mp4`;
-      initializeVideoPlayer(videoRef, playerRef, videoPath, setIsBuffering, setError, id, torrents, subtitles);
+  
+      // Wait for the DOM to fully render the video element
+      const timeout = setTimeout(() => {
+        initializeVideoPlayer(videoRef, playerRef, videoPath, setIsBuffering, setError, id, torrents, subtitles);
+      }, 0);
+  
       return () => {
+        clearTimeout(timeout);
         if (playerRef.current) {
           playerRef.current.dispose();
           playerRef.current = null; // Reset the player reference
