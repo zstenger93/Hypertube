@@ -59,7 +59,7 @@ router.get("/:title?", async (req, res) => {
     }
     if (page > 5) {
       return res
-        .status(404)
+        .status(500)
         .send("Need to save API rate Limits so I need to hard cap this ");
     }
     const url = `http://www.omdbapi.com/?apikey=${apiKey}&s=${encodeURIComponent(
@@ -67,7 +67,7 @@ router.get("/:title?", async (req, res) => {
     )}&page=${page}`;
     const response = await axios.get(url);
     if (response.data.Response === "False") {
-      return res.status(404).send("Movie not found in OMDB API");
+      return res.status(500).send("Movie not found in OMDB API");
     }
 
     await client.query("BEGIN");
@@ -99,7 +99,7 @@ router.get("/:title?", async (req, res) => {
     if (movieRows !== null && movieRows.length > 0) {
       return res.json(movieRows);
     }
-    return res.status(404).send("No movies found");
+    return res.status(500).send("No more movies found");
   } catch (error) {
     await client.query("ROLLBACK");
     console.error(error);
