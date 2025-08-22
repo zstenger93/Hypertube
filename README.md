@@ -13,7 +13,7 @@
 - [✅] Logout with one click from any page
 - [❌] Select a preferred language (default: English)
 - [❌] Modify profile details (email, profile picture, info)
-- [❌] View other users' profiles (without email visibility)
+- [✅] View other users' profiles (without email visibility)
 - [❌] Implement a Library Section (authenticated users only)
 - [✅] Search field querying at least two external video content sources
 - [✅] Display search results as thumbnails, sorted by name
@@ -23,7 +23,7 @@
 - [✅] Production year (if available)
 - [✅] IMDb rating (if available)
 - [✅] Cover image
-- [❌] Differentiate watched & unwatched videos in thumbnails
+- [✅] Differentiate watched & unwatched videos in thumbnails
 - [✅] Implement infinite scrolling (no "next page" link)
 - [✅] Sort & filter options (name, genre, IMDb rating, year, etc.)
 - [✅] Implement a Video Section (authenticated users only)
