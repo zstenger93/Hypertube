@@ -7,6 +7,12 @@ import "video.js/dist/video-js.css";
 
 const initializeVideoPlayer = async (videoRef, playerRef, videoPath, setIsBuffering, setError, id, torrents, subtitles, retryCount = 0) => {
   try {
+    // Ensure the videoRef DOM node exists
+    if (!videoRef.current) {
+      console.error("Video element is not available yet.");
+      return;
+    }
+
     const fileName = `${torrents}_512kb.mp4`;
     const response = await fetch(`http://localhost:3000/check-file/${id}/${torrents}/${fileName}`);
     const data = await response.json();
@@ -16,6 +22,7 @@ const initializeVideoPlayer = async (videoRef, playerRef, videoPath, setIsBuffer
       setError(false);
 
       if (!playerRef.current) {
+        // Initialize the video.js player
         playerRef.current = videojs(videoRef.current, {
           controls: true,
           autoplay: true,
@@ -36,6 +43,7 @@ const initializeVideoPlayer = async (videoRef, playerRef, videoPath, setIsBuffer
           );
         });
 
+        // Handle buffering and errors
         playerRef.current.on("waiting", () => setIsBuffering(true));
         playerRef.current.on("playing", () => setIsBuffering(false));
         playerRef.current.on("error", () => {
@@ -45,6 +53,7 @@ const initializeVideoPlayer = async (videoRef, playerRef, videoPath, setIsBuffer
           }, 5000);
         });
       } else {
+        // Update the video source if the player already exists
         playerRef.current.src({ src: videoPath, type: "video/mp4" });
         playerRef.current.play();
       }
@@ -130,6 +139,7 @@ const WatchMovie = () => {
       return () => {
         if (playerRef.current) {
           playerRef.current.dispose();
+          playerRef.current = null; // Reset the player reference
         }
       };
     }
