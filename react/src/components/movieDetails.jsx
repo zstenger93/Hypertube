@@ -15,6 +15,7 @@ const MovieDetails = () => {
   const [watched, setWatched] = useState(false);
   const [watch, setWatch] = useState(false);
   const [liked, setLiked] = useState(false);
+  const [user, setUser] = useState(null);
 
   const navigate = useNavigate();
 
@@ -105,6 +106,19 @@ const MovieDetails = () => {
   useEffect(() => {
     const fetchMovieDetails = async () => {
       try {
+        const validResp = await fetch(`/auth/validate`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${getCookie("accessToken")}`,
+          },
+        });
+        console.log(validResp);
+        if (!validResp.ok) {
+          navigate("/404");
+          return;
+        }
+        const validUser = await validResp.json();
+        setUser(validUser);
         const response = await fetch(`/watchTheMovie/${id}`);
         if (!response.ok) {
           navigate("/404");
@@ -218,7 +232,7 @@ const MovieDetails = () => {
       ) : (
         <p>Movie details not found.</p>
       )}
-      <Comments movie={id} />
+      <Comments movie={id} currentUser={user} />
     </div>
   );
 };

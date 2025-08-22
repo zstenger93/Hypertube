@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 import "../App.css";
 import { getCookie } from "../utils/cookie";
 
-const Comments = ({ movie }) => {
+const Comments = ({ movie, currentUser }) => {
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  console.log(currentUser);
   const getComments = async () => {
     try {
       const response = await fetch(`/comments/${movie}`);
@@ -66,6 +66,12 @@ const Comments = ({ movie }) => {
                 <div className="commentUser">
                   <h3>{comment.user.username}</h3>
                   <img src={comment.user.profile_pic} alt="Profile" />
+                  {currentUser && comment.id === currentUser.user_id && (
+                    <button>Edit</button>
+                  )}
+                  {currentUser && comment.id === currentUser.user_id && (
+                    <button>Delete</button>
+                  )}
                 </div>
               ) : (
                 <div className="commentUser">
