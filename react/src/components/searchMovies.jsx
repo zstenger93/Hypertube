@@ -3,6 +3,7 @@ import "../App.css";
 import { useNavigate } from "react-router-dom";
 import Logout from "./logout";
 import poster from "../assets/poster.jpg";
+import icantmeme from "../assets/icantmeme.jpg";
 import { getCookie } from "../utils/cookie";
 
 const SearchComponent = () => {
@@ -30,7 +31,6 @@ const SearchComponent = () => {
           moreConent(false);
           return;
         }
-        console.log(data);
         if (data) {
           moreConent(true);
           setResults((prev) => {
@@ -159,6 +159,23 @@ const SearchComponent = () => {
                     style={{ width: "100%", borderRadius: "8px" }}
                     onError={onErrorImage}
                   />
+                  {movie.isWatched && (
+                    <img
+                      src={icantmeme}
+                      alt="Watched overlay"
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        opacity: 0.3,
+                        pointerEvents: "none",
+                        zIndex: 10,
+                      }}
+                    />
+                  )}
                   <div
                     style={{
                       position: "absolute",
@@ -176,7 +193,7 @@ const SearchComponent = () => {
                     <span style={{ marginRight: "5px" }}>📈</span>{" "}
                     {movie.click_count}
                   </div>
-                </div>{" "}
+                </div>
                 <h3>{movie.Title ?? movie.title}</h3>
                 <p>{movie.Year ?? movie.year}</p>
               </button>

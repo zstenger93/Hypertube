@@ -6,6 +6,15 @@ import { justGetUser } from "../utils/validate.js";
 const router = express.Router();
 const apiKey = process.env.OMDBAPI_KEY;
 
+function appendWatchedMovies(user, result) {
+  if (!user) return result.map((m) => ({ ...m, isWatched: false }));
+  const watched = user.watched_movies || [];
+  return result.map((movie) => ({
+    ...movie,
+    isWatched: watched.includes(movie.imdbid || movie.imdbID),
+  }));
+}
+
 async function getMovies(req, res, user) {
   try {
     const limit = 20;
@@ -13,7 +22,8 @@ async function getMovies(req, res, user) {
     const offset = (page - 1) * limit;
     const query = `SELECT * FROM Movies ORDER BY year DESC LIMIT $1 OFFSET $2;`;
     const result = await client.query(query, [limit, offset]);
-    res.json(result.rows);
+    const newResult = appendWatchedMovies(user, result.rows);
+    res.json(newResult);
   } catch (error) {
     console.error(error);
     res.status(500).send("Error fetching movies");
@@ -28,7 +38,7 @@ async function getMoviesByName(req, res, user) {
     const { title } = req.params;
     const query = `SELECT * FROM Movies WHERE Title ILIKE '%' || $1 || '%' ORDER BY year DESC LIMIT $2 OFFSET $3;`;
     const result = await client.query(query, [title, limit, offset]);
-    return result.rows;
+    return appendWatchedMovies(user, result.rows);
   } catch (error) {
     return null;
   }
@@ -36,9 +46,8 @@ async function getMoviesByName(req, res, user) {
 
 router.get("/:title?", async (req, res) => {
   const { title } = req.params;
-  const user = await justGetUser();
+  const user = await justGetUser(req, res);
   const page = parseInt(req.query.page, 10) || 1;
-
   if (!title || title.length < 3) {
     return getMovies(req, res, user);
   }

@@ -23,7 +23,7 @@ export async function getUserFromToken(req, res) {
 
 export async function getUserFromTokenAndAdd(req, res, token) {
   var user = null;
-  if (!token) return null, null;
+  if (!token) return null;
   try {
     const searchToken = `SELECT * FROM Users WHERE oauth = $1;`;
     const result = await client.query(searchToken, [token]);
@@ -42,7 +42,9 @@ export async function justGetUser(req, resp) {
   var user = null;
   try {
     const token = req.headers.authorization?.split(" ")[1];
-    if (!token) return res.sendStatus(401);
+    if (!token) return null;
+    const searchToken = `SELECT * FROM Users WHERE oauth = $1;`;
+    const result = await client.query(searchToken, [token]);
     if (result.rows.length !== 0) {
       user = result.rows[0];
     }

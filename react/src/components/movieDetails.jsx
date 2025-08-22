@@ -187,12 +187,11 @@ const MovieDetails = () => {
                   <button onClick={() => handleWatched()}> Not Watched </button>
                 )}
                 {watch ? (
-                  <button onClick={() => handleWatch()}> Watch List </button>
-                ) : (
                   <button onClick={() => handleWatch()}>
-                    {" "}
-                    Remove From Watch List{" "}
+                    Remove From Watch List
                   </button>
+                ) : (
+                  <button onClick={() => handleWatch()}> Watch List </button>
                 )}
               </div>
             </div>
