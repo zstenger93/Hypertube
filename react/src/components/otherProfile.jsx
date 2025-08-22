@@ -28,9 +28,7 @@ const OtherProfile = () => {
   });
 
   if (loading) return <p>Loading...</p>;
-
   if (user.profile_pic === null) user.profile_pic = profile;
-
   return (
     <div className="center">
       <Logout />

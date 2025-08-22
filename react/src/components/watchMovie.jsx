@@ -17,9 +17,7 @@ const initializeVideoPlayer = async (
 ) => {
   try {
     const fileName = `${torrents}_512kb.mp4`;
-    const response = await fetch(
-      `http://localhost:3000/check-file/${id}/${torrents}/${fileName}`
-    );
+    const response = await fetch(`/check-file/${id}/${torrents}/${fileName}`);
     const data = await response.json();
 
     if (data.exists) {
