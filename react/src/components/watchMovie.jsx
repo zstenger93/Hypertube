@@ -68,19 +68,15 @@ const WatchMovie = () => {
   useEffect(() => {
     const fetchSubtitles = async (id) => {
       try {
-        const response = await fetch(`https://api.opensubtitles.com/api/v1/subtitles?imdb_id=${id}`, {
-          headers: {
-            "Api-Key": "YOUR_API_KEY",
-          },
-        });
+        const response = await fetch(`/api/subtitles/${id}`); // Call the backend route
         if (!response.ok) throw new Error("Failed to fetch subtitles");
         const data = await response.json();
-        console.log(data);
+        console.log(data); // Handle the subtitles data
       } catch (error) {
         console.error(error);
       }
     };
-    fetchSubtitles();
+    fetchSubtitles(id);
   }, [id]);
 
   useEffect(() => {
