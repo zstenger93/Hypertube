@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { getCookie, setCookie } from "../utils/cookie";
+import salt from "../assets/salt.jpg";
 
 function CallbackComponent() {
   const navigate = useNavigate();
@@ -38,11 +39,10 @@ function CallbackComponent() {
         navigate("/");
       }
     };
-
     fetchToken();
   }, [navigate]);
 
-  return <img></img>;
+  return <img className="centerMemes" src={salt}></img>;
 }
 
 export default CallbackComponent;
