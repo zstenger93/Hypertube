@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import "../App.css";
 import Logout from "./logout";
 import profile from "../assets/pesant.jpg";
 
 const OtherProfile = () => {
+  const { name } = useParams();
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUserDetails = async () => {
-      const { name } = useParams();
       try {
         const response = await fetch(`/users/${name}`, {
           method: "GET",
@@ -22,24 +23,28 @@ const OtherProfile = () => {
           navigate("/404");
           return;
         }
-        setUser(data.user);
+        const data = await response.json();
+        setUser(data);
       } catch (error) {
+        console.error(error);
       } finally {
         setLoading(false);
       }
     };
+
     fetchUserDetails();
-  });
+  }, [name, navigate]);
 
   if (loading) return <p>Loading...</p>;
-  if (user.profile_pic === null) user.profile_pic = profile;
+  if (!user) return <p>User not found</p>;
+  const profilePic = user.profile_pic ?? profile;
   return (
     <div className="center">
       <Logout />
       <div className="profileContainer">
         <h1>Profile</h1>
         <div className="profile">
-          <img src={user.profile_pic} alt="profile" />
+          <img src={profilePic} alt="profile" />
           <img src={"/src/assets/jail.png"} alt="overlay" className="overlay" />
         </div>
         <h3>{user.username}</h3>

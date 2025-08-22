@@ -4,30 +4,31 @@ const router = express.Router();
 
 router.get("/:user", async (req, res) => {
   const { user } = req.params;
+  console.log(user);
+
   if (!user || user.length === 0) {
     return res.status(404).send("Potato");
   }
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) return res.sendStatus(401);
+
   try {
-    const searchToken = `SELECT * FROM Users WHERE oauth = $1;`;
-    const result = await client.query(searchToken, [token]);
-    if (result.rows.length === 0) {
-      userData = result.rows[0];
-      return res.status(500).send({ message: "The Token Is expired" });
+    const authUser = await justGetUser(token);
+    console.log(authUser);
+    if (!authUser) {
+      return res.status(401).send("Invalid Token");
     }
-  } catch (error) {
-    return res.sendStatus(500);
-  }
-  try {
+    console.log("huh");
     const searchUser = `SELECT * FROM Users WHERE username = $1;`;
     const userResults = await client.query(searchUser, [user]);
+
     if (userResults.rows.length === 0) {
       return res.status(404).send("User not found");
     }
-    res.json(commentsResult.rows);
+    return res.json(userResults.rows[0]);
   } catch (error) {
-    res.status(500).send("Error");
+    console.error(error);
+    return res.status(500).send("Internal server error");
   }
 });
 

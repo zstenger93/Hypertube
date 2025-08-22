@@ -11,6 +11,7 @@ import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import Profile from "./components/profile";
 import FourOFour from "./components/fourOFour";
 import AllComents from "./components/allComments";
+import OtherProfile from "./components/otherProfile";
 export default function App() {
   return (
     <Router>
@@ -41,7 +42,7 @@ export default function App() {
             path="/prof/:id"
             element={
               <ProtectedRoute>
-                <Profile />
+                <OtherProfile />
               </ProtectedRoute>
             }
           />
