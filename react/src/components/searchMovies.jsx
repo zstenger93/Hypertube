@@ -11,10 +11,13 @@ const SearchComponent = () => {
   const [page, setPage] = useState(0);
   const [hasMoreConent, moreConent] = useState(true);
   const [filter, setFilter] = useState("year");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchInitialMovies = async () => {
+      setLoading(true);
+
       try {
         const token = getCookie("accessToken");
         const url = `/movies/${encodeURIComponent(query)}?page=${page}`;
@@ -27,31 +30,47 @@ const SearchComponent = () => {
           moreConent(false);
           return;
         }
-        if (data.Search) {
-          setResults((prev) => (page === 1 ? content : [...prev, ...content]));
-        } else if (data) {
-          setResults((prev) => [...prev, ...(data || [])]);
+        console.log(data);
+        if (data) {
+          moreConent(true);
+          setResults((prev) => {
+            const mergedResults = [...prev, ...data];
+            const uniqueMergedResults = [
+              ...new Map(
+                mergedResults.map((merged) => [merged.imdbid, merged])
+              ).values(),
+            ];
+            return uniqueMergedResults;
+          });
+        } else {
+          moreConent(false);
         }
-      } catch (error) {}
+      } catch (error) {
+      } finally {
+        setLoading(false);
+      }
     };
     fetchInitialMovies();
   }, [page, query]);
+
   useEffect(() => {
     const handleScroll = () => {
-      if (!hasMoreConent) return;
+      if (!hasMoreConent || loading) return;
       if (
         window.innerHeight + document.documentElement.scrollTop >=
-        document.documentElement.offsetHeight - 1500
-      ) {
+        document.documentElement.offsetHeight - 500
+      )
         setPage((prev) => prev + 1);
-      }
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [hasMoreConent]);
+  }, [hasMoreConent, loading]);
+
   const handleApiRequest = (e) => {
     const value = e.target.value;
     setQuery(value);
+    setResults([]);
+    moreConent(true);
     setPage(1);
   };
 

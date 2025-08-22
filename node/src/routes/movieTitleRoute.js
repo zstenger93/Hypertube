@@ -25,10 +25,10 @@ async function getMoviesByName(req, res, user) {
     const limit = 20;
     const page = parseInt(req.query.page, 10) || 1;
     const offset = (page - 1) * limit;
-    console.log("debug")
+    const { title } = req.params;
     const query = `SELECT * FROM Movies WHERE Title ILIKE '%' || $1 || '%' ORDER BY year DESC LIMIT $2 OFFSET $3;`;
-    const result = await client.query(query, [limit, offset]);
-    return result;
+    const result = await client.query(query, [title, limit, offset]);
+    return result.rows;
   } catch (error) {
     return null;
   }
@@ -36,14 +36,23 @@ async function getMoviesByName(req, res, user) {
 
 router.get("/:title?", async (req, res) => {
   const { title } = req.params;
-  var user = await justGetUser();
+  const user = await justGetUser();
   const page = parseInt(req.query.page, 10) || 1;
+
   if (!title || title.length < 3) {
     return getMovies(req, res, user);
   }
+
   try {
-    var movieResult = getMoviesByName(req, res, user);
-    if (movieResult !== null && movieResult.rows.length > 0) return res.json(movieResult.rows);
+    let movieRows = await getMoviesByName(req, res, user);
+    if (movieRows !== null && movieRows.length > 0) {
+      return res.json(movieRows);
+    }
+    if (page > 5) {
+      return res
+        .status(404)
+        .send("Need to save API rate Limits so I need to hard cap this ");
+    }
     const url = `http://www.omdbapi.com/?apikey=${apiKey}&s=${encodeURIComponent(
       title
     )}&page=${page}`;
@@ -51,6 +60,7 @@ router.get("/:title?", async (req, res) => {
     if (response.data.Response === "False") {
       return res.status(404).send("Movie not found in OMDB API");
     }
+
     await client.query("BEGIN");
     for (let element of response.data.Search) {
       const movie = {
@@ -59,14 +69,14 @@ router.get("/:title?", async (req, res) => {
         imdbID: element.imdbID,
         year: element.Year,
       };
+
       const insertQuery = `
-      INSERT INTO Movies (Title, Year, Genre, Plot, Director, Poster, imdbID, imdbRating, imdbVotes)
-      VALUES ($1, $2, NULL, NULL, NULL, $3, $4, NULL, NULL)
-      ON CONFLICT (imdbID) DO UPDATE
-      SET 
-        Poster = COALESCE(EXCLUDED.Poster, Movies.Poster)
-      RETURNING *;
-    `;
+        INSERT INTO Movies (Title, Year, Genre, Plot, Director, Poster, imdbID, imdbRating, imdbVotes)
+        VALUES ($1, $2, NULL, NULL, NULL, $3, $4, NULL, NULL)
+        ON CONFLICT (imdbID) DO UPDATE
+        SET Poster = COALESCE(EXCLUDED.Poster, Movies.Poster)
+        RETURNING *;
+      `;
       await client.query(insertQuery, [
         movie.title,
         movie.year,
@@ -75,9 +85,15 @@ router.get("/:title?", async (req, res) => {
       ]);
     }
     await client.query("COMMIT");
-    return getMovies(req, res, user);
+
+    movieRows = await getMoviesByName(req, res, user);
+    if (movieRows !== null && movieRows.length > 0) {
+      return res.json(movieRows);
+    }
+    return res.status(404).send("No movies found");
   } catch (error) {
     await client.query("ROLLBACK");
+    console.error(error);
     return res.status(500).send("Error fetching data from OMDB API");
   }
 });
