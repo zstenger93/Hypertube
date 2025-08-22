@@ -57,7 +57,7 @@ router.get("/:title?", async (req, res) => {
     if (movieRows !== null && movieRows.length > 0) {
       return res.json(movieRows);
     }
-    if (page > 5) {
+    if (page > 3) {
       return res
         .status(500)
         .send("Need to save API rate Limits so I need to hard cap this ");
