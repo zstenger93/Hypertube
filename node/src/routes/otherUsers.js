@@ -5,7 +5,7 @@ const router = express.Router();
 router.get("/:user", async (req, res) => {
   const { user } = req.params;
   if (!user || user.length === 0) {
-    return res.status(400).send("Potato");
+    return res.status(404).send("Potato");
   }
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) return res.sendStatus(401);

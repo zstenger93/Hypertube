@@ -15,10 +15,11 @@ const SearchComponent = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+
+
   useEffect(() => {
     const fetchInitialMovies = async () => {
       setLoading(true);
-
       try {
         const token = getCookie("accessToken");
         const url = `/movies/${encodeURIComponent(query)}?page=${page}`;

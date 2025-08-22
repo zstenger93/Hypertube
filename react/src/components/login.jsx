@@ -68,7 +68,6 @@ function Login() {
     try {
       const result = await signInWithPopup(auth, provider);
       const token = await result.user.getIdToken();
-      // localStorage.setItem("accessToken", token);
       setCookie("accessToken", token);
     } catch (error) {
       return;
@@ -84,8 +83,12 @@ function Login() {
         deleteCookie("accessToken");
         return;
       }
+      const data = await response.json();
+      setCookie("accessToken", data.user.oauth);
       navigate("/search");
-    } catch {}
+    } catch {
+      navigate("/404");
+    }
   };
 
   const handleForgotPassword = async () => {
@@ -119,7 +122,7 @@ function Login() {
       setCookie("accessToken", token);
       navigate("/search");
     } catch (error) {
-      //console.error("Authentication Error:", error);
+      navigate("/404");
     }
   };
 

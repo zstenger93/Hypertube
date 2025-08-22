@@ -106,7 +106,6 @@ const MovieDetails = () => {
     const fetchMovieDetails = async () => {
       try {
         const response = await fetch(`/watchTheMovie/${id}`);
-
         if (!response.ok) {
           navigate("/404");
           return;

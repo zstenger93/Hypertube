@@ -25,6 +25,8 @@ function CallbackComponent() {
               },
             });
             if (!response.ok) throw new Error("Failed to fetch user details");
+            const data = await response.json();
+            setCookie("accessToken", data.user.oauth);
             navigate("/search");
           } else {
             navigate("/");
@@ -40,7 +42,7 @@ function CallbackComponent() {
     fetchToken();
   }, [navigate]);
 
-  return <p>Authenticating...</p>;
+  return <img></img>;
 }
 
 export default CallbackComponent;
