@@ -68,10 +68,10 @@ const WatchMovie = () => {
   useEffect(() => {
     const fetchSubtitles = async (id) => {
       try {
-        const response = await fetch(`/api/subtitles/${id}`); // Call the backend route
+        const response = await fetch(`/movies/subtitles/${id}`); // Call the backend route
         if (!response.ok) throw new Error("Failed to fetch subtitles");
         const data = await response.json();
-        console.log(data); // Handle the subtitles data
+        console.log(data);
       } catch (error) {
         console.error(error);
       }
