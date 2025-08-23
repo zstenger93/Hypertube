@@ -1,5 +1,5 @@
-import express from 'express';
-import { client } from '../../index.js';
+import express from "express";
+import { client } from "../../index.js";
 const router = express.Router();
 
 router.get("/:movieId", async (req, res) => {
@@ -32,4 +32,4 @@ router.get("/:movieId", async (req, res) => {
   }
 });
 
-export default router
+export default router;
