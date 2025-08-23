@@ -33,7 +33,11 @@ export async function validateFirebaseToken(token) {
         idToken: token,
       }
     );
-    return response.data.users[0];
+    const user = response.data.users[0];
+    if (user.email && user.email.endsWith("@student.42heilbronn.de")) {
+      return null;
+    }
+    return user;
   } catch (error) {
     return null;
   }
