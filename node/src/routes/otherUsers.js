@@ -130,7 +130,9 @@ router.get("/:id", async (req, res) => {
     if (userResults.rows.length === 0) {
       return res.status(404).send("User not found");
     }
-    return res.json(userResults.rows[0]);
+    const user = userResults.rows[0];
+    user.oauth = null;
+    return res.json(user);
   } catch (error) {
     console.error(error);
     return res.status(500).send("Internal server error");

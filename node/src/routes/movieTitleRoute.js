@@ -34,6 +34,20 @@ async function getMovies(req, res, user) {
   }
 }
 
+async function getMovieByID(req, res) {
+  try {
+    const { title } = req.params;
+    console.log(title);
+    if (!title) return null;
+    const query = "SELECT * FROM Movies WHERE imdbID = $1";
+    const result = await client.query(query, [title]);
+    if (result.rows.length === 0) return null;
+    return result.rows[0];
+  } catch (error) {
+    return null;
+  }
+}
+
 async function getMoviesByName(req, res, user) {
   try {
     const limit = 20;
@@ -112,10 +126,11 @@ router.get("/:title?", async (req, res) => {
   const { title } = req.params;
   const user = await justGetUser(req, res);
   const page = parseInt(req.query.page, 10) || 1;
+  const moveId = await getMovieByID(req, res);
+  if (moveId) return res.json(moveId);
   if (!title || title.length < 3) {
     return getMovies(req, res, user);
   }
-
   try {
     let movieRows = await getMoviesByName(req, res, user);
     if (movieRows !== null && movieRows.length > 0) {

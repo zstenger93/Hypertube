@@ -5,6 +5,7 @@ import Logout from "./logout";
 import profile from "../assets/pesant.jpg";
 import { getCookie } from "../utils/cookie";
 import ChangeDetails from "./changeDetails";
+import Library from "./library";
 
 const Profile = () => {
   const [user, setUser] = useState(null);
@@ -72,6 +73,7 @@ const Profile = () => {
         </select>
         <ChangeDetails name="Username" currentValue={user.username} api="" />
         <ChangeDetails name="Email" currentValue={user.email} api="" />
+        <Library user={user} mode="0" />
       </div>
     </div>
   );

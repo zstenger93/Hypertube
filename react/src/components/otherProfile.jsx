@@ -49,6 +49,7 @@ const OtherProfile = () => {
           <img src={"/src/assets/jail.png"} alt="overlay" className="overlay" />
         </div>
         <h3>{user.username}</h3>
+        <Library user={user} mode="0" />
       </div>
     </div>
   );
