@@ -26,6 +26,7 @@ router.get("", async (req, res) => {
       return res.status(404).send("User not found");
     }
     user = result.rows[0];
+    
     res.status(200).send({ message: "User is valid", user: user });
   } catch (error) {
     res.status(404).send("Error");

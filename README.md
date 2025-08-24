@@ -32,13 +32,11 @@
 - [✅] Initiate streaming as soon as enough data is available
 - [✅] Store downloaded movies to avoid re-downloading
 - [❌] Implement a Library Section (authenticated users only)
-- [❌] Download English subtitles if available
-- [❌] Auto-select subtitles if video language ≠ user’s preferred language
 - [❌] Provide proof that the API is truly RESTful
 - [❌] Retrieve/update user profiles
 - [❌] Modify profile details (email, profile picture, info)
-- [❌] Select a preferred language (default: English)
 - [❌] username, last name, first name, needs to be edited
+- [✅] Select a preferred language (default: English)
 - [✅] Develop a RESTful API with OAuth2 authentication
 - [✅] Access/post comments via /comments/:id and /movies/:id/comments
 - [✅] View front page with top movies
@@ -47,6 +45,8 @@
 <!-- TODO  archive.org use mp4 always. there is no point for this check-->
 - [✅ ?? ❌] Convert videos on-the-fly if unsupported (at least mkv format) 
 - [❌] Delete movies if unwatched for one month
+- [❌] Auto-select subtitles if video language ≠ user’s preferred language
+- [❌] Download English subtitles if available
 
   ❌ Bonus Part
 

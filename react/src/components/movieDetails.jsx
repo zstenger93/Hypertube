@@ -34,33 +34,15 @@ const MovieDetails = () => {
     }
   };
 
-  const fetchState = async (title) => {
-    try {
-      const state = await fetch(`/state/${id}`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${getCookie("accessToken")}`,
-        },
-      });
-      if (!state.ok) throw new Error("Failed to get state");
-      const stateData = await state.json();
-      setWatched(stateData.isWatched);
-      setWatch(stateData.isWatch);
-      setLiked(stateData.isLiked);
-    } catch {
-      setWatched(false);
-      setWatch(false);
-      setLiked(false);
-    }
-  };
-
   const handleWatched = async () => {
     try {
-      const response = await fetch(`/watched/${id}`, {
-        method: "POST",
+      const response = await fetch(`/users/${user.user_id}`, {
+        method: "PATCH",
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${getCookie("accessToken")}`,
         },
+        body: JSON.stringify({ movieId: id, watched: true }),
       });
       if (!response.ok) throw new Error("No Match In Array ");
       const data = await response.json();
@@ -72,13 +54,14 @@ const MovieDetails = () => {
 
   const handleLike = async () => {
     try {
-      const response = await fetch(`/like/${id}`, {
-        method: "POST",
+      const response = await fetch(`/users/${user.user_id}`, {
+        method: "PATCH",
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${getCookie("accessToken")}`,
         },
+        body: JSON.stringify({ movieId: id, like: true }),
       });
-
       if (!response.ok) throw new Error("No Match In Array");
       const data = await response.json();
       setLiked(data.isLiked);
@@ -89,11 +72,13 @@ const MovieDetails = () => {
 
   const handleWatch = async () => {
     try {
-      const response = await fetch(`/watch/${id}`, {
-        method: "POST",
+      const response = await fetch(`/users/${user.user_id}`, {
+        method: "PATCH",
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${getCookie("accessToken")}`,
         },
+        body: JSON.stringify({ movieId: id, watch: true }),
       });
       if (!response.ok) throw new Error("No Match In Array");
       const data = await response.json();
@@ -112,13 +97,12 @@ const MovieDetails = () => {
             Authorization: `Bearer ${getCookie("accessToken")}`,
           },
         });
-        console.log(validResp);
         if (!validResp.ok) {
           navigate("/404");
           return;
         }
         const validUser = await validResp.json();
-        setUser(validUser);
+        setUser(validUser.user);
         const response = await fetch(`/watchTheMovie/${id}`);
         if (!response.ok) {
           navigate("/404");
@@ -133,7 +117,10 @@ const MovieDetails = () => {
             Authorization: `Bearer ${getCookie("accessToken")}`,
           },
         });
-        fetchState();
+        if (validUser?.user.watch_list.includes(String(id))) setWatch(true);
+        if (validUser?.user.watched_movies.includes(String(id)))
+          setWatched(true);
+        if (validUser?.user.liked_movies.includes(String(id))) setLiked(true);
       } catch (error) {
       } finally {
         setLoading(false);
