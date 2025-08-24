@@ -15,7 +15,6 @@ const Library = ({ user, mode }) => {
             fetch(`/movies/${imdbId}`).then((res) => res.json())
           )
         );
-        console.log(responses);
         setMovies(responses);
       } catch (error) {}
     };

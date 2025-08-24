@@ -4,6 +4,7 @@ import "../App.css";
 import Logout from "./logout";
 import profile from "../assets/pesant.jpg";
 import { getCookie } from "../utils/cookie";
+import Library from "./library";
 
 const OtherProfile = () => {
   const { id } = useParams();
@@ -49,8 +50,8 @@ const OtherProfile = () => {
           <img src={"/src/assets/jail.png"} alt="overlay" className="overlay" />
         </div>
         <h3>{user.username}</h3>
-        <Library user={user} mode="0" />
       </div>
+      <Library user={user} mode="0" />
     </div>
   );
 };

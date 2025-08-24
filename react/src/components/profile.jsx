@@ -73,8 +73,8 @@ const Profile = () => {
         </select>
         <ChangeDetails name="Username" currentValue={user.username} api="" />
         <ChangeDetails name="Email" currentValue={user.email} api="" />
-        <Library user={user} mode="0" />
       </div>
+      <Library user={user} mode="0" />
     </div>
   );
 };

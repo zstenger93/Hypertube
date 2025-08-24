@@ -37,7 +37,6 @@ async function getMovies(req, res, user) {
 async function getMovieByID(req, res) {
   try {
     const { title } = req.params;
-    console.log(title);
     if (!title) return null;
     const query = "SELECT * FROM Movies WHERE imdbID = $1";
     const result = await client.query(query, [title]);
