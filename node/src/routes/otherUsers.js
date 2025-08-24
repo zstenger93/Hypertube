@@ -16,7 +16,7 @@ router.get("/:id", async (req, res) => {
     if (authUser === null) {
       return res.status(401).send("Invalid Token");
     }
-    const searchUser = `SELECT * FROM Users WHERE username = $1;`;
+    const searchUser = `SELECT * FROM Users WHERE user_id = $1;`;
     const userResults = await client.query(searchUser, [id]);
 
     if (userResults.rows.length === 0) {
