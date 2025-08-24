@@ -3,7 +3,7 @@ import { client } from "../../index.js";
 import axios from "axios";
 const router = express.Router();
 const youtubeApiKey = process.env.YOUTUBE_KEY;
-const count = 3
+const count = 3;
 
 router.get("/:title", async (req, res) => {
   const { title } = req.params;
@@ -40,9 +40,7 @@ router.get("/:title", async (req, res) => {
     res.json(response.data.items);
   } catch (error) {
     await client.query("ROLLBACK");
-    res
-      .status(500)
-      .send("Error YouTube API 2");
+    res.status(500).send("Error YouTube API 2");
   }
 });
 

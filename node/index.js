@@ -49,10 +49,10 @@ app.use("/comments", commentsMovieIdRoute);
 app.use("/like", likeRoute);
 app.use("/watch", watchRoute);
 app.use("/watched", watchedRoute);
-app.use("/click", clickRoute);
 app.use("/comments", addComment);
 app.use("/state", getStateRoute);
 app.use("/users", otherUsersRoute);
+app.use("/click", clickRoute);
 
 app.get("/check-file/:id/:moviename/:filename", async (req, res) => {
   const { id, moviename, filename } = req.params;
