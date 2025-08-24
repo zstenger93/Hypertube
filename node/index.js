@@ -6,7 +6,6 @@ import crypto from "crypto";
 import { createTables } from "./src/db/createTables.js";
 import { checkUser, addUser } from "./src/db/user.js";
 import movieTitleRoute from "./src/routes/movieTitleRoute.js";
-import watchTheMovieRoute from "./src/routes/watchTheMovieId.js";
 import youtubeMovieRoute from "./src/routes/youtubeRequestsRoute.js";
 import authIntraRoute from "./src/routes/authIntraRoute.js";
 import apiAuthIntraCallbackRoute from "./src/routes/apiAuthIntraCallbackRoute.js";
@@ -16,7 +15,6 @@ import commentsMovieIdRoute from "./src/routes/commentMovieIdRoute.js";
 import otherUsersRoute from "./src/routes/otherUsers.js";
 import clickRoute from "./src/routes/click.js";
 import addComment from "./src/routes/addComment.js";
-import getStateRoute from "./src/routes/getState.js";
 import path from "path";
 import fs from "fs";
 
@@ -36,7 +34,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/movies", movieTitleRoute);
-app.use("/watchTheMovie", watchTheMovieRoute);
 app.use("/youtubeRequests", youtubeMovieRoute);
 app.use("/auth/intra", authIntraRoute);
 app.use("/api/auth/intra/callback", apiAuthIntraCallbackRoute);
@@ -44,7 +41,6 @@ app.use("/auth/validate", authValidateRoute);
 app.use("/comments", allCommentsRoute);
 app.use("/comments", commentsMovieIdRoute);
 app.use("/comments", addComment);
-app.use("/state", getStateRoute);
 app.use("/users", otherUsersRoute);
 app.use("/click", clickRoute);
 

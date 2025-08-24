@@ -2,6 +2,8 @@ import express from "express";
 import axios from "axios";
 import { client } from "../../index.js";
 import { justGetUser } from "../utils/validate.js";
+import { getMovieFromDB } from "../utils/getMovieFromDb.js";
+import { inserMovieInDb } from "../db/insertMovieInDb.js";
 
 const router = express.Router();
 const apiKey = process.env.OMDBAPI_KEY;
@@ -43,6 +45,23 @@ async function getMoviesByName(req, res, user) {
     return null;
   }
 }
+
+router.patch("/:id", async (req, res) => {
+  const { id } = req.params;
+  if (!id || id.length === 0) {
+    return res.status(400).send("Error: Invalid ID");
+  }
+  try {
+    const resp = await getMovieFromDB(id);
+    if (resp !== null) {
+      return res.json(resp);
+    }
+    const newMovie = await inserMovieInDb(id);
+    return res.json(newMovie);
+  } catch (error) {
+    return res.status(404).send(error.message);
+  }
+});
 
 router.get("/:title?", async (req, res) => {
   const { title } = req.params;

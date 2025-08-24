@@ -103,7 +103,14 @@ const MovieDetails = () => {
         }
         const validUser = await validResp.json();
         setUser(validUser.user);
-        const response = await fetch(`/watchTheMovie/${id}`);
+        const response = await fetch(`/movies/${id}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${getCookie("accessToken")}`,
+          },
+          ization: `Bearer ${getCookie("accessToken")}`,
+        });
         if (!response.ok) {
           navigate("/404");
           return;
