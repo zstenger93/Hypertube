@@ -4,7 +4,7 @@ import "../App.css";
 import Logout from "./logout";
 import profile from "../assets/pesant.jpg";
 import { getCookie } from "../utils/cookie";
-import Library from "./library";
+import Library from "./Library";
 
 const OtherProfile = () => {
   const { id } = useParams();
@@ -51,7 +51,12 @@ const OtherProfile = () => {
         </div>
         <h3>{user.username}</h3>
       </div>
-      <Library user={user} mode="0" />
+      <Library list={user?.watched_movies ?? []} title="Watched Movies" />
+      <Library
+        list={user?.watch_list ?? []}
+        title="Movies to Watch in Future"
+      />
+      <Library list={user?.liked_movies ?? []} title="Liked Movies" />
     </div>
   );
 };

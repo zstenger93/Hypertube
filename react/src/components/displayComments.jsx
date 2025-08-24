@@ -65,7 +65,7 @@ const Comments = ({ movie, currentUser }) => {
                 <div className="commentUser">
                   <h3>{comment.user.username}</h3>
                   <img src={comment.user.profile_pic} alt="Profile" />
-                  {currentUser !== null &&
+                  {currentUser?.user &&
                     parseInt(currentUser.user.user_id, 10) ===
                       parseInt(comment.user.user_id, 10) && (
                       <>

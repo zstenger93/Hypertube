@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
 import poster from "../assets/poster.jpg";
+import { useNavigate } from "react-router-dom";
 
-const Library = ({ user, mode }) => {
-  const limit = 30;
+const Library = ({ list, title }) => {
+  const limit = 15;
   const [movies, setMovies] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user?.watched_movies) return;
+    if (!list) return;
     const fetchMovies = async () => {
       try {
-        const limitedIds = user.watched_movies.slice(0, limit);
+        const limitedIds = list.slice(0, limit);
         const responses = await Promise.all(
           limitedIds.map((imdbId) =>
             fetch(`/movies/${imdbId}`).then((res) => res.json())
@@ -19,15 +21,15 @@ const Library = ({ user, mode }) => {
       } catch (error) {}
     };
     fetchMovies();
-  }, [user]);
+  }, [list]);
 
-  if (!user || !user.watched_movies) {
+  if (!list) {
     return <p>Add memeeeeees here</p>;
   }
   return (
     <div>
-      <h1>Watched Movies</h1>
-      <div>
+      <h1>{title}</h1>
+      <div className="displayMovies">
         {movies.length > 0 ? (
           movies.map((movie) => {
             let thePoster =
@@ -39,9 +41,7 @@ const Library = ({ user, mode }) => {
               <button
                 key={movie.imdbID ?? movie.imdbid}
                 className="movieFrame"
-                onClick={() =>
-                  navigate(`/movie/${movie.imdbID ?? movie.imdbid}`)
-                }
+                onClick={() => navigate(`/movie/${movie.imdbid}`)}
               >
                 <img
                   src={thePoster}

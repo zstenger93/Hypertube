@@ -34,8 +34,7 @@
 - [✅] Implement a Library Section (authenticated users only)
 - [✅] Retrieve/update user profiles
 - [❌] Provide proof that the API is truly RESTful
-- [❌] Modify profile details (email, profile picture, info)
-- [❌] username, last name, first name, needs to be edited
+- [❌] Modify profile details (email, profile picture, info, username, last name, first name, needs to be edited)
 - [✅] Select a preferred language (default: English)
 - [✅] Develop a RESTful API with OAuth2 authentication
 - [✅] Access/post comments via /comments/:id and /movies/:id/comments
@@ -43,8 +42,8 @@
 - [✅] Fetch movie details via /movies/:id
 - [✅] API must return appropriate HTTP codes for invalid calls
 <!-- TODO  archive.org use mp4 always. there is no point for this check-->
-- [✅ ?? ❌] Convert videos on-the-fly if unsupported (at least mkv format) 
-- [❌] Delete movies if unwatched for one month
+- [✅] Convert videos on-the-fly if unsupported (at least mkv format) 
+- [✅] Delete movies if unwatched for one month
 - [❌] Auto-select subtitles if video language ≠ user’s preferred language
 - [❌] Download English subtitles if available
 

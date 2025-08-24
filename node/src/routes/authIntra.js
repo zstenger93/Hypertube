@@ -1,6 +1,5 @@
 import express from "express";
-import { client } from "../../index.js";
-import axios from "axios";
+
 const router = express.Router();
 const intraUUID = process.env.INTRA_UUID;
 const redirectURI = `http://${process.env.IP}/auth/intra/callback`;
