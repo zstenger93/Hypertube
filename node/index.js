@@ -6,7 +6,6 @@ import crypto from "crypto";
 import { createTables } from "./src/db/createTables.js";
 import { checkUser, addUser } from "./src/db/user.js";
 import movieTitleRoute from "./src/routes/movieTitleRoute.js";
-import youtubeMovieRoute from "./src/routes/youtubeRequestsRoute.js";
 import authIntraRoute from "./src/routes/authIntraRoute.js";
 import apiAuthIntraCallbackRoute from "./src/routes/apiAuthIntraCallbackRoute.js";
 import authValidateRoute from "./src/routes/authValidateRoute.js";
@@ -34,7 +33,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/movies", movieTitleRoute);
-app.use("/youtubeRequests", youtubeMovieRoute);
 app.use("/auth/intra", authIntraRoute);
 app.use("/api/auth/intra/callback", apiAuthIntraCallbackRoute);
 app.use("/auth/validate", authValidateRoute);

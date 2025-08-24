@@ -19,21 +19,6 @@ const MovieDetails = () => {
 
   const navigate = useNavigate();
 
-  const fetchYoutube = async (title) => {
-    try {
-      const response = await fetch(`/youtubeRequests/${title}`);
-      if (!response.ok) throw new Error("Failed to fetch youtube video");
-      const data = await response.json();
-      if (data.items) {
-        setVideos(data.items);
-      } else if (data) {
-        setVideos(data);
-      }
-    } catch (error) {
-      setVideos([]);
-    }
-  };
-
   const handleWatched = async () => {
     try {
       const response = await fetch(`/users/${user.user_id}`, {
@@ -109,7 +94,6 @@ const MovieDetails = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${getCookie("accessToken")}`,
           },
-          ization: `Bearer ${getCookie("accessToken")}`,
         });
         if (!response.ok) {
           navigate("/404");
@@ -117,13 +101,7 @@ const MovieDetails = () => {
         }
         const data = await response.json();
         setMovie(data);
-        if (data.Title ?? data.title) fetchYoutube(data.Title ?? data.title);
-        await fetch(`/click/${id}`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${getCookie("accessToken")}`,
-          },
-        });
+        setVideos(data.videos || []);
         if (validUser?.user.watch_list.includes(String(id))) setWatch(true);
         if (validUser?.user.watched_movies.includes(String(id)))
           setWatched(true);
