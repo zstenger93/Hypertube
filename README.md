@@ -31,9 +31,9 @@
 - [✅] If not downloaded, start torrent download on the server
 - [✅] Initiate streaming as soon as enough data is available
 - [✅] Store downloaded movies to avoid re-downloading
-- [❌] Implement a Library Section (authenticated users only)
+- [✅] Implement a Library Section (authenticated users only)
+- [✅] Retrieve/update user profiles
 - [❌] Provide proof that the API is truly RESTful
-- [❌] Retrieve/update user profiles
 - [❌] Modify profile details (email, profile picture, info)
 - [❌] username, last name, first name, needs to be edited
 - [✅] Select a preferred language (default: English)
