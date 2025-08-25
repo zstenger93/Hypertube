@@ -5,6 +5,7 @@ import { useParams, useLocation } from "react-router-dom";
 import videojs from "video.js";
 import "video.js/dist/video-js.css";
 
+
 // Only handles checking file availability + (re)setting source & retry
 const setPlayerSourceWithRetry = async (
   playerRef,
@@ -88,6 +89,64 @@ const WatchMovie = () => {
   const videoRef = useRef(null);
   const playerRef = useRef(null);
 
+  useEffect(() => {
+    const fetchTorrentfile = async () => {
+      try {
+        const response = await fetch(
+          `https://archive.org/advancedsearch.php?q=${id}&fl%5B%5D=identifier&sort%5B%5D=&sort%5B%5D=&sort%5B%5D=&rows=50&page=1&output=json&save=yes#raw`
+        );
+        if (!response.ok) throw new Error("Failed to fetch torrents");
+        const data = await response.json();
+        if (data.response && data.response.docs && data.response.docs.length > 0) {
+          const identifier = data.response.docs[0].identifier;
+          setTorrents(identifier);
+        } else {
+          setTorrents("");
+        }
+      } catch (error) {
+        setTorrents("");
+      }
+    };
+    fetchTorrentfile();
+  }, [id, movie]);
+
+  useEffect(() => {
+    const startTorrentDownload = async () => {
+      if (torrents) {
+        const torrentLink = `https://archive.org/download/${torrents}/${torrents}_archive.torrent`;
+        try {
+          const response = await fetch("http://localhost:5000/upload-torrent", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              'id': id,
+              'link': torrentLink,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to upload torrent");
+          }
+
+          const result = await response.json();
+          console.log("Torrent uploaded successfully:", result);
+
+        } catch (error) {
+          console.error("Error uploading torrent:", error);
+        }
+      }
+    };
+
+    startTorrentDownload();
+
+    return () => {
+      if (playerRef.current) {
+        playerRef.current.dispose();
+      }
+    };
+  }, [torrents, id]);
   // Initialize player once
   useEffect(() => {
     if (playerRef.current || !videoRef.current) return;
