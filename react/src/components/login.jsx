@@ -65,7 +65,7 @@ function Login() {
 
   const handleGoogleLogin = async () => {
     const provider = new GoogleAuthProvider();
-    
+
     try {
       const result = await signInWithPopup(auth, provider);
       const token = await result.user.getIdToken();
@@ -120,6 +120,18 @@ function Login() {
       }
       const token = await userCredential.user.getIdToken();
       setCookie("accessToken", token);
+      const response = await fetch(`/auth/validate`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${getCookie("accessToken")}`,
+        },
+      });
+      if (!response.ok) {
+        deleteCookie("accessToken");
+        return;
+      }
+      const data = await response.json();
+      setCookie("accessToken", data.user.oauth);
       navigate("/search");
     } catch (error) {
       navigate("/404");
