@@ -33,5 +33,4 @@ router.get("/subtitles/:imdbId", async (req, res) => {
   }
 });
 
-
 export default router;
