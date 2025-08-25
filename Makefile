@@ -1,16 +1,15 @@
-COMPOSE_FILE=docker-compose_hyper.yml
 
 build:
-	docker-compose -f $(COMPOSE_FILE) up --build
+	docker-compose up --build
 
 
 re: stop run
 
 run:
-	docker-compose up -f $(COMPOSE_FILE)  -d
+	docker-compose up -d
 
 stop:
-	docker-compose -f $(COMPOSE_FILE) down
+	docker-compose down
 
 clean_docker:
 	docker stop $$(docker ps -q) \
