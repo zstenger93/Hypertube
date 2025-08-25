@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "../App.css";
 import Logout from "./logout";
-import profile from "../assets/pesant.jpg";
+import profile from "../../public/pesant.jpg";
 import { getCookie } from "../utils/cookie";
 import Library from "./Library";
 
