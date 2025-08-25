@@ -3,7 +3,8 @@ import { dropTables } from "../db/dropTables.js";
 
 export async function createTables() {
   try {
-    //await dropTables();
+    // await dropTables();
+    await client.query(`ALTER DATABASE ${process.env.DB_NAME} REFRESH COLLATION VERSION`);
     await client.query("BEGIN");
     await client.query(`
       CREATE TABLE IF NOT EXISTS public.Users (
