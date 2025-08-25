@@ -5,17 +5,14 @@ import { useParams, useLocation } from "react-router-dom";
 import videojs from "video.js";
 import "video.js/dist/video-js.css";
 
-const initializeVideoPlayer = async (
-  videoRef,
-  playerRef,
-  videoPath,
-  setIsBuffering,
-  setError,
-  id,
-  torrents,
-  retryCount = 0
-) => {
+const initializeVideoPlayer = async (videoRef, playerRef, videoPath, setIsBuffering, setError, id, torrents, subtitles, retryCount = 0) => {
   try {
+    // Ensure the videoRef DOM node exists and is in the DOM
+    if (!videoRef.current || !document.body.contains(videoRef.current)) {
+      console.warn("The video element is not yet in the DOM.");
+      return;
+    }
+
     const fileName = `${torrents}_512kb.mp4`;
     const response = await fetch(`/check-file/${id}/${torrents}/${fileName}`);
     const data = await response.json();
@@ -25,6 +22,7 @@ const initializeVideoPlayer = async (
       setError(false);
 
       if (!playerRef.current) {
+        // Initialize the video.js player
         playerRef.current = videojs(videoRef.current, {
           controls: true,
           autoplay: true,
@@ -32,6 +30,20 @@ const initializeVideoPlayer = async (
           sources: [{ src: videoPath, type: "video/mp4" }],
         });
 
+        // Add subtitles to the player
+        subtitles.forEach((subtitle) => {
+          playerRef.current.addRemoteTextTrack(
+            {
+              kind: "subtitles",
+              src: subtitle.url,
+              srclang: subtitle.language,
+              label: subtitle.language,
+            },
+            false
+          );
+        });
+
+        // Handle buffering and errors
         playerRef.current.on("waiting", () => setIsBuffering(true));
         playerRef.current.on("playing", () => setIsBuffering(false));
         playerRef.current.on("error", () => {
@@ -41,25 +53,13 @@ const initializeVideoPlayer = async (
           }, 5000);
         });
       } else {
+        // Update the video source if the player already exists
         playerRef.current.src({ src: videoPath, type: "video/mp4" });
         playerRef.current.play();
       }
     } else {
       if (retryCount < 10) {
-        setTimeout(
-          () =>
-            initializeVideoPlayer(
-              videoRef,
-              playerRef,
-              videoPath,
-              setIsBuffering,
-              setError,
-              id,
-              torrents,
-              retryCount + 1
-            ),
-          5000
-        );
+        setTimeout(() => initializeVideoPlayer(videoRef, playerRef, videoPath, setIsBuffering, setError, id, torrents, subtitles, retryCount + 1), 5000);
       } else {
         setIsBuffering(false);
         setError(true);
@@ -67,20 +67,7 @@ const initializeVideoPlayer = async (
     }
   } catch (error) {
     if (retryCount < 10) {
-      setTimeout(
-        () =>
-          initializeVideoPlayer(
-            videoRef,
-            playerRef,
-            videoPath,
-            setIsBuffering,
-            setError,
-            id,
-            torrents,
-            retryCount + 1
-          ),
-        5000
-      );
+      setTimeout(() => initializeVideoPlayer(videoRef, playerRef, videoPath, setIsBuffering, setError, id, torrents, subtitles, retryCount + 1), 5000);
     } else {
       setIsBuffering(false);
       setError(true);
@@ -96,8 +83,30 @@ const WatchMovie = () => {
   const [isPublicorNot, setIsPublicorNot] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
   const [error, setError] = useState(false);
+  const [subtitles, setSubtitles] = useState([]);
   const videoRef = useRef(null);
   const playerRef = useRef(null);
+
+  useEffect(() => {
+    const fetchSubtitles = async (id, torrents) => {
+      try {
+        const response = await fetch(`/movies/subtitles/${id}`); // Call the backend route
+        if (!response.ok) throw new Error("Failed to fetch subtitles");
+        const data = await response.json();
+        console.log("Fetched subtitles data:", data);
+        // Map subtitle data to a usable format
+        const subtitleList = data.data.map((item) => ({
+          id: item.id,
+          language: item.attributes.language,
+          url: `http://localhost:3000/stream/${id}/${torrents}/subtitles/${item.id}`,
+        }));
+        setSubtitles(subtitleList);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchSubtitles(id, torrents);
+  }, [id, torrents]);
 
   useEffect(() => {
     const fetchTorrentFile = async () => {
@@ -128,23 +137,22 @@ const WatchMovie = () => {
 
   useEffect(() => {
     if (isPublicorNot && videoRef.current && torrents) {
-      const videoPath = `/stream/${id}/${torrents}/${torrents}_512kb.mp4`;
-      initializeVideoPlayer(
-        videoRef,
-        playerRef,
-        videoPath,
-        setIsBuffering,
-        setError,
-        id,
-        torrents
-      );
+      const videoPath = `http://localhost:3000/stream/${id}/${torrents}/${torrents}_512kb.mp4`;
+  
+      // Wait for the DOM to fully render the video element
+      const timeout = setTimeout(() => {
+        initializeVideoPlayer(videoRef, playerRef, videoPath, setIsBuffering, setError, id, torrents, subtitles);
+      }, 0);
+  
       return () => {
+        clearTimeout(timeout);
         if (playerRef.current) {
           playerRef.current.dispose();
+          playerRef.current = null; // Reset the player reference
         }
       };
     }
-  }, [isPublicorNot, videoRef, torrents, id]);
+  }, [isPublicorNot, videoRef, torrents, id, subtitles]);
 
   return (
     <div className="center">

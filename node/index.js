@@ -1,17 +1,15 @@
 import pg from "pg";
 import express, { request } from "express";
 import cors from "cors";
-import axios from "axios";
-import crypto from "crypto";
 import { createTables } from "./src/db/createTables.js";
 import movieTitleRoute from "./src/routes/movies.js";
 import authIntraRoute from "./src/routes/authIntra.js";
 import apiAuthIntraCallbackRoute from "./src/routes/apIntra.js";
 import authValidateRoute from "./src/routes/authValidateRoute.js";
 import allCommentsRoute from "./src/routes/allCommentsRoute.js";
-
-import comments from "./src/routes/comments.js";
 import otherUsersRoute from "./src/routes/users.js";
+import subtitlesRoute from "./src/routes/subtitlesRoute.js";
+import comments from "./src/routes/comments.js";
 import path from "path";
 import fs from "fs";
 
@@ -30,13 +28,16 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+
+app.use("/movies", movieTitleRoute);
+app.use("/movies", subtitlesRoute);
 app.use("/auth/intra", authIntraRoute);
 app.use("/api/auth/intra/callback", apiAuthIntraCallbackRoute);
 app.use("/auth/validate", authValidateRoute);
-app.use("/movies", movieTitleRoute);
 app.use("/comments", comments);
 app.use("/comments", allCommentsRoute);
 app.use("/users", otherUsersRoute);
+
 
 app.get("/check-file/:id/:moviename/:filename", async (req, res) => {
   const { id, moviename, filename } = req.params;

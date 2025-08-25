@@ -9,7 +9,7 @@ import { getCookie } from "../utils/cookie";
 const SearchComponent = () => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
   const [hasMoreConent, moreConent] = useState(true);
   const [filter, setFilter] = useState("year");
   const [loading, setLoading] = useState(false);
