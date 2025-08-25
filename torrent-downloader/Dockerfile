@@ -20,7 +20,7 @@ RUN pip3 install --no-cache-dir --upgrade pip && \
 COPY . .
 
 # Expose the port Flask will run on
-EXPOSE 5000
+EXPOSE 5001
 
 # Start the Flask application
 CMD ["python3", "app.py"]

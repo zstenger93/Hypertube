@@ -50,7 +50,7 @@ const initializeVideoPlayer = async (videoRef, playerRef, videoPath, setIsBuffer
           setTimeout(() => {
             playerRef.current.src({ src: videoPath, type: "video/mp4" });
             playerRef.current.play();
-          }, 5000);
+          }, 5001);
         });
       } else {
         // Update the video source if the player already exists
@@ -59,7 +59,7 @@ const initializeVideoPlayer = async (videoRef, playerRef, videoPath, setIsBuffer
       }
     } else {
       if (retryCount < 10) {
-        setTimeout(() => initializeVideoPlayer(videoRef, playerRef, videoPath, setIsBuffering, setError, id, torrents, subtitles, retryCount + 1), 5000);
+        setTimeout(() => initializeVideoPlayer(videoRef, playerRef, videoPath, setIsBuffering, setError, id, torrents, subtitles, retryCount + 1), 5001);
       } else {
         setIsBuffering(false);
         setError(true);
@@ -67,7 +67,7 @@ const initializeVideoPlayer = async (videoRef, playerRef, videoPath, setIsBuffer
     }
   } catch (error) {
     if (retryCount < 10) {
-      setTimeout(() => initializeVideoPlayer(videoRef, playerRef, videoPath, setIsBuffering, setError, id, torrents, subtitles, retryCount + 1), 5000);
+      setTimeout(() => initializeVideoPlayer(videoRef, playerRef, videoPath, setIsBuffering, setError, id, torrents, subtitles, retryCount + 1), 5001);
     } else {
       setIsBuffering(false);
       setError(true);

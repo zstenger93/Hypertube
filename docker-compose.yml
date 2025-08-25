@@ -95,7 +95,7 @@ services:
     build:
       context: ./torrent-downloader
     ports:
-      - "5000:5000"  # Flask app port
+      - "5001:5001"  # Flask app port
     volumes:
       - ./torrent-downloader:/app
       - ./downloads:/app/downloads
