@@ -14,7 +14,7 @@ const initializeVideoPlayer = async (videoRef, playerRef, videoPath, setIsBuffer
     }
 
     const fileName = `${torrents}_512kb.mp4`;
-    const response = await fetch(`http://localhost:3000/check-file/${id}/${torrents}/${fileName}`);
+    const response = await fetch(`/check-file/${id}/${torrents}/${fileName}`);
     const data = await response.json();
 
     if (data.exists) {
@@ -117,7 +117,10 @@ const WatchMovie = () => {
         if (!response.ok) throw new Error("Failed to fetch torrents");
         const data = await response.json();
         const doc = data.response?.docs?.[0];
-        if (doc?.licenseurl === "http://creativecommons.org/licenses/publicdomain/") {
+        if (
+          doc?.licenseurl ===
+          "http://creativecommons.org/licenses/publicdomain/"
+        ) {
           setIsPublicorNot(true);
           setTorrents(doc.identifier || movie.title.replace(/\s/g, "_"));
         } else {
@@ -152,7 +155,7 @@ const WatchMovie = () => {
   }, [isPublicorNot, videoRef, torrents, id, subtitles]);
 
   return (
-    <div>
+    <div className="center">
       <Logout />
       <p>Here comes the movies</p>
       {isPublicorNot ? (
@@ -171,7 +174,9 @@ const WatchMovie = () => {
           )}
         </>
       ) : (
-        <p>This movie is protected by copyright or missing copyright information.</p>
+        <p>
+          This movie is protected by copyright or missing copyright information.
+        </p>
       )}
       {movie && (
         <div>

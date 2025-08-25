@@ -71,6 +71,7 @@ body {
     radial-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px);
   background-size: 20px 20px, 20px 20px;
   background-position: 0 0, 10px 10px;
+  overflow: visible;
 }
 
 .movieFrame img {
@@ -148,17 +149,25 @@ body {
   align-items: center;
   justify-content: center;
   flex-direction: column;
+  margin: 0;
+  justify-content: flex-start;
+  gap: 4px;
 }
 
 .hoverTop button {
-  border: 2px solid #bfbfbf;
   border-radius: 5px;
+  border: 2px solid #bfbfbf;
   background-color: #1a1b26;
-  width: 40px;
+  min-width: 40px;
+  max-width: 120px;
+  width: auto;
+  padding: 3px 3px;
+  font-size: 0.9rem;
   color: #bfbfbf;
-  font-size: 0.5rem;
   font-weight: bold;
   cursor: pointer;
+  height: auto;
+  gap: 4px;
 }
 
 .mainColor {
@@ -474,4 +483,25 @@ body {
   position: absolute;
   height: 100%;
   background-color: #76c7c0;
+}
+
+.centerMemes {
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50vw;
+  height: 50vh;
+  margin: 0;
+  padding: 0;
+  border-radius: 12px;
+  filter: grayscale(100%);
+}
+
+.centerMemes img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }

@@ -12,7 +12,7 @@ router.post("/", async (req, res) => {
       client_id: process.env.INTRA_UUID,
       client_secret: process.env.INTRA_SECRET,
       code,
-      redirect_uri: `http://${process.env.REACT_APP_IP}/auth/intra/callback`,
+      redirect_uri: `http://${process.env.IP}/auth/intra/callback`,
     });
 
     const accessToken = response.data.access_token;

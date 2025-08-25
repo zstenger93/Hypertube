@@ -4,7 +4,6 @@ const ChangeDetails = ({ name, currentValue, api }) => {
   const [details, setDetails] = useState(currentValue);
 
   const updateValue = async () => {
-    console.log(api);
   };
 
   return (

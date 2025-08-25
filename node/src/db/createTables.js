@@ -1,7 +1,6 @@
 import { client } from "../../index.js";
 import { dropTables } from "../db/dropTables.js";
 
-
 export async function createTables() {
   try {
     //await dropTables();
@@ -19,6 +18,8 @@ export async function createTables() {
         email VARCHAR(100) UNIQUE NOT NULL,
         profile_pic VARCHAR(255),
         oauth VARCHAR(255) UNIQUE,
+        email_provider VARCHAR(255),
+        language VARCHAR(255),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
       `);

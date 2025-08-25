@@ -3,90 +3,76 @@ import "../App.css";
 import { useNavigate } from "react-router-dom";
 import Logout from "./logout";
 import poster from "../assets/poster.jpg";
+import icantmeme from "../assets/icantmeme.jpg";
+import { getCookie } from "../utils/cookie";
 
 const SearchComponent = () => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
   const [hasMoreConent, moreConent] = useState(true);
   const [filter, setFilter] = useState("year");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+
 
   useEffect(() => {
     const fetchInitialMovies = async () => {
+      setLoading(true);
       try {
-        const response = await fetch(`/movies?page=${page}`);
+        const token = getCookie("accessToken");
+        const url = `/movies/${encodeURIComponent(query)}?page=${page}`;
+        const response = await fetch(url, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
         const data = await response.json();
         const content = data.results || data || [];
         if (content.length === 0) {
           moreConent(false);
           return;
         }
-
-        if (data.Search) {
-          setResults((prev) => (page === 1 ? content : [...prev, ...content]));
-        } else if (data) {
-          setResults((prev) => [...prev, ...(data || [])]);
-
-          // setResults(data || []);
+        if (data) {
+          moreConent(true);
+          setResults((prev) => {
+            const mergedResults = [...prev, ...data];
+            const uniqueMergedResults = [
+              ...new Map(
+                mergedResults.map((merged) => [merged.imdbid, merged])
+              ).values(),
+            ];
+            return uniqueMergedResults;
+          });
+        } else {
+          moreConent(false);
         }
       } catch (error) {
-        //setResults([]);
+      } finally {
+        setLoading(false);
       }
     };
-
     fetchInitialMovies();
-  }, [page]);
+  }, [page, query]);
 
   useEffect(() => {
     const handleScroll = () => {
-      if (!hasMoreConent) return;
+      if (!hasMoreConent || loading) return;
       if (
         window.innerHeight + document.documentElement.scrollTop >=
-        document.documentElement.offsetHeight - 1500
-      ) {
+        document.documentElement.offsetHeight - 500
+      )
         setPage((prev) => prev + 1);
-      }
     };
-
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [hasMoreConent]);
+  }, [hasMoreConent, loading]);
 
-  const handleApiRequest = async (e) => {
+  const handleApiRequest = (e) => {
     const value = e.target.value;
     setQuery(value);
-    if (value) {
-      try {
-        const response = await fetch(`/movies/${value}`);
-        const data = await response.json();
-        if (data.Search) {
-          setResults(data.Search || []);
-        } else if (data) {
-          setResults(data || []);
-        }
-        if (data.error) {
-          return;
-        }
-      } catch (error) {
-        setResults([]);
-      }
-    } else {
-      try {
-        const response = await fetch(`/movies?${page}`);
-        const data = await response.json();
-        if (data.Search) {
-          setResults(data.Search || []);
-        } else if (data) {
-          setResults(data || []);
-        }
-        if (data.error) {
-          return;
-        }
-      } catch (error) {
-        setResults([]);
-      }
-    }
+    setResults([]);
+    moreConent(true);
+    setPage(1);
   };
 
   const handleFilterChange = (e) => {
@@ -174,6 +160,23 @@ const SearchComponent = () => {
                     style={{ width: "100%", borderRadius: "8px" }}
                     onError={onErrorImage}
                   />
+                  {movie.isWatched && (
+                    <img
+                      src={icantmeme}
+                      alt="Watched overlay"
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        opacity: 0.3,
+                        pointerEvents: "none",
+                        zIndex: 10,
+                      }}
+                    />
+                  )}
                   <div
                     style={{
                       position: "absolute",
@@ -191,7 +194,7 @@ const SearchComponent = () => {
                     <span style={{ marginRight: "5px" }}>📈</span>{" "}
                     {movie.click_count}
                   </div>
-                </div>{" "}
+                </div>
                 <h3>{movie.Title ?? movie.title}</h3>
                 <p>{movie.Year ?? movie.year}</p>
               </button>

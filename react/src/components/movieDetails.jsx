@@ -15,31 +15,19 @@ const MovieDetails = () => {
   const [watched, setWatched] = useState(false);
   const [watch, setWatch] = useState(false);
   const [liked, setLiked] = useState(false);
+  const [user, setUser] = useState(null);
 
   const navigate = useNavigate();
 
-  const fetchYoutube = async (title) => {
-    try {
-      const response = await fetch(`/youtubeRequests/${title}`);
-      if (!response.ok) throw new Error("Failed to fetch youtube video");
-      const data = await response.json();
-      if (data.items) {
-        setVideos(data.items);
-      } else if (data) {
-        setVideos(data);
-      }
-    } catch (error) {
-      setVideos([]);
-    }
-  };
-
   const handleWatched = async () => {
     try {
-      const response = await fetch(`/watched/${id}`, {
-        method: "POST",
+      const response = await fetch(`/users/${user.user_id}`, {
+        method: "PATCH",
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${getCookie("accessToken")}`,
         },
+        body: JSON.stringify({ movieId: id, watched: true }),
       });
       if (!response.ok) throw new Error("No Match In Array ");
       const data = await response.json();
@@ -51,14 +39,14 @@ const MovieDetails = () => {
 
   const handleLike = async () => {
     try {
-      console.log;
-      const response = await fetch(`/like/${id}`, {
-        method: "POST",
+      const response = await fetch(`/users/${user.user_id}`, {
+        method: "PATCH",
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${getCookie("accessToken")}`,
         },
+        body: JSON.stringify({ movieId: id, like: true }),
       });
-
       if (!response.ok) throw new Error("No Match In Array");
       const data = await response.json();
       setLiked(data.isLiked);
@@ -69,11 +57,13 @@ const MovieDetails = () => {
 
   const handleWatch = async () => {
     try {
-      const response = await fetch(`/watch/${id}`, {
-        method: "POST",
+      const response = await fetch(`/users/${user.user_id}`, {
+        method: "PATCH",
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${getCookie("accessToken")}`,
         },
+        body: JSON.stringify({ movieId: id, watch: true }),
       });
       if (!response.ok) throw new Error("No Match In Array");
       const data = await response.json();
@@ -86,29 +76,36 @@ const MovieDetails = () => {
   useEffect(() => {
     const fetchMovieDetails = async () => {
       try {
-        const response = await fetch(`/watchTheMovie/${id}`);
-
-        if (!response.ok) throw new Error("Failed to fetch movie details");
-        const data = await response.json();
-        setMovie(data);
-        if (data.Title ?? data.title) fetchYoutube(data.Title ?? data.title);
-        await fetch(`/click/${id}`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${getCookie("accessToken")}`,
-          },
-        });
-        const state = await fetch(`/state/${id}`, {
+        const validResp = await fetch(`/auth/validate`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${getCookie("accessToken")}`,
           },
         });
-        if (!state.ok) throw new Error("Failed to get state");
-        const stateData = await state.json();
-        setWatched(stateData.isWatched);
-        setWatch(stateData.isWatch);
-        setLiked(stateData.isLiked);
+        if (!validResp.ok) {
+          navigate("/404");
+          return;
+        }
+        const validUser = await validResp.json();
+        setUser(validUser.user);
+        const response = await fetch(`/movies/${id}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${getCookie("accessToken")}`,
+          },
+        });
+        if (!response.ok) {
+          navigate("/404");
+          return;
+        }
+        const data = await response.json();
+        setMovie(data);
+        setVideos(data.videos || []);
+        if (validUser?.user.watch_list.includes(String(id))) setWatch(true);
+        if (validUser?.user.watched_movies.includes(String(id)))
+          setWatched(true);
+        if (validUser?.user.liked_movies.includes(String(id))) setLiked(true);
       } catch (error) {
       } finally {
         setLoading(false);
@@ -153,7 +150,9 @@ const MovieDetails = () => {
           <div className="movieBox">
             <button
               className="movieFrame1"
-              onClick={() => navigate(`/movie/${id}/watch`,  { state: { movie } })}
+              onClick={() =>
+                navigate(`/movie/${id}/watch`, { state: { movie } })
+              }
             >
               <img src={thePoster} alt={movie.Title ?? movie.title} />
             </button>
@@ -176,12 +175,11 @@ const MovieDetails = () => {
                   <button onClick={() => handleWatched()}> Not Watched </button>
                 )}
                 {watch ? (
-                  <button onClick={() => handleWatch()}> Watch List </button>
-                ) : (
                   <button onClick={() => handleWatch()}>
-                    {" "}
-                    Remove From Watch List{" "}
+                    Remove From Watch List
                   </button>
+                ) : (
+                  <button onClick={() => handleWatch()}> Watch List </button>
                 )}
               </div>
             </div>
@@ -206,7 +204,7 @@ const MovieDetails = () => {
       ) : (
         <p>Movie details not found.</p>
       )}
-      <Comments movie={id} />
+      <Comments movie={id} currentUser={user} />
     </div>
   );
 };

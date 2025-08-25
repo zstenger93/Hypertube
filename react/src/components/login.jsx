@@ -65,10 +65,10 @@ function Login() {
 
   const handleGoogleLogin = async () => {
     const provider = new GoogleAuthProvider();
+    
     try {
       const result = await signInWithPopup(auth, provider);
       const token = await result.user.getIdToken();
-      // localStorage.setItem("accessToken", token);
       setCookie("accessToken", token);
     } catch (error) {
       return;
@@ -82,11 +82,14 @@ function Login() {
       });
       if (!response.ok) {
         deleteCookie("accessToken");
-        // localStorage.removeItem("accessToken");
         return;
       }
+      const data = await response.json();
+      setCookie("accessToken", data.user.oauth);
       navigate("/search");
-    } catch {}
+    } catch {
+      navigate("/404");
+    }
   };
 
   const handleForgotPassword = async () => {
@@ -116,11 +119,10 @@ function Login() {
         );
       }
       const token = await userCredential.user.getIdToken();
-      //localStorage.setItem("accessToken", token);
       setCookie("accessToken", token);
       navigate("/search");
     } catch (error) {
-      //console.error("Authentication Error:", error);
+      navigate("/404");
     }
   };
 

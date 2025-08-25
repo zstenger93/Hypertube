@@ -1,27 +1,16 @@
 import pg from "pg";
 import express, { request } from "express";
 import cors from "cors";
-import axios from "axios";
-import crypto from "crypto";
 import { createTables } from "./src/db/createTables.js";
-import { checkUser, addUser } from "./src/db/user.js";
-import moviesRoute from "./src/routes/movieRoute.js";
-import movieTitleRoute from "./src/routes/movieTitleRoute.js";
-import watchTheMovieRoute from "./src/routes/watchTheMovieId.js";
-import youtubeMovieRoute from "./src/routes/youtubeRequestsRoute.js";
-import authIntraRoute from "./src/routes/authIntraRoute.js";
-import apiAuthIntraCallbackRoute from "./src/routes/apiAuthIntraCallbackRoute.js";
+import movieTitleRoute from "./src/routes/movies.js";
+import authIntraRoute from "./src/routes/authIntra.js";
+import apiAuthIntraCallbackRoute from "./src/routes/apIntra.js";
 import authValidateRoute from "./src/routes/authValidateRoute.js";
 import allCommentsRoute from "./src/routes/allCommentsRoute.js";
-import commentsMovieIdRoute from "./src/routes/commentMovieIdRoute.js";
-import likeRoute from "./src/routes/like.js";
-import watchRoute from "./src/routes/watch.js";
-import watchedRoute from "./src/routes/watched.js";
 import otherUsersRoute from "./src/routes/otherUsers.js";
-import clickRoute from "./src/routes/click.js";
-import addComment from "./src/routes/addComment.js";
-import getStateRoute from "./src/routes/getState.js";
 import subtitlesRoute from "./src/routes/subtitlesRoute.js";
+import comments from "./src/routes/comments.js";
+import otherUsersRoute from "./src/routes/users.js";
 import path from "path";
 import fs from "fs";
 
@@ -41,22 +30,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 
-app.use("/movies", moviesRoute);
 app.use("/movies", movieTitleRoute);
 app.use("/movies", subtitlesRoute);
-app.use("/watchTheMovie", watchTheMovieRoute);
-app.use("/youtubeRequests", youtubeMovieRoute);
 app.use("/auth/intra", authIntraRoute);
 app.use("/api/auth/intra/callback", apiAuthIntraCallbackRoute);
 app.use("/auth/validate", authValidateRoute);
+app.use("/movies", movieTitleRoute);
+app.use("/comments", comments);
 app.use("/comments", allCommentsRoute);
-app.use("/comments", commentsMovieIdRoute);
-app.use("/like", likeRoute);
-app.use("/watch", watchRoute);
-app.use("/watched", watchedRoute);
-app.use("/click", clickRoute);
-app.use("/comments", addComment);
-app.use("/state", getStateRoute);
 app.use("/users", otherUsersRoute);
 
 
@@ -77,7 +58,6 @@ app.get("/check-file/:id/:moviename/:filename", async (req, res) => {
   }
 });
 
-
 // Route for streaming video files
 app.get("/stream/:id/:moviename/:filename", (req, res) => {
   const { id, moviename, filename } = req.params;
@@ -87,7 +67,7 @@ app.get("/stream/:id/:moviename/:filename", (req, res) => {
     moviename,
     filename
   ); // Construct the full path dynamically
-  
+
   // Check if the file exists
   if (!fs.existsSync(videoPath)) {
     return res.status(404).send("Video not found");

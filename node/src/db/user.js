@@ -13,6 +13,10 @@ export async function checkUser(email) {
 
 export async function addUser(userData) {
   try {
+    // var provider = null;
+    // if (userData.provider === "intra") provider = "intra";
+    // else if (userData.provider === "google") provider = "google";
+    // else if (userData.provider === "firebase") provider = "firebase";
     await client.query("BEGIN");
     const query = `
     INSERT INTO Users (username, email, profile_pic, oauth, name, surename) 

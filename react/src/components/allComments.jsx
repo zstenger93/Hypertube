@@ -9,7 +9,7 @@ const AllComments = () => {
 
   const getAllComments = async () => {
     try {
-      const response = await fetch(`/comments`);
+      const response = await fetch(`/comments/`);
       const data = await response.json();
       return data;
     } catch (error) {
@@ -42,9 +42,6 @@ const AllComments = () => {
           >
             <img src={comment.movieData.poster || "/src/assets/poster.jpg"} />
           </button>
-          {/* <button className="commentButton">
-            <img src={comment.user.profile_pic} />
-          </button> */}
           <div className="centerComment">
             <h3>
               {comment.movieData.title} ({comment.movieData.year})

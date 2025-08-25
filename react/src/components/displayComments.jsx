@@ -2,10 +2,9 @@ import React, { useEffect, useState } from "react";
 import "../App.css";
 import { getCookie } from "../utils/cookie";
 
-const Comments = ({ movie }) => {
+const Comments = ({ movie, currentUser }) => {
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const getComments = async () => {
     try {
       const response = await fetch(`/comments/${movie}`);
@@ -28,7 +27,6 @@ const Comments = ({ movie }) => {
 
   const sendComment = async (event) => {
     event.preventDefault();
-    //const token = localStorage.getItem("accessToken");
     const token = getCookie("accessToken");
     const text = event.target.comment.value;
     const movieId = movie;
@@ -67,6 +65,14 @@ const Comments = ({ movie }) => {
                 <div className="commentUser">
                   <h3>{comment.user.username}</h3>
                   <img src={comment.user.profile_pic} alt="Profile" />
+                  {currentUser?.user &&
+                    parseInt(currentUser.user.user_id, 10) ===
+                      parseInt(comment.user.user_id, 10) && (
+                      <>
+                        <button>Edit</button>
+                        <button>Delete</button>
+                      </>
+                    )}
                 </div>
               ) : (
                 <div className="commentUser">

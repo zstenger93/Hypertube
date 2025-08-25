@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { getCookie, setCookie } from "../utils/cookie";
+import salt from "../assets/salt.jpg";
 
 function CallbackComponent() {
   const navigate = useNavigate();
@@ -25,6 +26,8 @@ function CallbackComponent() {
               },
             });
             if (!response.ok) throw new Error("Failed to fetch user details");
+            const data = await response.json();
+            setCookie("accessToken", data.user.oauth);
             navigate("/search");
           } else {
             navigate("/");
@@ -36,11 +39,10 @@ function CallbackComponent() {
         navigate("/");
       }
     };
-
     fetchToken();
   }, [navigate]);
 
-  return <p>Authenticating...</p>;
+  return <img className="centerMemes" src={salt}></img>;
 }
 
 export default CallbackComponent;
