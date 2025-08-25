@@ -29,7 +29,7 @@ const Library = ({ list, title }) => {
   return (
     <div>
       <h1>{title}</h1>
-      <div className="displayMovies">
+      <div className="displayMovies" style={{ marginTop: "15px"}}>
         {movies.length > 0 ? (
           movies.map((movie) => {
             let thePoster =
