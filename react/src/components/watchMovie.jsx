@@ -93,7 +93,7 @@ const WatchMovie = () => {
         const response = await fetch(`/movies/subtitles/${id}`); // Call the backend route
         if (!response.ok) throw new Error("Failed to fetch subtitles");
         const data = await response.json();
-
+        console.log("Fetched subtitles data:", data);
         // Map subtitle data to a usable format
         const subtitleList = data.data.map((item) => ({
           id: item.id,
