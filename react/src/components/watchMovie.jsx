@@ -194,7 +194,7 @@ const WatchMovie = () => {
         const subtitleList = data.data.map(item => ({
           id: item.id,
           language: item.attributes.language,
-          url: `http://localhost:3000/subtitle/${id}/${torrents}/${item.id}.srt`
+          url: `http://localhost:3000/subtitle/${id}/${torrents}/${item.id}.vtt`
         }));
         setSubtitles(subtitleList);
       } catch (e) {
