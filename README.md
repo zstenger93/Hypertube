@@ -35,6 +35,7 @@
 - [✅] Retrieve/update user profiles
 - [❌] Provide proof that the API is truly RESTful
 - [❌] Modify profile details (email, profile picture, info, username, last name, first name, needs to be edited)
+
 - [✅] Select a preferred language (default: English)
 - [✅] Develop a RESTful API with OAuth2 authentication
 - [✅] Access/post comments via /comments/:id and /movies/:id/comments

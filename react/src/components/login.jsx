@@ -61,8 +61,8 @@ const WarningPopup1 = () => {
           <img
             src={warning}
             style={{
-              maxWidth: "300px",
-              maxHeight: "300px",
+              maxWidth: "500px",
+              maxHeight: "350px",
               width: "100%",
               height: "auto",
             }}

@@ -218,7 +218,7 @@ const MovieDetails = () => {
       ) : (
         <p>Movie details not found.</p>
       )}
-      <Comments movie={id} currentUser={user} />
+      {user && <Comments movie={id} currentUser={user} />}
     </div>
   );
 };

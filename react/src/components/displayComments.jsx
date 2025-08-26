@@ -48,6 +48,7 @@ const Comments = ({ movie, currentUser }) => {
   };
 
   if (loading) return <p>Loading...</p>;
+  if (!currentUser) return <p>Loading user...</p>;
 
   return (
     <div>
@@ -65,14 +66,21 @@ const Comments = ({ movie, currentUser }) => {
                 <div className="commentUser">
                   <h3>{comment.user.username}</h3>
                   <img src={comment.user.profile_pic} alt="Profile" />
-                  {currentUser?.user &&
-                    parseInt(currentUser.user.user_id, 10) ===
-                      parseInt(comment.user.user_id, 10) && (
-                      <>
-                        <button>Edit</button>
-                        <button>Delete</button>
-                      </>
-                    )}
+                  {String(currentUser.user_id) ===
+                    String(comment.user.user_id) && (
+                    <>
+                      <button
+                        style={{
+                          width: "50%",
+                          height: "10%",
+                          border: "1px",
+                          fontSize: "5px",
+                        }}
+                      >
+                        Delete
+                      </button>
+                    </>
+                  )}
                 </div>
               ) : (
                 <div className="commentUser">
