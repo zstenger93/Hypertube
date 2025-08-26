@@ -210,7 +210,7 @@ useEffect(() => {
       const subtitleList = englishSubs.map(item => ({
         id: item.id,
         language: item.attributes.language,
-        url: `http://localhost:3000/subtitle/${id}/${torrents}/${item.id}.vtt`
+        url: `/subtitle/${id}/${torrents}/${item.id}.vtt`
       }));
       setSubtitles(subtitleList);
     } catch (e) {
@@ -245,7 +245,7 @@ useEffect(() => {
   // Set video source (and retry)
   useEffect(() => {
     if (!isPublicorNot || !torrents || !playerRef.current || playerRef.current.isDisposed()) return;
-    const videoPath = `http://localhost:3000/stream/${id}/${torrents}/${torrents}_512kb.mp4`;
+    const videoPath = `/stream/${id}/${torrents}/${torrents}_512kb.mp4`;
     setIsBuffering(true);
     setPlayerSourceWithRetry(
       playerRef,

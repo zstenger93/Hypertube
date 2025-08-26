@@ -15,8 +15,8 @@ export async function addUser(userData, signInProvider) {
   try {
     await client.query("BEGIN");
     const query = `
-    INSERT INTO Users (username, email, profile_pic, oauth, name, surename, sign_in_provider) 
-    VALUES ($1, $2, $3, $4, $5, $6, $7)
+    INSERT INTO Users (username, email, profile_pic, oauth, name, surename, sign_in_provider, language) 
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
     RETURNING *;
     `;
     let values = [
@@ -27,6 +27,7 @@ export async function addUser(userData, signInProvider) {
       userData.first_name ?? "Anonymous",
       userData.last_name ?? "Anonymous",
       signInProvider ?? "intra",
+	  "EN"
     ];
     const result = await client.query(query, values);
     await client.query("COMMIT");
