@@ -4,6 +4,7 @@ import Logout from "./logout";
 import { useParams, useLocation } from "react-router-dom";
 import videojs from "video.js";
 import "video.js/dist/video-js.css";
+import { getCookie } from "../utils/cookie";
 
 
 // Only handles checking file availability + (re)setting source & retry
@@ -195,7 +196,7 @@ useEffect(() => {
         },
       });
       const validUser = await validResp.json();
-      const selectedLang = validUser.user.language || "en";
+      const selectedLang = validUser.user.language.toLowerCase() || "en";
       const response = await fetch(`/movies/subtitles/${id}`);
       if (!response.ok) throw new Error("Failed to fetch subtitles");
       const data = await response.json();

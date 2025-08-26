@@ -128,6 +128,7 @@ async function PatchLanguage(id, body) {
       !(
         body.language === "EN" ||
         body.language === "HU" ||
+        body.language === "ES" ||
         body.language === "LV"
       )
     )
