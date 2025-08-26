@@ -43,7 +43,7 @@
 - [✅] API must return appropriate HTTP codes for invalid calls
 <!-- TODO  archive.org use mp4 always. there is no point for this check-->
 - [✅] Convert videos on-the-fly if unsupported (at least mkv format) 
-- [✅] Delete movies if unwatched for one month
+- [❌] Delete movies if unwatched for one month
 - [❌] Auto-select subtitles if video language ≠ user’s preferred language
 - [✅] Download English subtitles if available
 
