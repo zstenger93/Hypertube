@@ -41,6 +41,7 @@ const AllComments = () => {
   if (loading) return <p>Loading...</p>;
 
   return (
+    <div style={{ position: 'relative', minHeight: '100vh' }}>
     <div className="center">
       <Logout />
       <h1>All Comments</h1>
@@ -55,7 +56,7 @@ const AllComments = () => {
               onError={onErrorImage}
             />
           </button>
-          <div className="centerComment">
+          <div className="centerComment" style={{marginBottom: '40px'}}>
             <h3>
               {comment.movieData.title} ({comment.movieData.year})
             </h3>
@@ -71,9 +72,10 @@ const AllComments = () => {
           </div>
         </div>
       ))}
-      <footer style={{
+    </div>
+    <footer style={{
         position: 'absolute',
-        bottom: '-5px',
+        bottom: '-50px',
         width: '100%',
         color: 'white',
         textAlign: 'center',
