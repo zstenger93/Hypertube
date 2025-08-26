@@ -185,15 +185,20 @@ function Login() {
           zIndex: 0,
         }}
       ></div>
-      <button onClick={() => navigate("/search")}>Seach</button>
-      <button onClick={() => navigate("/x")}>Comments</button>
-      <button onClick={handleLoginWithIntra}>Login with Intra</button>
-      <button onClick={handleGoogleLogin}>Login with Google</button>
+      {!showInputs && (
+        <>
+          <button onClick={() => navigate("/search")}>Search</button>
+          <button onClick={() => navigate("/x")}>Comments</button>
+          <button onClick={handleLoginWithIntra}>Login with Intra</button>
+          <button onClick={handleGoogleLogin}>Login with Google</button>
+        </>
+      )}
+
       <button onClick={handleShowHideInputs}>
         {showInputs
           ? isRegistering
             ? "Hide Register"
-            : "Hide Login"
+            : "Other Login Options"
           : isRegistering
           ? "Register with Email"
           : "Login with Email"}
