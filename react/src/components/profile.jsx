@@ -56,7 +56,6 @@ const Profile = () => {
 
       if (!response.ok) throw new Error("Some forbiden magic happened or smt;");
     } catch (error) {
-      console.log(error);
     }
   }
 

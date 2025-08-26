@@ -15,8 +15,6 @@ const SearchComponent = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-
-
   useEffect(() => {
     const fetchInitialMovies = async () => {
       setLoading(true);

@@ -7,6 +7,16 @@ const Library = ({ list, title, appendValue }) => {
   const [movies, setMovies] = useState([]);
   const navigate = useNavigate();
 
+  const onErrorImage = (e) => {
+    if (
+      !e.target.complete ||
+      e.target.naturalHeight < 50 ||
+      e.target.naturalWidth < 50
+    ) {
+      e.target.src = poster;
+    }
+  };
+
   useEffect(() => {
     if (!list) return;
     const fetchMovies = async () => {
@@ -47,7 +57,7 @@ const Library = ({ list, title, appendValue }) => {
                   src={thePoster}
                   alt={movie.Title ?? movie.title}
                   style={{ width: "100%", borderRadius: "8px" }}
-                  onError={(e) => (e.target.src = poster)}
+                  onError={onErrorImage}
                 />
                 <h3>{movie.Title ?? movie.title}</h3>
                 <p>{movie.Year ?? movie.year}</p>

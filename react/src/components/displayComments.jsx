@@ -5,6 +5,7 @@ import { getCookie } from "../utils/cookie";
 const Comments = ({ movie, currentUser }) => {
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const getComments = async () => {
     try {
       const response = await fetch(`/comments/${movie}`);
@@ -14,6 +15,40 @@ const Comments = ({ movie, currentUser }) => {
       return [];
     }
   };
+
+  async function deleteComment(comment_id) {
+    try {
+      const response = await fetch(`/comments/${comment_id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getCookie("accessToken")}`,
+        },
+      });
+      if (!response.ok) throw new Error("Some error");
+      setComments((prev) => prev.filter((c) => c.comment_id !== comment_id));
+    } catch (error) {}
+  }
+
+  async function patchComment(comment_id) {
+    try {
+      const response = await fetch(`/comments/${comment_id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getCookie("accessToken")}`,
+        },
+        body: JSON.stringify({ text: "Wow I tried to hide my opinions!" }),
+      });
+      if (!response.ok) throw new Error("Some error");
+      const data = await response.json();
+      setComments((prev) =>
+        prev.map((comma) =>
+          comma.comment_id === comment_id ? data.comment : comma
+        )
+      );
+    } catch (error) {}
+  }
 
   useEffect(() => {
     const fetchComments = async () => {
@@ -27,7 +62,6 @@ const Comments = ({ movie, currentUser }) => {
 
   const sendComment = async (event) => {
     event.preventDefault();
-    const token = getCookie("accessToken");
     const text = event.target.comment.value;
     const movieId = movie;
     try {
@@ -35,15 +69,13 @@ const Comments = ({ movie, currentUser }) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${getCookie("accessToken")}`,
         },
         body: JSON.stringify({ text }),
       });
       const data = await getComments();
       setComments(data);
-    } catch (error) {
-      console.log(error.message);
-    }
+    } catch (error) {}
     event.target.comment.value = "";
   };
 
@@ -72,12 +104,24 @@ const Comments = ({ movie, currentUser }) => {
                       <button
                         style={{
                           width: "50%",
-                          height: "10%",
-                          border: "1px",
-                          fontSize: "5px",
+                          height: "15%",
+                          border: "2px",
+                          fontSize: "7px",
                         }}
+                        onClick={() => deleteComment(comment.comment_id)}
                       >
                         Delete
+                      </button>
+                      <button
+                        style={{
+                          width: "50%",
+                          height: "15%",
+                          border: "2px",
+                          fontSize: "7px",
+                        }}
+                        onClick={() => patchComment(comment.comment_id)}
+                      >
+                        Edit
                       </button>
                     </>
                   )}

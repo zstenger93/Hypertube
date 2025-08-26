@@ -1,6 +1,7 @@
 import Logout from "./logout";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import poster from "../assets/poster.jpg";
 
 const AllComments = () => {
   const [comments, setComments] = useState([]);
@@ -13,8 +14,17 @@ const AllComments = () => {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.log(error.message);
       return [];
+    }
+  };
+
+  const onErrorImage = (e) => {
+    if (
+      !e.target.complete ||
+      e.target.naturalHeight < 50 ||
+      e.target.naturalWidth < 50
+    ) {
+      e.target.src = poster;
     }
   };
 
@@ -40,7 +50,10 @@ const AllComments = () => {
             className="commentButton"
             onClick={() => navigate(`/movie/${comment.movieData.imdbid}`)}
           >
-            <img src={comment.movieData.poster || "/src/assets/poster.jpg"} />
+            <img
+              src={comment.movieData.poster || "/src/assets/poster.jpg"}
+              onError={onErrorImage}
+            />
           </button>
           <div className="centerComment">
             <h3>
