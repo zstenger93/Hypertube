@@ -39,6 +39,70 @@ app.use("/comments", allCommentsRoute);
 app.use("/users", otherUsersRoute);
 
 
+function srtToVtt(raw) {
+  return (
+    "WEBVTT\n\n" +
+    raw
+      .replace(/\ufeff/g, "")                 // BOM
+      .replace(/\r+/g, "")                    // CR
+      .replace(/^\d+\s*$/gm, "")              // cue indices (line with only digits)
+      .replace(/(\d{2}:\d{2}:\d{2}),(\d{3})/g, "$1.$2") // comma -> dot
+      .replace(/\n{3,}/g, "\n\n")             // collapse extra blanks
+      .trim() + "\n"
+  );
+}
+
+app.get("/subtitle/:id/:moviename/:filename", async (req, res) => {
+  try {
+    const { id, moviename, filename } = req.params;
+
+    if (filename.includes("..")) return res.status(400).send("Invalid filename");
+
+    const subtitlesDir = path.resolve("/usr/src/app/downloads", id, moviename, "subtitles");
+    const requestedPath = path.resolve(subtitlesDir, filename);
+    if (!requestedPath.startsWith(subtitlesDir)) return res.status(400).send("Invalid path");
+
+    const ext = path.extname(filename).toLowerCase();
+    const baseName = path.basename(filename, ext);
+
+    if (ext === ".vtt") {
+      // If .vtt requested but only .srt exists, convert on the fly
+      const srtPath = path.join(subtitlesDir, baseName + ".srt");
+      if (fs.existsSync(requestedPath)) {
+        res.setHeader("Content-Type", "text/vtt; charset=utf-8");
+        res.setHeader("Cache-Control", "public, max-age=3600");
+        return fs.createReadStream(requestedPath).pipe(res);
+      } else if (fs.existsSync(srtPath)) {
+        const raw = await fs.promises.readFile(srtPath, "utf8");
+        const vtt = srtToVtt(raw);
+        res.setHeader("Content-Type", "text/vtt; charset=utf-8");
+        res.setHeader("Cache-Control", "public, max-age=3600");
+        return res.send(vtt);
+      } else {
+        return res.status(404).send("Subtitle not found");
+      }
+    }
+
+    if (ext === ".srt") {
+      // Serve original SRT if explicitly asked (optional) OR convert if query.format=vtt
+      const raw = await fs.promises.readFile(requestedPath, "utf8");
+      if (req.query.format === "vtt") {
+        const vtt = srtToVtt(raw);
+        res.setHeader("Content-Type", "text/vtt; charset=utf-8");
+        res.setHeader("Cache-Control", "public, max-age=3600");
+        return res.send(vtt);
+      }
+      res.setHeader("Content-Type", "application/x-subrip; charset=utf-8");
+      res.setHeader("Cache-Control", "public, max-age=3600");
+      return res.send(raw);
+    }
+
+    return res.status(400).send("Unsupported subtitle type");
+  } catch (e) {
+    return res.status(404).send("Subtitle not found");
+  }
+});
+
 app.get("/check-file/:id/:moviename/:filename", async (req, res) => {
   const { id, moviename, filename } = req.params;
   const videoPath = path.resolve(
