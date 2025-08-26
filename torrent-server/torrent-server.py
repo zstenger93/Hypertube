@@ -2,6 +2,7 @@ import libtorrent as lt
 import time
 import signal
 import sys
+import os
 
 # Path to the test video torrent file
 test_torrent_file = './video_test/testmovie_short.torrent'
@@ -46,11 +47,28 @@ def signal_handler(sig, frame):
 # Register signal handler for SIGTERM
 signal.signal(signal.SIGTERM, signal_handler)
 
+def delete_older():
+    path = './downloads'
+    treshold = 30 * 24 * 60 * 60 # should be 
+    time_now = time.time()
+    for root, dirs, files in os.walk(path):
+        for name in files:
+            file_path = os.path.join(root, name)
+            if time_now - os.path.getmtime(file_path) > treshold:
+                os.remove(file_path)
+        for dir in dirs:
+            dir_path = os.path.join(root, dir)
+            if not os.listdir(dir_path):
+                os.rmdir(dir_path)
+
+
+
 try:
     while not shutdown_flag:  # Keep the session open until shutdown_flag is set
         status = handle.status()
         print(f" - State: {status.state}, Progress: {status.progress * 100:.2f}%, Peers: {status.num_peers}")
         time.sleep(30)  # Check status every 30 seconds
+        delete_older()
 except KeyboardInterrupt:
     print("\nSeeding stopped manually.")
 
