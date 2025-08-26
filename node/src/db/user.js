@@ -22,7 +22,7 @@ export async function addUser(userData, signInProvider) {
     let values = [
       userData.login ?? userData.displayName ?? "Anonymous",
       userData.email ?? "No email provided",
-      userData.image?.versions?.medium ?? null,
+      userData.image?.versions?.medium ?? `http://${process.env.IP}/pesant.jpg`,
       crypto.randomBytes(32).toString("hex"),
       userData.first_name ?? "Anonymous",
       userData.last_name ?? "Anonymous",

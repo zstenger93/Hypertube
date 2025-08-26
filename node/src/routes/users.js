@@ -35,6 +35,13 @@ async function changeEmail(oldEmail, body) {
   }
 }
 
+async function changeName(id, body) {}
+
+async function changeSurname(id, body) {}
+
+async function changeNicname(id, body) {}
+
+
 async function PatchLanguage(id, body) {
   try {
     if (
@@ -50,7 +57,6 @@ async function PatchLanguage(id, body) {
     if (result.rows.length === 0) return null;
     return result.rows[0].language;
   } catch (error) {
-    console.error(error);
     return null;
   }
 }
@@ -61,15 +67,13 @@ async function toggleListWatch(movieId, email) {
     const checkResult = await client.query(query, [movieId, email]);
     const isWatch = checkResult.rows[0].state;
     let updateQuery;
-    if (isWatch) {
+    if (isWatch)
       updateQuery = `UPDATE Users SET watch_list = array_remove(watch_list, $1) WHERE email = $2`;
-    } else {
+    else
       updateQuery = `UPDATE Users SET watch_list = array_append(watch_list, $1) WHERE email = $2`;
-    }
     await client.query(updateQuery, [movieId, email]);
     return !isWatch;
   } catch (error) {
-    console.error("ToggleWatchList error:", error);
     return false;
   }
 }
@@ -80,11 +84,10 @@ async function toggleListWatched(movieId, email) {
     const checkResult = await client.query(query, [movieId, email]);
     const isWatch = checkResult.rows[0].state;
     let updateQuery;
-    if (isWatch) {
+    if (isWatch)
       updateQuery = `UPDATE Users SET watched_movies = array_remove(watched_movies, $1) WHERE email = $2`;
-    } else {
+    else
       updateQuery = `UPDATE Users SET watched_movies = array_append(watched_movies, $1) WHERE email = $2`;
-    }
     await client.query(updateQuery, [movieId, email]);
     return !isWatch;
   } catch (error) {
@@ -138,7 +141,6 @@ router.patch("/:id", async (req, res) => {
     } else if (body.newEmail !== undefined && body.newToken !== undefined) {
       if (user.sign_in_provider == "password") {
         const updateEmail = await changeEmail(user.email, body);
-        console.log(updateEmail);
         if (updateEmail == null) {
           return res.status(400).send("Error");
         } else {
@@ -151,7 +153,6 @@ router.patch("/:id", async (req, res) => {
       return res.status(400).send("Probably not allowed action");
     }
   } catch (error) {
-    console.error(error);
     return res.status(500).send("Internal server error");
   }
 });

@@ -10,11 +10,10 @@ router.delete("/:id", async (req, res) => {
   try {
     const query = `DELETE FROM Comments WHERE comment_id = $1 AND user_email = $2 RETURNING *;`;
     const result = await client.query(query, [id, user.email]);
-
     if (result.rows.length === 0) return res.status(404).send("Some error");
     return res.status(200).json({ message: "C D", comment: result.rows[0] });
   } catch (error) {
-    return res.status(500).send("Error deleting comment");
+    return res.status(500).send("I eat the chips and I Delete");
   }
 });
 
