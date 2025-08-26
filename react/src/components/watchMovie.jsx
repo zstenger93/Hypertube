@@ -89,25 +89,32 @@ const WatchMovie = () => {
   const videoRef = useRef(null);
   const playerRef = useRef(null);
 
+  // Fetch torrent / license info
   useEffect(() => {
-    const fetchTorrentfile = async () => {
+    const fetchTorrentFile = async () => {
       try {
         const response = await fetch(
-          `https://archive.org/advancedsearch.php?q=${id}&fl%5B%5D=identifier&sort%5B%5D=&sort%5B%5D=&sort%5B%5D=&rows=50&page=1&output=json&save=yes#raw`
+          `https://archive.org/advancedsearch.php?q=${id}&rows=50&page=1&output=json`
         );
         if (!response.ok) throw new Error("Failed to fetch torrents");
         const data = await response.json();
-        if (data.response && data.response.docs && data.response.docs.length > 0) {
-          const identifier = data.response.docs[0].identifier;
-          setTorrents(identifier);
+        const doc = data.response?.docs?.[0];
+        if (
+          doc?.licenseurl ===
+          "http://creativecommons.org/licenses/publicdomain/"
+        ) {
+          setIsPublicorNot(true);
+          setTorrents(doc.identifier || movie?.title?.replace(/\s/g, "_") || "");
         } else {
+          setIsPublicorNot(false);
           setTorrents("");
         }
-      } catch (error) {
+      } catch {
+        setIsPublicorNot(false);
         setTorrents("");
       }
     };
-    fetchTorrentfile();
+    fetchTorrentFile();
   }, [id, movie]);
 
   useEffect(() => {
@@ -141,12 +148,13 @@ const WatchMovie = () => {
 
     startTorrentDownload();
 
-    return () => {
-      if (playerRef.current) {
-        playerRef.current.dispose();
-      }
-    };
+    // return () => {
+    //   if (playerRef.current) {
+    //     playerRef.current.dispose();
+    //   }
+    // };
   }, [torrents, id]);
+
   // Initialize player once
   useEffect(() => {
     if (playerRef.current || !videoRef.current) return;
@@ -222,33 +230,6 @@ const WatchMovie = () => {
     });
   }, [subtitles]);
 
-  // Fetch torrent / license info
-  useEffect(() => {
-    const fetchTorrentFile = async () => {
-      try {
-        const response = await fetch(
-          `https://archive.org/advancedsearch.php?q=${id}&rows=50&page=1&output=json`
-        );
-        if (!response.ok) throw new Error("Failed to fetch torrents");
-        const data = await response.json();
-        const doc = data.response?.docs?.[0];
-        if (
-          doc?.licenseurl ===
-          "http://creativecommons.org/licenses/publicdomain/"
-        ) {
-          setIsPublicorNot(true);
-          setTorrents(doc.identifier || movie?.title?.replace(/\s/g, "_") || "");
-        } else {
-          setIsPublicorNot(false);
-          setTorrents("");
-        }
-      } catch {
-        setIsPublicorNot(false);
-        setTorrents("");
-      }
-    };
-    fetchTorrentFile();
-  }, [id, movie]);
 
   // Set video source (and retry)
   useEffect(() => {
