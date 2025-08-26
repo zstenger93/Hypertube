@@ -228,7 +228,30 @@ function Login() {
           <button onClick={handleForgotPassword}>{"Forgot password?"}</button>
           <p>{info}</p>
         </div>
+        
       )}
+      <footer style={{
+        position: 'absolute',
+        bottom: '-5px',
+        width: '100%',
+        color: 'white',
+        textAlign: 'center',
+        padding: '10px 0',
+        zIndex: 10,
+      }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0 20px' }}>
+          <p style={{ color: '#aaff00', margin: '5px 0', fontSize: '14px' }}>
+            © 2025 HyperCrime - For Educational Purposes Only
+          </p>
+          <p style={{ 
+            color: '#aaff00', margin: '8px 0 0 0', 
+            fontSize: '12px', 
+            opacity: 0.7 
+          }}>
+            This project is a demonstration and not intended for actual use.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
