@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "../App.css";
 import Logout from "./logout";
-import profile from "../assets/pesant.jpg";
+import profile from "/pesant.jpg";
 import { getCookie } from "../utils/cookie";
 import Library from "./Library";
 
@@ -50,13 +50,24 @@ const OtherProfile = () => {
           <img src={"/src/assets/jail.png"} alt="overlay" className="overlay" />
         </div>
         <h3>{user.username}</h3>
+        <h3>{user.name}</h3>
+        <h3>{user.surename}</h3>
       </div>
-      <Library list={user?.watched_movies ?? []} title="Watched Movies" />
+      <Library
+        list={user?.watched_movies ?? []}
+        title="Watched Movies"
+        appendValue={"1"}
+      />
       <Library
         list={user?.watch_list ?? []}
         title="Movies to Watch in Future"
+        appendValue={"2"}
       />
-      <Library list={user?.liked_movies ?? []} title="Liked Movies" />
+      <Library
+        list={user?.liked_movies ?? []}
+        title="Liked Movies"
+        appendValue={"3"}
+      />
     </div>
   );
 };

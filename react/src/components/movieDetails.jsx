@@ -73,6 +73,16 @@ const MovieDetails = () => {
     }
   };
 
+  const onErrorImage = (e) => {
+    if (
+      !e.target.complete ||
+      e.target.naturalHeight < 50 ||
+      e.target.naturalWidth < 50
+    ) {
+      e.target.src = poster;
+    }
+  };
+
   useEffect(() => {
     const fetchMovieDetails = async () => {
       try {
@@ -154,7 +164,11 @@ const MovieDetails = () => {
                 navigate(`/movie/${id}/watch`, { state: { movie } })
               }
             >
-              <img src={thePoster} alt={movie.Title ?? movie.title} />
+              <img
+                src={thePoster}
+                alt={movie.Title ?? movie.title}
+                onError={onErrorImage}
+              />
             </button>
             <div className="anotherColor">
               <h2>{movie.Title ?? movie.title}</h2>
@@ -204,7 +218,7 @@ const MovieDetails = () => {
       ) : (
         <p>Movie details not found.</p>
       )}
-      <Comments movie={id} currentUser={user} />
+      {user && <Comments movie={id} currentUser={user} />}
     </div>
   );
 };

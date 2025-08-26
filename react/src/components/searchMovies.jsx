@@ -15,8 +15,6 @@ const SearchComponent = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-
-
   useEffect(() => {
     const fetchInitialMovies = async () => {
       setLoading(true);
@@ -94,11 +92,18 @@ const SearchComponent = () => {
       return (b.Year ?? b.year) - (a.Year ?? a.year);
     } else if (filter === "imdbRating") {
       return (b.imdbRating ?? b.imdbrating) - (a.imdbRating ?? a.imdbrating);
+    } else if (filter === "alphabetical") {
+      const titleA = (a.Title ?? a.title ?? "").toLowerCase();
+      const titleB = (b.Title ?? b.title ?? "").toLowerCase();
+      if (titleA < titleB) return -1;
+      if (titleA > titleB) return 1;
+      return 0;
     }
     return 0;
   });
 
   return (
+    <div style={{ position: 'relative', minHeight: '100vh' }}>
     <div className="center">
       <div className="searchBox">
         <Logout />
@@ -132,6 +137,7 @@ const SearchComponent = () => {
           <select value={filter} onChange={handleFilterChange}>
             <option value="year">Year</option>
             <option value="imdbRating">IMDb Rating</option>
+            <option value="alphabetical">Alphabetical</option>
           </select>
         </div>
       </div>
@@ -204,6 +210,29 @@ const SearchComponent = () => {
           <p>No results found</p>
         )}
       </div>
+      </div>
+      <footer style={{
+        position: 'absolute',
+        bottom: '-42px',
+        width: '100%',
+        color: 'white',
+        textAlign: 'center',
+        padding: '10px 0',
+        zIndex: 10,
+      }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0 20px' }}>
+          <p style={{ color: '#aaff00', margin: '5px 0', fontSize: '14px' }}>
+            © 2025 HyperCrime - For Educational Purposes Only
+          </p>
+          <p style={{ 
+            color: '#aaff00', margin: '8px 0 0 0', 
+            fontSize: '12px', 
+            opacity: 0.7 
+          }}>
+            This project is a demonstration and not intended for actual use.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 };

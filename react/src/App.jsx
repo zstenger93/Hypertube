@@ -6,8 +6,6 @@ import Login from "./components/login";
 import ProtectedRoute from "./components/protectedRoute";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import WatchMovie from "./components/watchMovie";
-import { initializeApp } from "firebase/app";
-import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import Profile from "./components/profile";
 import FourOFour from "./components/fourOFour";
 import AllComents from "./components/allComments";

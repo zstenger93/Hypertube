@@ -56,7 +56,7 @@ These dependencies are listed in the `requirements.txt` file and will be install
 Contributions are welcome! Please open an issue or submit a pull request for any improvements or bug fixes.
 
 ## testing the API in dev
-    # curl -X POST -F "file=@./src/temp_torrent/testmovie_short.torrent" http://localhost:5000/upload-torrent
+    # curl -X POST -F "file=@./src/temp_torrent/testmovie_short.torrent" http://localhost:5001/upload-torrent
 
 ## License
 

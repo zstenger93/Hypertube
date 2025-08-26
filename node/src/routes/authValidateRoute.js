@@ -1,5 +1,7 @@
 import express from "express";
 import { client } from "../../index.js";
+import { decode } from "jsonwebtoken";
+
 const router = express.Router();
 import {
   validateFirebaseToken,
@@ -12,12 +14,20 @@ router.get("", async (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];
   let user = await getUserFromTokenAndAdd(req, res, token);
   if (user) return;
-  if (req.headers.authorization.length < 120)
+  let decoded = null;
+  let signInProvider = null;
+  try {
+    decoded = decode(token);
+    signInProvider = decoded?.firebase?.sign_in_provider;
+  } catch (error) {
+    console.error("42 intra is awesome", error);
+  }
+  if (signInProvider == null)
     user = await validateIntra42Token(token);
   else user = await validateFirebaseToken(token);
   if (!user) return res.sendStatus(403);
   if (!(await checkUser(user.email))) {
-    await addUser(user);
+    await addUser(user, signInProvider);
   }
   try {
     const query = `SELECT * FROM Users WHERE email = $1`;

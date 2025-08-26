@@ -5,6 +5,7 @@ import { getCookie } from "../utils/cookie";
 const Comments = ({ movie, currentUser }) => {
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const getComments = async () => {
     try {
       const response = await fetch(`/comments/${movie}`);
@@ -14,6 +15,40 @@ const Comments = ({ movie, currentUser }) => {
       return [];
     }
   };
+
+  async function deleteComment(comment_id) {
+    try {
+      const response = await fetch(`/comments/${comment_id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getCookie("accessToken")}`,
+        },
+      });
+      if (!response.ok) throw new Error("Some error");
+      setComments((prev) => prev.filter((c) => c.comment_id !== comment_id));
+    } catch (error) {}
+  }
+
+  async function patchComment(comment_id) {
+    try {
+      const response = await fetch(`/comments/${comment_id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getCookie("accessToken")}`,
+        },
+        body: JSON.stringify({ text: "Wow I tried to hide my opinions!" }),
+      });
+      if (!response.ok) throw new Error("Some error");
+      const data = await response.json();
+      setComments((prev) =>
+        prev.map((comma) =>
+          comma.comment_id === comment_id ? data.comment : comma
+        )
+      );
+    } catch (error) {}
+  }
 
   useEffect(() => {
     const fetchComments = async () => {
@@ -27,7 +62,6 @@ const Comments = ({ movie, currentUser }) => {
 
   const sendComment = async (event) => {
     event.preventDefault();
-    const token = getCookie("accessToken");
     const text = event.target.comment.value;
     const movieId = movie;
     try {
@@ -35,19 +69,18 @@ const Comments = ({ movie, currentUser }) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${getCookie("accessToken")}`,
         },
         body: JSON.stringify({ text }),
       });
       const data = await getComments();
       setComments(data);
-    } catch (error) {
-      console.log(error.message);
-    }
+    } catch (error) {}
     event.target.comment.value = "";
   };
 
   if (loading) return <p>Loading...</p>;
+  if (!currentUser) return <p>Loading user...</p>;
 
   return (
     <div>
@@ -65,14 +98,33 @@ const Comments = ({ movie, currentUser }) => {
                 <div className="commentUser">
                   <h3>{comment.user.username}</h3>
                   <img src={comment.user.profile_pic} alt="Profile" />
-                  {currentUser?.user &&
-                    parseInt(currentUser.user.user_id, 10) ===
-                      parseInt(comment.user.user_id, 10) && (
-                      <>
-                        <button>Edit</button>
-                        <button>Delete</button>
-                      </>
-                    )}
+                  {String(currentUser.user_id) ===
+                    String(comment.user.user_id) && (
+                    <>
+                      <button
+                        style={{
+                          width: "50%",
+                          height: "15%",
+                          border: "2px",
+                          fontSize: "7px",
+                        }}
+                        onClick={() => deleteComment(comment.comment_id)}
+                      >
+                        Delete
+                      </button>
+                      <button
+                        style={{
+                          width: "50%",
+                          height: "15%",
+                          border: "2px",
+                          fontSize: "7px",
+                        }}
+                        onClick={() => patchComment(comment.comment_id)}
+                      >
+                        Edit
+                      </button>
+                    </>
+                  )}
                 </div>
               ) : (
                 <div className="commentUser">

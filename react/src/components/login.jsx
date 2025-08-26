@@ -8,10 +8,10 @@ import {
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
 } from "firebase/auth";
-
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { getCookie, setCookie, deleteCookie } from "../utils/cookie";
+import warning from "../assets/warning.jpg";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDdCQbBKuVCKAR67luHVd_WyxpEGVvRfNI",
@@ -52,11 +52,34 @@ const WarningPopup = () => {
   );
 };
 
+const WarningPopup1 = () => {
+  const [showPopup1, setShowPopup1] = useState(true);
+  return (
+    showPopup1 && (
+      <div>
+        <div className="popup">
+          <img
+            src={warning}
+            style={{
+              maxWidth: "500px",
+              maxHeight: "350px",
+              width: "100%",
+              height: "auto",
+            }}
+          />
+          <button onClick={() => setShowPopup1(false)}>Close</button>
+        </div>
+      </div>
+    )
+  );
+};
+
 function Login() {
   const [showInputs, setShowInputs] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [info, setInfo] = useState("");
   const navigate = useNavigate();
 
   const handleLoginWithIntra = () => {
@@ -65,13 +88,12 @@ function Login() {
 
   const handleGoogleLogin = async () => {
     const provider = new GoogleAuthProvider();
-    
     try {
       const result = await signInWithPopup(auth, provider);
       const token = await result.user.getIdToken();
       setCookie("accessToken", token);
     } catch (error) {
-      return;
+      setInfo(error.message);
     }
     try {
       const response = await fetch(`/auth/validate`, {
@@ -88,7 +110,7 @@ function Login() {
       setCookie("accessToken", data.user.oauth);
       navigate("/search");
     } catch {
-      navigate("/404");
+      setInfo(error.message);
     }
   };
 
@@ -97,7 +119,7 @@ function Login() {
     try {
       await sendPasswordResetEmail(auth, email);
     } catch (error) {
-      console.error("Error sending reset email:", error);
+      setInfo(error.message);
     }
   };
 
@@ -117,12 +139,25 @@ function Login() {
           email,
           password
         );
+        setInfo("Sent User Verification");
       }
       const token = await userCredential.user.getIdToken();
       setCookie("accessToken", token);
+      const response = await fetch(`/auth/validate`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${getCookie("accessToken")}`,
+        },
+      });
+      if (!response.ok) {
+        deleteCookie("accessToken");
+        return;
+      }
+      const data = await response.json();
+      setCookie("accessToken", data.user.oauth);
       navigate("/search");
     } catch (error) {
-      navigate("/404");
+      setInfo(error.message);
     }
   };
 
@@ -134,6 +169,7 @@ function Login() {
 
   return (
     <div className="centerScreen">
+      <WarningPopup1 />
       <WarningPopup />
       <div
         style={{
@@ -149,15 +185,20 @@ function Login() {
           zIndex: 0,
         }}
       ></div>
-      <button onClick={() => navigate("/search")}>Seach</button>
-      <button onClick={() => navigate("/x")}>Comments</button>
-      <button onClick={handleLoginWithIntra}>Login with Intra</button>
-      <button onClick={handleGoogleLogin}>Login with Google</button>
+      {!showInputs && (
+        <>
+          <button onClick={() => navigate("/search")}>Search</button>
+          <button onClick={() => navigate("/x")}>Comments</button>
+          <button onClick={handleLoginWithIntra}>Login with Intra</button>
+          <button onClick={handleGoogleLogin}>Login with Google</button>
+        </>
+      )}
+
       <button onClick={handleShowHideInputs}>
         {showInputs
           ? isRegistering
             ? "Hide Register"
-            : "Hide Login"
+            : "Other Login Options"
           : isRegistering
           ? "Register with Email"
           : "Login with Email"}
@@ -185,8 +226,32 @@ function Login() {
               : "Don't have an account? Register"}
           </button>
           <button onClick={handleForgotPassword}>{"Forgot password?"}</button>
+          <p>{info}</p>
         </div>
+        
       )}
+      <footer style={{
+        position: 'absolute',
+        bottom: '-5px',
+        width: '100%',
+        color: 'white',
+        textAlign: 'center',
+        padding: '10px 0',
+        zIndex: 10,
+      }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0 20px' }}>
+          <p style={{ color: '#aaff00', margin: '5px 0', fontSize: '14px' }}>
+            © 2025 HyperCrime - For Educational Purposes Only
+          </p>
+          <p style={{ 
+            color: '#aaff00', margin: '8px 0 0 0', 
+            fontSize: '12px', 
+            opacity: 0.7 
+          }}>
+            This project is a demonstration and not intended for actual use.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }

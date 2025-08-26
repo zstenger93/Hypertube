@@ -2,10 +2,20 @@ import { useEffect, useState } from "react";
 import poster from "../assets/poster.jpg";
 import { useNavigate } from "react-router-dom";
 
-const Library = ({ list, title }) => {
+const Library = ({ list, title, appendValue }) => {
   const limit = 15;
   const [movies, setMovies] = useState([]);
   const navigate = useNavigate();
+
+  const onErrorImage = (e) => {
+    if (
+      !e.target.complete ||
+      e.target.naturalHeight < 50 ||
+      e.target.naturalWidth < 50
+    ) {
+      e.target.src = poster;
+    }
+  };
 
   useEffect(() => {
     if (!list) return;
@@ -29,7 +39,7 @@ const Library = ({ list, title }) => {
   return (
     <div>
       <h1>{title}</h1>
-      <div className="displayMovies">
+      <div className="displayMovies" style={{ marginTop: "15px" }}>
         {movies.length > 0 ? (
           movies.map((movie) => {
             let thePoster =
@@ -39,7 +49,7 @@ const Library = ({ list, title }) => {
             if (thePoster === "N/A") thePoster = poster;
             return (
               <button
-                key={movie.imdbID ?? movie.imdbid}
+                key={`${movie.imdbID ?? movie.imdbid}-${appendValue}`}
                 className="movieFrame"
                 onClick={() => navigate(`/movie/${movie.imdbid}`)}
               >
@@ -47,7 +57,7 @@ const Library = ({ list, title }) => {
                   src={thePoster}
                   alt={movie.Title ?? movie.title}
                   style={{ width: "100%", borderRadius: "8px" }}
-                  onError={(e) => (e.target.src = poster)}
+                  onError={onErrorImage}
                 />
                 <h3>{movie.Title ?? movie.title}</h3>
                 <p>{movie.Year ?? movie.year}</p>
