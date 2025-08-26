@@ -21,3 +21,13 @@ clean_docker:
 
 execute_backend:
 	docker exec -it db /bin/bash
+
+
+test_unix:
+	python3 -m venv venv
+	. venv/bin/activate && pip install -r requirements.txt && python3 test.py
+
+test_windows:
+	python.exe -m venv venv
+	venv\Scripts\python.exe -m pip install -r requirements.txt
+	venv\Scripts\python.exe test.py
