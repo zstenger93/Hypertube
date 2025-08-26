@@ -47,7 +47,7 @@ const setPlayerSourceWithRetry = async (
               retryCount + 1,
               maxRetries
             ),
-          5000
+          5001
         );
       } else {
         setIsBuffering(false);
@@ -68,7 +68,7 @@ const setPlayerSourceWithRetry = async (
             retryCount + 1,
             maxRetries
           ),
-        5000
+        5001
       );
     } else {
       setIsBuffering(false);
@@ -122,7 +122,7 @@ const WatchMovie = () => {
       if (torrents) {
         const torrentLink = `https://archive.org/download/${torrents}/${torrents}_archive.torrent`;
         try {
-          const response = await fetch("http://localhost:5000/upload-torrent", {
+          const response = await fetch("http://localhost:5001/upload-torrent", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -172,7 +172,7 @@ const WatchMovie = () => {
         if (!playerRef.current || playerRef.current.isDisposed()) return;
         playerRef.current.src(srcObj);
         playerRef.current.play().catch(() => {});
-      }, 5000);
+      }, 5001);
     });
 
     return () => {
