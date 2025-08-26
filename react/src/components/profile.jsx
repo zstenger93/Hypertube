@@ -1,16 +1,47 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import {
+  getAuth,
+  verifyBeforeUpdateEmail,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
+} from "firebase/auth";
 import "../App.css";
 import Logout from "./logout";
-import profile from "../../public/pesant.jpg";
+import profile from "/pesant.jpg";
 import { getCookie } from "../utils/cookie";
-import ChangeDetails from "./changeDetails";
 import Library from "./Library";
 
 const Profile = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [language, setLan] = useState("EN");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+
+  async function changeEmail(newEmail, password) {
+    const auth = getAuth();
+    const firebaseUser = auth.currentUser;
+    if (!firebaseUser) throw new Error("Probaly 42 Intra User logged In");
+    const isPassword = firebaseUser.providerData.some(
+      (p) => p.providerId === "password"
+    );
+    if (!isPassword) throw new Error("Only password users can update email");
+    try {
+      const credential = EmailAuthProvider.credential(
+        firebaseUser.email,
+        password
+      );
+      await reauthenticateWithCredential(firebaseUser, credential);
+      await verifyBeforeUpdateEmail(firebaseUser, newEmail);
+      console.log(newEmail);
+      const token = await firebaseUser.getIdToken(true);
+      return token;
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  }
 
   async function changeLanguage(params) {
     setLan(params || "EN");
@@ -43,6 +74,8 @@ const Profile = () => {
         const data = await response.json();
         setLan(data.user.language || "EN");
         setUser(data.user);
+        setUsername(data.user.username);
+        setEmail(data.user.email);
       } catch (error) {
         console.error("Error fetching user:", error);
       } finally {
@@ -71,8 +104,42 @@ const Profile = () => {
           <option value="EN">EN</option>
           <option value="HU">HU</option>
         </select>
-        <ChangeDetails name="Username" currentValue={user.username} api="" />
-        <ChangeDetails name="Email" currentValue={user.email} api="" />
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            padding: 0,
+            margin: 0,
+          }}
+        >
+          <label>Username</label>
+          <input
+            placeholder=""
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <button>Change username</button>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            padding: 0,
+            margin: 0,
+          }}
+        >
+          <label>Email</label>
+          <input
+            placeholder=""
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <button onClick={() => changeEmail(email, password)}>
+            Change email
+          </button>
+        </div>
       </div>
       <div>
         <Library list={user?.watched_movies ?? []} title="Watched Movies" />

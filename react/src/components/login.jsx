@@ -7,6 +7,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
+  sendEmailVerification,
 } from "firebase/auth";
 
 import { useNavigate } from "react-router-dom";
@@ -57,6 +58,7 @@ function Login() {
   const [isRegistering, setIsRegistering] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [info, setInfo] = useState("");
   const navigate = useNavigate();
 
   const handleLoginWithIntra = () => {
@@ -65,13 +67,12 @@ function Login() {
 
   const handleGoogleLogin = async () => {
     const provider = new GoogleAuthProvider();
-
     try {
       const result = await signInWithPopup(auth, provider);
       const token = await result.user.getIdToken();
       setCookie("accessToken", token);
     } catch (error) {
-      return;
+      setInfo(error.message);
     }
     try {
       const response = await fetch(`/auth/validate`, {
@@ -88,7 +89,7 @@ function Login() {
       setCookie("accessToken", data.user.oauth);
       navigate("/search");
     } catch {
-      navigate("/404");
+      setInfo(error.message);
     }
   };
 
@@ -97,7 +98,7 @@ function Login() {
     try {
       await sendPasswordResetEmail(auth, email);
     } catch (error) {
-      console.error("Error sending reset email:", error);
+      setInfo(error.message);
     }
   };
 
@@ -117,6 +118,7 @@ function Login() {
           email,
           password
         );
+        setInfo("Sent User Verification");
       }
       const token = await userCredential.user.getIdToken();
       setCookie("accessToken", token);
@@ -134,7 +136,7 @@ function Login() {
       setCookie("accessToken", data.user.oauth);
       navigate("/search");
     } catch (error) {
-      navigate("/404");
+      setInfo(error.message);
     }
   };
 
@@ -197,6 +199,7 @@ function Login() {
               : "Don't have an account? Register"}
           </button>
           <button onClick={handleForgotPassword}>{"Forgot password?"}</button>
+          <p>{info}</p>
         </div>
       )}
     </div>
