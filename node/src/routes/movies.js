@@ -96,27 +96,22 @@ async function updateClick(movieId) {
     await client.query("COMMIT");
   } catch (error) {
     await client.query("ROLLBACK");
-    console.error(error);
   }
 }
 
 router.patch("/:id", async (req, res) => {
   const { id } = req.params;
-  if (!id || id.length === 0) {
-    return res.status(400).send("Error: Invalid ID");
-  }
+  if (!id || id.length === 0) return res.status(400).send("Error: Invalid ID");
   try {
     let movie = await getMovieFromDB(id);
     if (movie === null) {
       movie = await inserMovieInDb(id);
     }
     await updateClick(id);
-    if (!movie.videos || movie.videos.length === 0) {
+    if (!movie.videos || movie.videos.length === 0)
       movie = await fetchYoutube(movie);
-    }
     return res.json(movie);
   } catch (error) {
-    console.log(error);
     return res.status(404).send(error.message);
   }
 });
@@ -132,9 +127,7 @@ router.get("/:title?", async (req, res) => {
   }
   try {
     let movieRows = await getMoviesByName(req, res, user);
-    if (movieRows !== null && movieRows.length > 0) {
-      return res.json(movieRows);
-    }
+    if (movieRows !== null && movieRows.length > 0) return res.json(movieRows);
     if (page > 3) {
       return res
         .status(500)
@@ -173,9 +166,7 @@ router.get("/:title?", async (req, res) => {
     }
     await client.query("COMMIT");
     movieRows = await getMoviesByName(req, res, user);
-    if (movieRows !== null && movieRows.length > 0) {
-      return res.json(movieRows);
-    }
+    if (movieRows !== null && movieRows.length > 0) return res.json(movieRows);
     return res.status(500).send("No more movies found");
   } catch (error) {
     await client.query("ROLLBACK");

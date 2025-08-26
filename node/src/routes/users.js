@@ -30,17 +30,97 @@ async function changeEmail(oldEmail, body) {
     }
     return updatedUser.rows[0];
   } catch (error) {
-    console.log(error);
+    await client.query("ROLLBACK");
     return null;
   }
 }
 
-async function changeName(id, body) {}
+async function changeName(id, body) {
+  try {
+    if (
+      typeof body.name !== "string" ||
+      body.name.length === 0 ||
+      body.name.length > 20
+    )
+      return null;
+    await client.query("BEGIN");
+    const query = `UPDATE Users SET name = $1 WHERE user_id = $2 RETURNING *;`;
+    const result = await client.query(query, [body.name, id]);
+    await client.query("COMMIT");
 
-async function changeSurname(id, body) {}
+    return result.rows[0] || null;
+  } catch {
+    await client.query("ROLLBACK");
 
-async function changeNicname(id, body) {}
+    return null;
+  }
+}
 
+async function changeSurname(id, body) {
+  try {
+    if (
+      typeof body.surename !== "string" ||
+      body.surename.length === 0 ||
+      body.surename.length > 20
+    )
+      return null;
+    await client.query("BEGIN");
+    const query = `UPDATE Users SET surename = $1 WHERE user_id = $2 RETURNING *;`;
+    const result = await client.query(query, [body.surename, id]);
+    await client.query("COMMIT");
+    return result.rows[0] || null;
+  } catch {
+    await client.query("ROLLBACK");
+
+    return null;
+  }
+}
+
+async function changeNicname(id, body) {
+  try {
+    console.log("I WSA HERE");
+    if (
+      typeof body.nicname !== "string" ||
+      body.nicname.length === 0 ||
+      body.nicname.length > 20
+    )
+      return null;
+    await client.query("BEGIN");
+    console.log(body);
+    const query = `UPDATE Users SET username = $1 WHERE user_id = $2 RETURNING *;`;
+    const result = await client.query(query, [body.nicname, id]);
+    await client.query("COMMIT");
+    return result.rows[0] || null;
+  } catch {
+    await client.query("ROLLBACK");
+    return null;
+  }
+}
+
+async function changeProfilePic(id, body) {
+  try {
+    if (
+      typeof body.pic !== "string" ||
+      body.pic.length === 0 ||
+      body.pic.length > 20
+    )
+      return null;
+    let picture = null;
+    if (body.pic == "pesant") picture = `http://${process.env.IP}/pesant.jpg`;
+    else if (body.pic == "change")
+      picture = `http://${process.env.IP}/change.jpg`;
+    else return null;
+    if (picture == null) return null;
+    await client.query("BEGIN");
+    const query = `UPDATE Users SET profile_pic = $1 WHERE user_id = $2 RETURNING *;`;
+    const result = await client.query(query, [picture, id]);
+    await client.query("COMMIT");
+    return result.rows[0] || null;
+  } catch {
+    await client.query("ROLLBACK");
+    return null;
+  }
+}
 
 async function PatchLanguage(id, body) {
   try {
@@ -120,6 +200,7 @@ router.patch("/:id", async (req, res) => {
   const body = req.body;
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) return res.sendStatus(401);
+  console.log(token, body);
   try {
     const user = await justGetUser(req, res);
     if (user === null) return res.status(401).send("Invalid Token");
@@ -149,6 +230,22 @@ router.patch("/:id", async (req, res) => {
       } else {
         return res.status(400).send("Not allowed to change this email");
       }
+    } else if (body.nicname !== undefined) {
+      const nicname = changeNicname(id, body);
+      if (nicname) res.json(nicname);
+      else res.status(500).send("Some error");
+    } else if (body.name !== undefined) {
+      const name = changeName(id, body);
+      if (name) res.json(name);
+      else res.status(500).send("Some error");
+    } else if (body.surename !== undefined) {
+      const surename = changeSurname(id, body);
+      if (surename) res.json(surename);
+      else res.status(500).send("Some error");
+    } else if (body.pic !== undefined) {
+      const pic = changeProfilePic(id, body);
+      if (pic) res.json(pic);
+      else res.status(500).send("Some error");
     } else {
       return res.status(400).send("Probably not allowed action");
     }
