@@ -17,7 +17,7 @@ const Profile = () => {
   const [error, setError] = useState("");
   const [surename, setSurename] = useState("");
   const [name, setName] = useState("");
-  const [picture, setPicture] = useState(profile);
+  const [hide, setHide] = useState(true);
   const navigate = useNavigate();
 
   async function changeName(name) {
@@ -184,95 +184,101 @@ const Profile = () => {
               className="overlay"
             />
           </div>
+          <button onClick={() => setHide(!hide)}>
+            {hide ? "Show Info" : "Hide Info"}
+          </button>
           <p>{error}</p>
-          <select
-            value={language}
-            onChange={(e) => changeLanguage(e.target.value)}
-          >
-            <option value="LV">LV</option>
-            <option value="EN">EN</option>
-            <option value="HU">HU</option>
-          </select>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              padding: 0,
-              margin: 0,
-            }}
-          >
-            <label>Username</label>
-            <input
-              placeholder=""
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-            <button onClick={() => changeNicname(username)}>
-              Change username
-            </button>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              padding: 0,
-              margin: 0,
-            }}
-          >
-            <label>name</label>
-            <input
-              placeholder=""
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-            <button onClick={() => changeName(name)}>Change Name</button>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              padding: 0,
-              margin: 0,
-            }}
-          >
-            <label>Surename</label>
-            <input
-              placeholder=""
-              value={surename}
-              onChange={(e) => setSurename(e.target.value)}
-            />
-            <button onClick={() => changeSurename(surename)}>
-              Change surename
-            </button>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              padding: 0,
-              margin: 0,
-            }}
-          >
-            <label>Email</label>
-            <input
-              placeholder=""
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <button onClick={() => changeEmail(email)}>Change email</button>
+          {!hide && (
+            <>
+              <select
+                value={language}
+                onChange={(e) => changeLanguage(e.target.value)}
+              >
+                <option value="LV">LV</option>
+                <option value="EN">EN</option>
+                <option value="HU">HU</option>
+              </select>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  padding: 0,
+                  margin: 0,
+                }}
+              >
+                <label>Username</label>
+                <input
+                  placeholder=""
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                />
+                <button onClick={() => changeNicname(username)}>
+                  Change username
+                </button>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  padding: 0,
+                  margin: 0,
+                }}
+              >
+                <label>name</label>
+                <input
+                  placeholder=""
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+                <button onClick={() => changeName(name)}>Change Name</button>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  padding: 0,
+                  margin: 0,
+                }}
+              >
+                <label>Surename</label>
+                <input
+                  placeholder=""
+                  value={surename}
+                  onChange={(e) => setSurename(e.target.value)}
+                />
+                <button onClick={() => changeSurename(surename)}>
+                  Change surename
+                </button>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  padding: 0,
+                  margin: 0,
+                }}
+              >
+                <label>Email</label>
+                <input
+                  placeholder=""
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                <button onClick={() => changeEmail(email)}>Change email</button>
+                <button onClick={() => changeProfilePicture("pesant")}>
+                  Default profile picture
+                </button>
 
-            <button onClick={() => changeProfilePicture("pesant")}>
-              Default profile picture
-            </button>
-
-            <button onClick={() => changeProfilePicture("change")}>
-              Awesome meme picture
-            </button>
-          </div>
+                <button onClick={() => changeProfilePicture("change")}>
+                  Awesome meme picture
+                </button>
+              </div>
+            </>
+          )}
         </div>
         <div style={{ marginBottom: "42px" }}>
           <Library list={user?.watched_movies ?? []} title="Watched Movies" />

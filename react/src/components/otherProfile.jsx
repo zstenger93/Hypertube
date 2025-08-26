@@ -50,6 +50,8 @@ const OtherProfile = () => {
           <img src={"/src/assets/jail.png"} alt="overlay" className="overlay" />
         </div>
         <h3>{user.username}</h3>
+        <h3>{user.name}</h3>
+        <h3>{user.surename}</h3>
       </div>
       <Library
         list={user?.watched_movies ?? []}
