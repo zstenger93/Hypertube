@@ -3,9 +3,42 @@ import { client } from "../../index.js";
 import { getUserFromToken } from "../utils/validate.js";
 const router = express.Router();
 
+router.delete("/:id", async (req, res) => {
+  const id = req.params.id;
+  const user = await getUserFromToken(req, res);
+  if (!user) return;
+  try {
+    const query = `DELETE FROM Comments WHERE comment_id = $1 AND user_email = $2 RETURNING *;`;
+    const result = await client.query(query, [id, user.email]);
+
+    if (result.rows.length === 0) return res.status(404).send("Some error");
+    return res.status(200).json({ message: "C D", comment: result.rows[0] });
+  } catch (error) {
+    return res.status(500).send("Error deleting comment");
+  }
+});
+
+router.patch("/:id", async (req, res) => {
+  const commentId = req.params.id;
+  const { text } = req.body;
+  if (!text) return res.status(400).send("No text provided for update");
+  if (text.length > 500) return res.status(400).send("This is X");
+  const user = await getUserFromToken(req, res);
+  if (!user) return;
+  try {
+    const query = `UPDATE Comments SET content = $1 WHERE comment_id = $2 AND user_email = $3 RETURNING *;`;
+    const result = await client.query(query, [text, commentId, user.email]);
+    if (result.rows.length === 0) return res.status(404).send("Error");
+    return res.status(200).json({ message: "U", comment: result.rows[0] });
+  } catch (error) {
+    return res.status(500).send("Error updating comment");
+  }
+});
+
 router.post("/:movieId", async (req, res) => {
   const movieId = req.params.movieId;
   if (movieId.length === 0) {
+    return res.status(500).send("Error adding comment");
   }
   const user = await getUserFromToken(req, res);
   if (!user) return;
