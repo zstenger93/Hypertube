@@ -8,10 +8,10 @@ import {
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
 } from "firebase/auth";
-
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { getCookie, setCookie, deleteCookie } from "../utils/cookie";
+import warning from "../assets/warning.jpg";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDdCQbBKuVCKAR67luHVd_WyxpEGVvRfNI",
@@ -46,6 +46,28 @@ const WarningPopup = () => {
           <h1>WARNING!!!!</h1>
           <p>THIS PROJECT IS MADE FOR EDUCATIONAL PURPOSES</p>
           <button onClick={() => setShowPopup(false)}>Close</button>
+        </div>
+      </div>
+    )
+  );
+};
+
+const WarningPopup1 = () => {
+  const [showPopup1, setShowPopup1] = useState(true);
+  return (
+    showPopup1 && (
+      <div>
+        <div className="popup">
+          <img
+            src={warning}
+            style={{
+              maxWidth: "300px",
+              maxHeight: "300px",
+              width: "100%",
+              height: "auto",
+            }}
+          />
+          <button onClick={() => setShowPopup1(false)}>Close</button>
         </div>
       </div>
     )
@@ -147,6 +169,7 @@ function Login() {
 
   return (
     <div className="centerScreen">
+      <WarningPopup1 />
       <WarningPopup />
       <div
         style={{

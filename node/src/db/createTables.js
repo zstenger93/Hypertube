@@ -3,7 +3,7 @@ import { dropTables } from "../db/dropTables.js";
 
 export async function createTables() {
   try {
-    // await dropTables();
+    await dropTables();
     await client.query(
       `ALTER DATABASE ${process.env.DB_NAME} REFRESH COLLATION VERSION`
     );
@@ -52,7 +52,7 @@ export async function createTables() {
     await client.query(`
       CREATE TABLE IF NOT EXISTS public.Comments (
           comment_id SERIAL PRIMARY KEY,
-          user_email VARCHAR(100) REFERENCES Users(email) ON DELETE CASCADE,
+          user_email VARCHAR(100) REFERENCES Users(email) ON DELETE CASCADE ON UPDATE CASCADE,
           movie_id INT REFERENCES Movies(movie_id) ON DELETE CASCADE,
           content TEXT NOT NULL,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

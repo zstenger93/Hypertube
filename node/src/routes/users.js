@@ -1,4 +1,4 @@
-import express from "express";
+import express, { query } from "express";
 import { client } from "../../index.js";
 import { justGetUser } from "../utils/validate.js";
 import admin from "firebase-admin";
@@ -12,14 +12,25 @@ admin.initializeApp({
   }),
 });
 
-async function changeEmail(id, body) {
+async function changeEmail(oldEmail, body) {
   try {
+    if (body.newEmail.endsWith("@student.42heilbronn.de")) throw new Error("F");
     const decoded = await admin.auth().verifyIdToken(body.newToken);
     const uid = decoded.uid;
-    const userRecord = await admin.auth().updateUser(uid, {
+    await admin.auth().updateUser(uid, {
       email: body.newEmail,
     });
-  } catch {
+    await client.query("BEGIN");
+    const query = `UPDATE Users SET email = $1 WHERE email = $2 RETURNING *`;
+    const updatedUser = await client.query(query, [body.newEmail, oldEmail]);
+    await client.query("COMMIT");
+    if (updatedUser.rows.length === 0) {
+      console.log("I ");
+      return null;
+    }
+    return updatedUser.rows[0];
+  } catch (error) {
+    console.log(error);
     return null;
   }
 }
@@ -106,7 +117,6 @@ router.patch("/:id", async (req, res) => {
   const body = req.body;
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) return res.sendStatus(401);
-  console.log("I was here");
   try {
     const user = await justGetUser(req, res);
     if (user === null) return res.status(401).send("Invalid Token");
@@ -126,7 +136,17 @@ router.patch("/:id", async (req, res) => {
       const watced = await toggleListWatched(body.movieId, user.email);
       return res.json({ isWatched: watced });
     } else if (body.newEmail !== undefined && body.newToken !== undefined) {
-      changeEmail(id, body);
+      if (user.sign_in_provider == "password") {
+        const updateEmail = await changeEmail(user.email, body);
+        console.log(updateEmail);
+        if (updateEmail == null) {
+          return res.status(400).send("Error");
+        } else {
+          return res.json(updateEmail);
+        }
+      } else {
+        return res.status(400).send("Not allowed to change this email");
+      }
     } else {
       return res.status(400).send("Probably not allowed action");
     }

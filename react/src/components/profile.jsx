@@ -5,6 +5,8 @@ import profile from "/pesant.jpg";
 import { getCookie } from "../utils/cookie";
 import Library from "./Library";
 import { getAuth } from "firebase/auth";
+import { deleteCookie } from "../utils/cookie";
+import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const [user, setUser] = useState(null);
@@ -13,6 +15,7 @@ const Profile = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   async function changeEmail(newEmail) {
     try {
@@ -32,6 +35,8 @@ const Profile = () => {
         body: JSON.stringify({ newEmail, newToken }),
       });
       if (!response.ok) throw new Error("Smt went wrong");
+      deleteCookie("accessToken");
+      navigate("/");
     } catch (error) {
       setError(error.message);
     }
