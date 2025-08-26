@@ -188,13 +188,21 @@ useEffect(() => {
   if (!torrents) return;
   const fetchSubtitles = async () => {
     try {
+      const validResp = await fetch(`/auth/validate`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${getCookie("accessToken")}`,
+        },
+      });
+      const validUser = await validResp.json();
+      const selectedLang = validUser.user.language || "en";
       const response = await fetch(`/movies/subtitles/${id}`);
       if (!response.ok) throw new Error("Failed to fetch subtitles");
       const data = await response.json();
       // Keep only English (handle common variants)
       const englishSubs = (data.data || []).filter(
         item =>
-          ["en", "eng", "english"].includes(
+          ["en", "eng", "english", selectedLang].includes(
             item?.attributes?.language?.toLowerCase()
           )
       );
