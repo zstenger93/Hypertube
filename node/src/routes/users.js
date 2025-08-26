@@ -1,7 +1,28 @@
 import express from "express";
 import { client } from "../../index.js";
 import { justGetUser } from "../utils/validate.js";
+import admin from "firebase-admin";
 const router = express.Router();
+
+admin.initializeApp({
+  credential: admin.credential.cert({
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+    privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+  }),
+});
+
+async function changeEmail(id, body) {
+  try {
+    const decoded = await admin.auth().verifyIdToken(body.newToken);
+    const uid = decoded.uid;
+    const userRecord = await admin.auth().updateUser(uid, {
+      email: body.newEmail,
+    });
+  } catch {
+    return null;
+  }
+}
 
 async function PatchLanguage(id, body) {
   try {
@@ -85,6 +106,7 @@ router.patch("/:id", async (req, res) => {
   const body = req.body;
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) return res.sendStatus(401);
+  console.log("I was here");
   try {
     const user = await justGetUser(req, res);
     if (user === null) return res.status(401).send("Invalid Token");
@@ -103,6 +125,8 @@ router.patch("/:id", async (req, res) => {
     } else if (body.movieId !== undefined && body.watched !== undefined) {
       const watced = await toggleListWatched(body.movieId, user.email);
       return res.json({ isWatched: watced });
+    } else if (body.newEmail !== undefined && body.newToken !== undefined) {
+      changeEmail(id, body);
     } else {
       return res.status(400).send("Probably not allowed action");
     }

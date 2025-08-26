@@ -1,16 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import {
-  getAuth,
-  verifyBeforeUpdateEmail,
-  reauthenticateWithCredential,
-  EmailAuthProvider,
-} from "firebase/auth";
 import "../App.css";
 import Logout from "./logout";
 import profile from "/pesant.jpg";
 import { getCookie } from "../utils/cookie";
 import Library from "./Library";
+import { getAuth } from "firebase/auth";
 
 const Profile = () => {
   const [user, setUser] = useState(null);
@@ -18,28 +12,28 @@ const Profile = () => {
   const [language, setLan] = useState("EN");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
 
-  async function changeEmail(newEmail, password) {
-    const auth = getAuth();
-    const firebaseUser = auth.currentUser;
-    if (!firebaseUser) throw new Error("Probaly 42 Intra User logged In");
-    const isPassword = firebaseUser.providerData.some(
-      (p) => p.providerId === "password"
-    );
-    if (!isPassword) throw new Error("Only password users can update email");
+  async function changeEmail(newEmail) {
     try {
-      const credential = EmailAuthProvider.credential(
-        firebaseUser.email,
-        password
-      );
-      await reauthenticateWithCredential(firebaseUser, credential);
-      await verifyBeforeUpdateEmail(firebaseUser, newEmail);
-      console.log(newEmail);
-      const token = await firebaseUser.getIdToken(true);
-      return token;
+      const auth = getAuth();
+      const firebaseUser = auth.currentUser;
+      if (!firebaseUser) {
+        throw new Error("No user logged in.");
+      }
+      const newToken = await firebaseUser.getIdToken();
+      const token = getCookie("accessToken");
+      const response = await fetch(`/users/${user.user_id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ newEmail, newToken }),
+      });
+      if (!response.ok) throw new Error("Smt went wrong");
     } catch (error) {
-      console.log(error);
-      return null;
+      setError(error.message);
     }
   }
 
@@ -96,6 +90,7 @@ const Profile = () => {
           <img src={user.profile_pic} alt="profile" />
           <img src={"/src/assets/jail.png"} alt="overlay" className="overlay" />
         </div>
+        <p>{error}</p>
         <select
           value={language}
           onChange={(e) => changeLanguage(e.target.value)}
@@ -136,9 +131,7 @@ const Profile = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          <button onClick={() => changeEmail(email, password)}>
-            Change email
-          </button>
+          <button onClick={() => changeEmail(email)}>Change email</button>
         </div>
       </div>
       <div>
