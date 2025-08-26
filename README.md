@@ -45,7 +45,7 @@
 - [✅] Convert videos on-the-fly if unsupported (at least mkv format) 
 - [✅] Delete movies if unwatched for one month
 - [❌] Auto-select subtitles if video language ≠ user’s preferred language
-- [❌] Download English subtitles if available
+- [✅] Download English subtitles if available
 
   ❌ Bonus Part
 

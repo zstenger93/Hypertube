@@ -148,11 +148,6 @@ const WatchMovie = () => {
 
     startTorrentDownload();
 
-    // return () => {
-    //   if (playerRef.current) {
-    //     playerRef.current.dispose();
-    //   }
-    // };
   }, [torrents, id]);
 
   // Initialize player once
@@ -199,7 +194,7 @@ const WatchMovie = () => {
         const subtitleList = data.data.map(item => ({
           id: item.id,
           language: item.attributes.language,
-          url: `http://localhost:3000/stream/${id}/${torrents}/subtitles/${item.id}`
+          url: `http://localhost:3000/subtitle/${id}/${torrents}/${item.id}.srt`
         }));
         setSubtitles(subtitleList);
       } catch (e) {
