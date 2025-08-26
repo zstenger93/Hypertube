@@ -60,7 +60,7 @@ const AllComments = () => {
               <h3>
                 {comment.movieData.title} ({comment.movieData.year})
               </h3>
-              <h3 onClick={() => navigate(`/prof/${comment.user.user_id}`)}>
+              <h3 onClick={() => navigate(`/prof/${comment.user.user_id}`)} style={{cursor: 'pointer', textDecoration: 'underline'}}>
                 {comment.user.username}
               </h3>
               <p>
