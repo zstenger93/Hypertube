@@ -94,6 +94,12 @@ const SearchComponent = () => {
       return (b.Year ?? b.year) - (a.Year ?? a.year);
     } else if (filter === "imdbRating") {
       return (b.imdbRating ?? b.imdbrating) - (a.imdbRating ?? a.imdbrating);
+    } else if (filter === "alphabetical") {
+      const titleA = (a.Title ?? a.title ?? "").toLowerCase();
+      const titleB = (b.Title ?? b.title ?? "").toLowerCase();
+      if (titleA < titleB) return -1;
+      if (titleA > titleB) return 1;
+      return 0;
     }
     return 0;
   });
@@ -132,6 +138,7 @@ const SearchComponent = () => {
           <select value={filter} onChange={handleFilterChange}>
             <option value="year">Year</option>
             <option value="imdbRating">IMDb Rating</option>
+            <option value="alphabetical">Alphabetical</option>
           </select>
         </div>
       </div>
