@@ -183,26 +183,33 @@ const WatchMovie = () => {
     };
   }, []);
 
-  // Fetch subtitles when torrents ready
-  useEffect(() => {
-    if (!torrents) return;
-    const fetchSubtitles = async () => {
-      try {
-        const response = await fetch(`/movies/subtitles/${id}`);
-        if (!response.ok) throw new Error("Failed to fetch subtitles");
-        const data = await response.json();
-        const subtitleList = data.data.map(item => ({
-          id: item.id,
-          language: item.attributes.language,
-          url: `http://localhost:3000/subtitle/${id}/${torrents}/${item.id}.vtt`
-        }));
-        setSubtitles(subtitleList);
-      } catch (e) {
-        console.error(e);
-      }
-    };
-    fetchSubtitles();
-  }, [id, torrents]);
+// Fetch subtitles when torrents ready
+useEffect(() => {
+  if (!torrents) return;
+  const fetchSubtitles = async () => {
+    try {
+      const response = await fetch(`/movies/subtitles/${id}`);
+      if (!response.ok) throw new Error("Failed to fetch subtitles");
+      const data = await response.json();
+      // Keep only English (handle common variants)
+      const englishSubs = (data.data || []).filter(
+        item =>
+          ["en", "eng", "english"].includes(
+            item?.attributes?.language?.toLowerCase()
+          )
+      );
+      const subtitleList = englishSubs.map(item => ({
+        id: item.id,
+        language: item.attributes.language,
+        url: `http://localhost:3000/subtitle/${id}/${torrents}/${item.id}.vtt`
+      }));
+      setSubtitles(subtitleList);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+  fetchSubtitles();
+}, [id, torrents]);
 
   // Apply subtitles to existing player (remove old, add new)
   useEffect(() => {
