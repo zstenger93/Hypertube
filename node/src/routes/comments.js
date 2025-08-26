@@ -63,6 +63,7 @@ router.post("/:movieId", async (req, res) => {
 
 router.get("/:movieId", async (req, res) => {
   const { movieId } = req.params;
+  console.log(movieId);
   if (!movieId || movieId.length === 0) {
     return res.status(400).send("Potato");
   }
