@@ -196,6 +196,7 @@ const Profile = () => {
               >
                 <option value="LV">LV</option>
                 <option value="EN">EN</option>
+                <option value="ES">ES</option>
                 <option value="HU">HU</option>
               </select>
               <div
