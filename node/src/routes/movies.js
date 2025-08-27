@@ -62,8 +62,9 @@ async function getMoviesByName(req, res, user) {
 }
 
 async function fetchYoutube(movie) {
-  if (!movie || !movie.Title) return movie;
+  if (!movie || !movie.title) return movie;
   const title = movie.Title + " Movie";
+  const count = 3;
   const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=${count}&q=${encodeURIComponent(
     title
   )}&key=${youtubeApiKey}`;
@@ -78,7 +79,7 @@ async function fetchYoutube(movie) {
       WHERE imdbID = $2
       RETURNING *;
     `;
-    const result = await client.query(updateQuery, [videosJSON, movie.imdbID]);
+    const result = await client.query(updateQuery, [videosJSON, movie.imdbid]);
     await client.query("COMMIT");
     return result.rows[0];
   } catch (error) {
@@ -108,8 +109,9 @@ router.patch("/:id", async (req, res) => {
       movie = await inserMovieInDb(id);
     }
     await updateClick(id);
-    if (!movie.videos || movie.videos.length === 0)
+    if (!movie.videos || movie.videos.length === 0) {
       movie = await fetchYoutube(movie);
+    }
     return res.json(movie);
   } catch (error) {
     return res.status(404).send(error.message);
