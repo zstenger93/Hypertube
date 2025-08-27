@@ -63,7 +63,7 @@ async function getMoviesByName(req, res, user) {
 
 async function fetchYoutube(movie) {
   if (!movie || !movie.title) return movie;
-  const title = movie.Title + " Movie";
+  const title = movie.title + " Movie";
   const count = 3;
   const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=${count}&q=${encodeURIComponent(
     title
