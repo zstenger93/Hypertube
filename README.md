@@ -2,7 +2,7 @@
 ![Login](./doc/login.png)
 ![Search](./doc/search.png)
 
-❌ Mandatory Part
+✅ Mandatory Part
 
 - [✅] Create a web application with a user-friendly UI
 - [✅] User registration with email and a protected password
@@ -33,19 +33,17 @@
 - [✅] Store downloaded movies to avoid re-downloading
 - [✅] Implement a Library Section (authenticated users only)
 - [✅] Retrieve/update user profiles
-- [❌] Provide proof that the API is truly RESTful
-- [❌] Modify profile details (email, profile picture, info, username, last name, first name, needs to be edited)
-
+- [✅] Provide proof that the API is truly RESTful
+- [✅] Modify profile details (email, profile picture, info, username, last name, first name, needs to be edited)
 - [✅] Select a preferred language (default: English)
 - [✅] Develop a RESTful API with OAuth2 authentication
 - [✅] Access/post comments via /comments/:id and /movies/:id/comments
 - [✅] View front page with top movies
 - [✅] Fetch movie details via /movies/:id
 - [✅] API must return appropriate HTTP codes for invalid calls
-<!-- TODO  archive.org use mp4 always. there is no point for this check-->
 - [✅] Convert videos on-the-fly if unsupported (at least mkv format) 
-- [❌] Delete movies if unwatched for one month
-- [❌] Auto-select subtitles if video language ≠ user’s preferred language
+- [✅] Delete movies if unwatched for one month
+- [✅] Auto-select subtitles if video language ≠ user’s preferred language
 - [✅] Download English subtitles if available
 
   ❌ Bonus Part
